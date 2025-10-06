@@ -83,7 +83,8 @@ mypy==1.7.1
 # ============================================================================
 
 # Page Factory Pattern support (optional)
-selenium-page-factory==1.0.1
+# Note: Version 1.0.1 does not exist; using latest compatible version
+selenium-page-factory==2.7
 
 # HTTP library for API testing (if needed)
 requests==2.31.0
