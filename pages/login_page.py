@@ -54,6 +54,7 @@ import logging
 from typing import Tuple
 from selenium.webdriver.common.by import By
 from selenium.webdriver.remote.webelement import WebElement
+from selenium.common.exceptions import TimeoutException
 from pages.base_page import BasePage
 
 
@@ -430,13 +431,11 @@ class LoginPage(BasePage):
 
 # Module-level example demonstrating LoginPage usage
 if __name__ == "__main__":
-    """
-    Module self-test demonstrating LoginPage functionality.
-
-    Note: This requires a running Selenium WebDriver instance and active Testinium
-    application. Primarily for documentation purposes - actual usage should be in
-    Behave step definitions or test scripts.
-    """
+    # Module self-test demonstrating LoginPage functionality.
+    #
+    # Note: This requires a running Selenium WebDriver instance and active Testinium
+    # application. Primarily for documentation purposes - actual usage should be in
+    # Behave step definitions or test scripts.
     print("LoginPage module loaded successfully")
     print("This module provides login page object for Testinium application")
     print("\nKey features:")
