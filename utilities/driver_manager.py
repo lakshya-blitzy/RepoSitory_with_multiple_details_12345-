@@ -14,7 +14,7 @@ CRITICAL BUG FIX:
     Original Java Driver.java line 37 incorrectly called:
         WebDriverManager.chromedriver().setup()
     for Firefox browser, causing Firefox tests to fail.
-    
+
     This Python implementation correctly uses:
         GeckoDriverManager().install()
     for Firefox, ensuring proper GeckoDriver binary provisioning.
@@ -77,7 +77,6 @@ class DriverInitializationError(Exception):
         ...     logger.error(f"Failed to initialize driver: {e}")
         ...     raise
     """
-    pass
 
 
 class DriverManager:
@@ -115,12 +114,12 @@ class DriverManager:
         >>> # Get driver for current thread
         >>> driver = DriverManager.get_driver()
         >>> driver.get("https://example.com")
-        >>> 
+        >>>
         >>> # Each thread gets its own driver
         >>> # Thread 1: driver_1 = DriverManager.get_driver()
         >>> # Thread 2: driver_2 = DriverManager.get_driver()
         >>> # driver_1 != driver_2 (different instances)
-        >>> 
+        >>>
         >>> # Cleanup
         >>> DriverManager.quit_driver()
     """
@@ -136,12 +135,12 @@ class DriverManager:
 
         Returns same driver instance for repeated calls within same thread.
         Creates new driver on first call per thread using _create_driver().
-        
+
         This replaces Java's getDriver() method with equivalent functionality:
         - Lazy initialization (create only when needed)
         - Thread-local storage (one driver per thread)
         - Configuration-driven browser selection
-        
+
         Thread Safety:
             Each thread calling this method gets its own WebDriver instance
             stored in threading.local(). No synchronization needed since
@@ -170,7 +169,7 @@ class DriverManager:
                 "No WebDriver found for thread '%s', initializing new instance",
                 thread_name
             )
-            
+
             try:
                 # Create new driver for this thread
                 cls._thread_local.driver = cls._create_driver()
@@ -210,7 +209,7 @@ class DriverManager:
                 case "firefox":
                     WebDriverManager.chromedriver().setup();  // BUG!
                     driverPool.set(new FirefoxDriver());
-            
+
             This Python version correctly uses:
                 elif browser_type == "firefox":
                     firefox_service = FirefoxService(GeckoDriverManager().install())
@@ -219,7 +218,7 @@ class DriverManager:
         CRITICAL CHANGE - NO IMPLICIT WAITS:
             Java version had driver.manage().timeouts().implicitlyWait(10, TimeUnit.SECONDS)
             on lines 34 and 40, creating anti-pattern of mixing implicit and explicit waits.
-            
+
             This Python version uses NO implicit waits. All waits are explicit via
             utilities/wait_helpers.py. This provides predictable, controllable wait behavior.
 
@@ -253,7 +252,7 @@ class DriverManager:
             config = ConfigReader()
             browser_type = config.get_property('browser.type', default='chrome')
             headless = config.get_property('browser.headless', default=False)
-            
+
             logger.info(
                 "Creating WebDriver: browser_type='%s', headless=%s",
                 browser_type,
@@ -265,12 +264,12 @@ class DriverManager:
             if browser_type.lower() == 'chrome':
                 # Configure Chrome options
                 chrome_options = ChromeOptions()
-                
+
                 if headless:
                     # Selenium 4.x new headless syntax
                     chrome_options.add_argument('--headless=new')
                     logger.debug("Chrome headless mode enabled")
-                
+
                 # Add stability options for CI/CD environments
                 chrome_options.add_argument('--disable-gpu')
                 chrome_options.add_argument('--no-sandbox')
@@ -282,7 +281,7 @@ class DriverManager:
                 # Caches drivers in ~/.wdm/drivers/
                 logger.debug("Provisioning ChromeDriver binary via webdriver-manager")
                 chrome_service = ChromeService(ChromeDriverManager().install())
-                
+
                 # Create Chrome driver
                 driver = webdriver.Chrome(service=chrome_service, options=chrome_options)
                 logger.info("Chrome WebDriver created successfully")
@@ -292,10 +291,10 @@ class DriverManager:
                 # Original Java code on line 37 incorrectly called:
                 #     WebDriverManager.chromedriver().setup()
                 # This Python version correctly uses GeckoDriverManager for Firefox
-                
+
                 # Configure Firefox options
                 firefox_options = FirefoxOptions()
-                
+
                 if headless:
                     firefox_options.add_argument('--headless')
                     logger.debug("Firefox headless mode enabled")
@@ -304,7 +303,7 @@ class DriverManager:
                 # This replaces the incorrect chromedriver().setup() from Java
                 logger.debug("Provisioning GeckoDriver binary via webdriver-manager")
                 firefox_service = FirefoxService(GeckoDriverManager().install())
-                
+
                 # Create Firefox driver
                 driver = webdriver.Firefox(service=firefox_service, options=firefox_options)
                 logger.info("Firefox WebDriver created successfully (bug fixed)")
@@ -342,7 +341,7 @@ class DriverManager:
                 #     from utilities.wait_helpers import WaitHelpers
                 #     waiter = WaitHelpers(driver)
                 #     element = waiter.wait_for_element(locator, timeout=10)
-                
+
                 logger.debug(
                     "NO implicit wait configured (explicit waits only). "
                     "This fixes anti-pattern from Java version."
@@ -418,7 +417,7 @@ class DriverManager:
         # Check if current thread has a driver instance
         if hasattr(cls._thread_local, 'driver') and cls._thread_local.driver is not None:
             logger.info("Quitting WebDriver for thread '%s'", thread_name)
-            
+
             try:
                 # Attempt to quit driver gracefully
                 cls._thread_local.driver.quit()
