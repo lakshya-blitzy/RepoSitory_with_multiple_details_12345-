@@ -510,15 +510,12 @@ class SalesPage(BasePage):
 
 # Module-level validation
 if __name__ == "__main__":
-    """
-    Module self-test demonstrating SalesPage structure.
-
-    Note: This requires a running WebDriver instance and is for documentation.
-    Actual usage occurs in Behave step definitions.
-    """
+    # Module self-test demonstrating SalesPage structure.
+    # Note: This requires a running WebDriver instance and is for documentation.
+    # Actual usage occurs in Behave step definitions.
     print("SalesPage module loaded successfully")
-    print(f"Total locators defined: 20")
-    print(f"Total properties exposed: 20 single elements + 1 list property")
+    print("Total locators defined: 20")
+    print("Total properties exposed: 20 single elements + 1 list property")
     print("\nLocator summary:")
     print("  - Navigation: 3 elements (sales_partial, customers_button, link)")
     print("  - Action buttons: 3 elements (create_button, save_button, create_customer)")
@@ -531,4 +528,3 @@ if __name__ == "__main__":
     print("\nTechnical Debt Alert:")
     print("  6 locators use generated IDs (o_field_input_470, 474, 477, 516, 517, 518)")
     print("  Recommend requesting stable test IDs from development team")
-
