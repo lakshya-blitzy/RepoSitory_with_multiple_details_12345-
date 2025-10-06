@@ -353,7 +353,8 @@ class EmployeePage(BasePage):
         Create new employee button (Kanban board create button).
 
         Converted from Java:
-            @FindBy(xpath = "//button[@class='btn btn-primary btn-sm o-kanban-button-new btn-default']")
+            @FindBy(xpath = "//button[@class='btn btn-primary btn-sm 
+                                      o-kanban-button-new btn-default']")
             public WebElement createBtn;
 
         Returns:
@@ -371,7 +372,8 @@ class EmployeePage(BasePage):
         Employee name input field in creation form.
 
         Converted from Java:
-            @FindBy(xpath = "//input[@class='o_field_char o_field_widget o_input o_required_modifier']")
+            @FindBy(xpath = "//input[@class='o_field_char o_field_widget 
+                                      o_input o_required_modifier']")
             public WebElement employeesName;
 
         Returns:
@@ -578,12 +580,9 @@ class EmployeePage(BasePage):
 
 # Module self-test and example usage
 if __name__ == "__main__":
-    """
-    Module self-test demonstrating EmployeePage functionality.
-
-    Note: This requires environment variables and running WebDriver instance.
-    Primarily for documentation purposes.
-    """
+    # Module self-test demonstrating EmployeePage functionality.
+    # Note: This requires environment variables and running WebDriver instance.
+    # Primarily for documentation purposes.
     print("EmployeePage module loaded successfully")
     print("\n" + "="*70)
     print("SECURITY NOTICE")
