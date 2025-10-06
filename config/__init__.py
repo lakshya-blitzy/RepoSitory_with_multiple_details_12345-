@@ -97,6 +97,10 @@ Benefits over Java implementation:
 - Better testability with singleton reset capability
 """
 
+# Standard library imports
+import logging
+
+
 # Import all configuration classes and utilities from test_config module
 # These imports enable convenient access pattern: 'from config import Config'
 from config.test_config import (
@@ -116,14 +120,14 @@ from config.test_config import (
 __all__ = [
     # Main configuration class providing type-safe access to all settings
     'Config',
-    
+
     # Dataclass configuration sections for structured access
     'BrowserConfig',      # Browser settings (type, headless, window_size, implicit_wait)
     'TimeoutConfig',      # Timeout values (explicit, page_load, element_presence, clickability)
     'ApplicationConfig',  # Application URLs (base_url, login_url, web_table_url, empl_title)
     'CredentialsConfig',  # User credentials (username, password, role-based credentials)
     'ReportingConfig',    # Reporting settings (screenshot_on_failure, output_directory, formats)
-    
+
     # Utility functions for singleton access pattern
     'get_config',   # Get or create singleton Config instance
     'reset_config', # Reset singleton (useful for testing)
@@ -134,7 +138,5 @@ __version__ = '1.0.0'
 __author__ = 'Testinium QA Team'
 __description__ = 'Type-safe configuration management for Python test automation framework'
 
-# Module-level convenience: pre-instantiate logger for config package
-import logging
 logger = logging.getLogger(__name__)
 logger.debug("Config package initialized - all configuration classes available for import")
