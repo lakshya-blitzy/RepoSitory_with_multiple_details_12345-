@@ -26,7 +26,7 @@ Example Usage:
 import os
 import logging
 from pathlib import Path
-from typing import Optional, Dict, Any, Union
+from typing import Optional, Dict, Any
 from copy import deepcopy
 import yaml
 from dotenv import load_dotenv
@@ -39,13 +39,13 @@ logger = logging.getLogger(__name__)
 class ConfigurationError(Exception):
     """
     Custom exception for configuration-related errors.
-    
+
     Raised when:
     - Configuration file is missing
     - YAML parsing fails
     - Required configuration key is missing
     - Invalid configuration format
-    
+
     This replaces the silent exception swallowing from Java ConfigurationReader.
     """
     pass
@@ -54,7 +54,7 @@ class ConfigurationError(Exception):
 class ConfigReader:
     """
     Singleton configuration reader supporting YAML files and environment variables.
-    
+
     Features:
     - Singleton pattern: Only one instance exists per process
     - YAML configuration: Loads from config/config.yaml
@@ -63,32 +63,36 @@ class ConfigReader:
     - Default values: Optional defaults for missing keys
     - Type preservation: Maintains YAML types (str, int, bool, float, list, dict)
     - Security: Sensitive credentials from environment variables only
-    
+
     Configuration Precedence (highest to lowest):
     1. Environment variables (e.g., BROWSER_TYPE)
     2. .env file variables
     3. config/config.yaml values
     4. Provided default values
-    
+
     Thread Safety:
         This singleton is NOT thread-safe during initialization. Ensure first
         instantiation happens in main thread before parallel test execution.
-    
+
     Example:
         >>> config = ConfigReader()
         >>> browser = config.get_property('browser.type', default='chrome')
         >>> timeout = config.get_property('timeouts.explicit', default=10)
         >>> all_props = config.get_all_properties()
     """
-    
+
     _instance: Optional['ConfigReader'] = None
     _config: Dict[str, Any] = {}
     _initialized: bool = False
-    
-    def __new__(cls) -> 'ConfigReader':
+
+    def __new__(cls, *args, **kwargs) -> 'ConfigReader':
         """
         Implement singleton pattern ensuring single instance per process.
-        
+
+        Args:
+            *args: Positional arguments (passed to __init__)
+            **kwargs: Keyword arguments (passed to __init__)
+
         Returns:
             ConfigReader: The singleton instance
         """
@@ -96,19 +100,19 @@ class ConfigReader:
             logger.debug("Creating new ConfigReader singleton instance")
             cls._instance = super(ConfigReader, cls).__new__(cls)
         return cls._instance
-    
+
     def __init__(self, config_file: str = "config/config.yaml") -> None:
         """
         Initialize configuration reader (runs only once due to singleton).
-        
+
         Args:
             config_file: Path to YAML configuration file relative to project root
                         Defaults to 'config/config.yaml'
-        
+
         Raises:
             FileNotFoundError: If configuration file doesn't exist
             ConfigurationError: If YAML parsing fails or file is invalid
-        
+
         Note:
             Due to singleton pattern, __init__ is called multiple times but
             initialization logic runs only once (tracked by _initialized flag).
@@ -117,10 +121,10 @@ class ConfigReader:
         if ConfigReader._initialized:
             logger.debug("ConfigReader already initialized, skipping re-initialization")
             return
-        
-        logger.info(f"Initializing ConfigReader with config file: {config_file}")
+
+        logger.info("Initializing ConfigReader with config file: %s", config_file)
         self._config_file = config_file
-        
+
         try:
             # Load environment variables from .env file (if exists)
             # This supports local development with sensitive credentials
@@ -130,39 +134,39 @@ class ConfigReader:
                 load_dotenv(dotenv_path=env_file)
             else:
                 logger.debug(".env file not found, skipping dotenv loading")
-            
+
             # Load YAML configuration
             self._load_configuration()
-            
+
             ConfigReader._initialized = True
             logger.info("ConfigReader initialization complete")
-            
+
         except Exception as e:
             logger.exception(f"Failed to initialize ConfigReader: {e}")
             raise
-    
+
     def _load_configuration(self) -> None:
         """
         Load YAML configuration file into memory.
-        
+
         Replaces Java Properties loading with YAML support for:
         - Nested configuration structures (dictionaries)
         - Type preservation (string, int, bool, float)
         - Lists and complex data structures
         - Multi-line strings
         - Comments in configuration
-        
+
         Raises:
             FileNotFoundError: If config file doesn't exist
             ConfigurationError: If YAML parsing fails
-        
+
         Critical Fix:
             Java version silently swallowed IOException (lines 21-24) allowing
             null Properties. This version explicitly raises exceptions for
             fail-fast behavior.
         """
         config_path = Path(self._config_file)
-        
+
         # Validate file exists
         if not config_path.exists():
             error_msg = (
@@ -173,23 +177,23 @@ class ConfigReader:
             )
             logger.error(error_msg)
             raise FileNotFoundError(error_msg)
-        
+
         if not config_path.is_file():
             error_msg = f"Configuration path is not a file: {config_path.resolve()}"
             logger.error(error_msg)
             raise ConfigurationError(error_msg)
-        
+
         # Load and parse YAML
         try:
-            logger.debug(f"Reading YAML configuration from: {config_path.resolve()}")
+            logger.debug("Reading YAML configuration from: %s", config_path.resolve())
             with open(config_path, 'r', encoding='utf-8') as file:
                 ConfigReader._config = yaml.safe_load(file)
-            
+
             # Validate loaded configuration
             if ConfigReader._config is None:
                 ConfigReader._config = {}
                 logger.warning("YAML file is empty, using empty configuration")
-            
+
             if not isinstance(ConfigReader._config, dict):
                 error_msg = (
                     f"Invalid YAML format: expected dictionary at root, "
@@ -197,55 +201,51 @@ class ConfigReader:
                 )
                 logger.error(error_msg)
                 raise ConfigurationError(error_msg)
-            
-            logger.info(
-                f"Successfully loaded configuration with "
-                f"{len(ConfigReader._config)} top-level keys: "
-                f"{list(ConfigReader._config.keys())}"
-            )
-            
-        except yaml.YAMLError as e:
-            error_msg = f"Failed to parse YAML configuration: {e}"
+
+            logger.info("Successfully loaded configuration with %d top-level keys: %s", len(ConfigReader._config), list(ConfigReader._config.keys()))
+
+        except yaml.YAMLError as yaml_err:
+            error_msg = "Failed to parse YAML configuration: %s" % yaml_err
             logger.exception(error_msg)
-            raise ConfigurationError(error_msg) from e
-        
-        except Exception as e:
-            error_msg = f"Unexpected error loading configuration: {e}"
+            raise ConfigurationError(error_msg) from yaml_err
+
+        except Exception as exc:
+            error_msg = "Unexpected error loading configuration: %s" % exc
             logger.exception(error_msg)
-            raise ConfigurationError(error_msg) from e
-    
+            raise ConfigurationError(error_msg) from exc
+
     def get_property(
-        self, 
-        key: str, 
+        self,
+        key: str,
         default: Optional[Any] = None
     ) -> Optional[Any]:
         """
         Retrieve configuration value by key with environment variable precedence.
-        
+
         Supports:
         - Dot notation for nested keys: 'browser.type' -> config['browser']['type']
         - Environment variable override: 'browser.type' checks BROWSER_TYPE env var first
         - Default values: Returns default if key missing and default provided
         - Type preservation: Returns YAML types (str, int, bool, float, list, dict)
-        
+
         Configuration Precedence (highest to lowest):
         1. Environment variable (BROWSER_TYPE)
         2. YAML configuration (browser.type)
         3. Provided default value
-        
+
         Args:
             key: Configuration key using dot notation for nested access
                  Examples: 'browser.type', 'timeouts.explicit', 'test_data.base_url'
             default: Default value returned if key not found (optional)
                     If None and key missing, raises KeyError
-        
+
         Returns:
             Configuration value from environment variable, YAML, or default
             Type matches YAML type (str, int, bool, float, list, dict)
-        
+
         Raises:
             KeyError: If key not found and no default provided
-        
+
         Example:
             >>> config = ConfigReader()
             >>> # Get with default
@@ -260,33 +260,29 @@ class ConfigReader:
         # Convert dot notation to environment variable format
         # Example: 'browser.type' -> 'BROWSER_TYPE'
         env_key = key.upper().replace('.', '_')
-        
+
         # Check environment variable first (highest precedence)
         env_value = os.getenv(env_key)
         if env_value is not None:
-            logger.debug(
-                f"Retrieved config '{key}' from environment variable '{env_key}'"
-            )
+            logger.debug("Retrieved config '%s' from environment variable '%s'", key, env_key)
             return env_value
-        
+
         # Navigate nested dictionary using dot notation
         # Example: 'browser.type' -> config['browser']['type']
         try:
             value = ConfigReader._config
             for key_part in key.split('.'):
                 value = value[key_part]
-            
-            logger.debug(f"Retrieved config '{key}' from YAML configuration")
+
+            logger.debug("Retrieved config '%s' from YAML configuration", key)
             return value
-        
-        except (KeyError, TypeError) as e:
+
+        except (KeyError, TypeError) as key_err:
             # Key not found in configuration
             if default is not None:
-                logger.debug(
-                    f"Config key '{key}' not found, using default: {default}"
-                )
+                logger.debug("Config key '%s' not found, using default: %s", key, default)
                 return default
-            
+
             # No default provided - raise error for required key
             error_msg = (
                 f"Required configuration key '{key}' not found. "
@@ -294,22 +290,22 @@ class ConfigReader:
                 f"Available top-level keys: {list(ConfigReader._config.keys())}"
             )
             logger.error(error_msg)
-            raise KeyError(error_msg) from e
-    
+            raise KeyError(error_msg) from key_err
+
     def get_all_properties(self) -> Dict[str, Any]:
         """
         Retrieve complete configuration dictionary.
-        
+
         Returns:
             Deep copy of entire configuration dictionary to prevent external
             modification of singleton state. This protects configuration
             integrity across test scenarios.
-        
+
         Note:
             Environment variables are NOT included in this dictionary,
             only YAML configuration values. Use get_property() to access
             values with environment variable precedence.
-        
+
         Example:
             >>> config = ConfigReader()
             >>> all_config = config.get_all_properties()
@@ -318,11 +314,11 @@ class ConfigReader:
         """
         logger.debug("Returning deep copy of complete configuration")
         return deepcopy(ConfigReader._config)
-    
+
     def __repr__(self) -> str:
         """
         String representation of ConfigReader instance.
-        
+
         Returns:
             String showing configuration file path and key count
         """
@@ -336,10 +332,10 @@ class ConfigReader:
 def get_config() -> ConfigReader:
     """
     Convenience function to get ConfigReader singleton instance.
-    
+
     Returns:
         ConfigReader: The singleton configuration reader instance
-    
+
     Example:
         >>> from utilities.config_reader import get_config
         >>> config = get_config()
@@ -359,34 +355,34 @@ if __name__ == "__main__":
         level=logging.DEBUG,
         format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
     )
-    
+
     try:
         # Initialize configuration reader
         config = ConfigReader()
         print(f"✓ ConfigReader initialized: {config}")
-        
+
         # Test retrieving all properties
         all_props = config.get_all_properties()
         print(f"✓ Loaded configuration with {len(all_props)} top-level keys")
-        
+
         # Test default value
         test_value = config.get_property('nonexistent.key', default='default_value')
         print(f"✓ Default value handling works: {test_value}")
-        
+
         # Test singleton pattern
         config2 = ConfigReader()
         assert config is config2, "Singleton pattern failed!"
         print("✓ Singleton pattern verified")
-        
+
         print("\n✓ All configuration reader tests passed!")
-        
-    except FileNotFoundError as e:
-        print(f"✗ Configuration file not found: {e}")
+
+    except FileNotFoundError as err:
+        print(f"✗ Configuration file not found: {err}")
         print("  Ensure config/config.yaml exists in project root")
-    
-    except ConfigurationError as e:
-        print(f"✗ Configuration error: {e}")
-    
-    except Exception as e:
-        print(f"✗ Unexpected error: {e}")
+
+    except ConfigurationError as err:
+        print(f"✗ Configuration error: {err}")
+
+    except Exception as exc:
+        print(f"✗ Unexpected error: {exc}")
         logger.exception("Configuration reader self-test failed")

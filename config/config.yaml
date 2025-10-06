@@ -1,0 +1,48 @@
+# Test Configuration for Python Behave Test Framework
+# This file replaces the missing configuration.properties from Java version
+
+browser:
+  type: chrome
+  headless: false
+  window_size:
+    width: 1920
+    height: 1080
+  implicit_wait: 0
+
+timeouts:
+  implicit: 0
+  explicit: 10
+  page_load: 30
+  short: 5
+  medium: 10
+  long: 30
+
+test_data:
+  base_url: https://testinium.example.com
+  app_title: Testinium Test Application
+
+credentials:
+  # Sensitive credentials should be loaded from environment variables
+  # These are just placeholders for configuration structure
+  admin_username: ${ADMIN_USERNAME}
+  admin_password: ${ADMIN_PASSWORD}
+  pos_manager_username: ${POS_MANAGER_USERNAME}
+  pos_manager_password: ${POS_MANAGER_PASSWORD}
+  sales_manager_username: ${SALES_MANAGER_USERNAME}
+  sales_manager_password: ${SALES_MANAGER_PASSWORD}
+
+reporting:
+  screenshots_on_failure: true
+  screenshot_dir: reports/screenshots
+  html_report: reports/cucumber-reports.html
+  json_report: reports/cucumber.json
+
+logging:
+  level: INFO
+  file: logs/test_execution.log
+  format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+
+parallel:
+  enabled: true
+  max_workers: 4
+  mode: scenario
