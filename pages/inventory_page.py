@@ -370,12 +370,9 @@ class InventoryPage(BasePage):
 
 # Module self-test and documentation
 if __name__ == "__main__":
-    """
-    Module self-test demonstrating InventoryPage usage.
-
-    This section provides usage examples and serves as executable documentation.
-    It does not run actual tests but shows the expected usage patterns.
-    """
+    # Module self-test demonstrating InventoryPage usage.
+    # This section provides usage examples and serves as executable documentation.
+    # It does not run actual tests but shows the expected usage patterns.
     print("InventoryPage module loaded successfully")
     print("\nThis page object provides inventory and product management elements")
     print("\n⚠️  TECHNICAL DEBT NOTICE:")
