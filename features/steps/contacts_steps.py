@@ -193,7 +193,7 @@ def user_enters_name(context, name):
     logger.debug(f"Contact name '{name}' entered successfully")
 
 
-@when('User enters "{street_name}"')
+@when('User enters street "{street_name}"')
 def user_enters_street(context, street_name):
     """
     Enter street address in the street input field.
@@ -209,6 +209,8 @@ def user_enters_street(context, street_name):
         - Parameter name from 'streetName' to 'street_name' (Python naming convention)
         - Added logging for input tracking
         - No clear() call in original Java, preserved behavior
+        - BUGFIX: Added "street" keyword to step text to avoid ambiguity with phone/email step
+          (Behave pattern matching requires non-overlapping patterns)
     
     Args:
         context: Behave context object containing driver and shared state
