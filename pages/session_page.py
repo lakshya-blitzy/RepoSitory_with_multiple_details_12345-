@@ -50,10 +50,11 @@ Example Usage:
     >>> assert session_page.input_login.is_displayed()
 """
 
+import logging
 from typing import Tuple
 from selenium.webdriver.common.by import By
 from selenium.webdriver.remote.webelement import WebElement
-from pages.base_page import BasePage
+from pages.base_page import BasePage  # pylint: disable=import-error
 
 
 class SessionPage(BasePage):
@@ -136,6 +137,7 @@ class SessionPage(BasePage):
             >>> # session_page.driver, session_page.wait, session_page.config available
         """
         super().__init__(driver)
+        self.logger = logging.getLogger(__name__)
 
     @property
     def input_login(self) -> WebElement:
@@ -264,13 +266,11 @@ class SessionPage(BasePage):
 
 # Module-level documentation for import validation
 if __name__ == "__main__":
-    """
-    Module self-test demonstrating SessionPage functionality.
-
-    This section provides usage examples and verifies the module can be imported
-    successfully. Actual test execution requires running WebDriver instance and
-    should be performed through Behave step definitions.
-    """
+    # Module self-test demonstrating SessionPage functionality.
+    #
+    # This section provides usage examples and verifies the module can be imported
+    # successfully. Actual test execution requires running WebDriver instance and
+    # should be performed through Behave step definitions.
     print("SessionPage module loaded successfully")
     print("\nSessionPage converted from Java SessionP.java")
     print("Locators preserved for behavioral equivalence:")
