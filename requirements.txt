@@ -1,0 +1,89 @@
+# Python Dependencies for Testinium QA Test Automation Framework
+# Converted from Maven pom.xml to Python packages
+# Migration: Java Selenium + Cucumber → Python Selenium + Behave BDD
+
+# ============================================================================
+# Core Testing Framework
+# ============================================================================
+
+# Selenium WebDriver 4.x (upgraded from selenium-java 3.141.59)
+selenium==4.15.2
+
+# Behave BDD Framework (replaces cucumber-java 7.2.3)
+behave==1.2.6
+
+# pytest Test Framework (replaces junit 4.13.2)
+pytest==7.4.3
+
+# pytest-BDD Integration (optional: replaces cucumber-junit 7.2.3)
+pytest-bdd==6.1.1
+
+# ============================================================================
+# WebDriver Management
+# ============================================================================
+
+# WebDriver Manager (replaces webdrivermanager 5.1.0)
+webdriver-manager==4.0.1
+
+# ============================================================================
+# Test Data Generation
+# ============================================================================
+
+# Faker - Test data generation (replaces javafaker 1.0.2)
+Faker==20.1.0
+
+# ============================================================================
+# Configuration Management
+# ============================================================================
+
+# Environment variable management
+python-dotenv==1.0.0
+
+# YAML configuration file parsing
+PyYAML==6.0.1
+
+# ============================================================================
+# Reporting and Visualization
+# ============================================================================
+
+# Allure reporting for Behave (replaces reporting-plugin 7.2.0)
+allure-behave==2.13.2
+
+# Allure reporting for pytest
+allure-pytest==2.13.2
+
+# pytest HTML report generation
+pytest-html==4.1.1
+
+# Behave HTML formatter
+behave-html-formatter==0.9.10
+
+# ============================================================================
+# Parallel Execution
+# ============================================================================
+
+# pytest parallel execution (replaces maven-surefire-plugin parallel execution)
+pytest-xdist==3.5.0
+
+# ============================================================================
+# Code Quality and Linting
+# ============================================================================
+
+# Python linter
+pylint==3.0.3
+
+# Python code formatter
+black==23.12.1
+
+# Static type checker
+mypy==1.7.1
+
+# ============================================================================
+# Optional: Additional Utilities
+# ============================================================================
+
+# Page Factory Pattern support (optional)
+selenium-page-factory==1.0.1
+
+# HTTP library for API testing (if needed)
+requests==2.31.0
