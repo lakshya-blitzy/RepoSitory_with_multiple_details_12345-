@@ -70,7 +70,6 @@ Example Usage:
 """
 
 import logging
-from typing import Tuple
 from selenium.webdriver.common.by import By
 from selenium.webdriver.remote.webelement import WebElement
 from pages.base_page import BasePage
@@ -432,12 +431,10 @@ class NotesPage(BasePage):
 
 # Module-level docstring for direct execution
 if __name__ == "__main__":
-    """
-    Module self-test demonstrating NotesPage functionality.
-
-    Note: This requires a running Selenium WebDriver instance and is primarily
-    for documentation purposes. Actual usage should be in step definition files.
-    """
+    # Module self-test demonstrating NotesPage functionality.
+    #
+    # Note: This requires a running Selenium WebDriver instance and is primarily
+    # for documentation purposes. Actual usage should be in step definition files.
     print("NotesPage module loaded successfully")
     print("\nPage Object Model Pattern Implementation:")
     print("- 10 element properties with explicit waits")
