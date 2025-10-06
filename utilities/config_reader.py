@@ -214,10 +214,13 @@ class ConfigReader:
             logger.exception(error_msg)
             raise ConfigurationError(error_msg) from exc
 
+    # Sentinel value to distinguish "no default" from "default=None"
+    _NO_DEFAULT = object()
+
     def get_property(
         self,
         key: str,
-        default: Optional[Any] = None
+        default: Any = _NO_DEFAULT
     ) -> Optional[Any]:
         """
         Retrieve configuration value by key with environment variable precedence.
@@ -225,7 +228,7 @@ class ConfigReader:
         Supports:
         - Dot notation for nested keys: 'browser.type' -> config['browser']['type']
         - Environment variable override: 'browser.type' checks BROWSER_TYPE env var first
-        - Default values: Returns default if key missing and default provided
+        - Default values: Returns default if key missing and default provided (including None)
         - Type preservation: Returns YAML types (str, int, bool, float, list, dict)
 
         Configuration Precedence (highest to lowest):
@@ -236,8 +239,8 @@ class ConfigReader:
         Args:
             key: Configuration key using dot notation for nested access
                  Examples: 'browser.type', 'timeouts.explicit', 'test_data.base_url'
-            default: Default value returned if key not found (optional)
-                    If None and key missing, raises KeyError
+            default: Default value returned if key not found (optional, can be None)
+                    If not provided and key missing, raises KeyError
 
         Returns:
             Configuration value from environment variable, YAML, or default
@@ -250,6 +253,8 @@ class ConfigReader:
             >>> config = ConfigReader()
             >>> # Get with default
             >>> browser = config.get_property('browser.type', default='chrome')
+            >>> # Get with None as default
+            >>> optional = config.get_property('optional.key', default=None)
             >>> # Get from environment variable (BROWSER_TYPE)
             >>> browser = config.get_property('browser.type')
             >>> # Get nested value
@@ -279,7 +284,8 @@ class ConfigReader:
 
         except (KeyError, TypeError) as key_err:
             # Key not found in configuration
-            if default is not None:
+            # Check if a default was provided (including None)
+            if default is not ConfigReader._NO_DEFAULT:
                 logger.debug("Config key '%s' not found, using default: %s", key, default)
                 return default
 
