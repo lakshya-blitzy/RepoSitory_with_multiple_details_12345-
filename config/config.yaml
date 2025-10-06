@@ -1,48 +1,162 @@
-# Test Configuration for Python Behave Test Framework
-# This file replaces the missing configuration.properties from Java version
+# =============================================================================
+# Test Configuration for Python Behave Test Automation Framework
+# =============================================================================
+# This YAML configuration file replaces the missing configuration.properties
+# file referenced in the Java implementation (ConfigurationReader.java).
+#
+# ENVIRONMENT VARIABLE INTERPOLATION:
+# - Syntax: ${VAR_NAME} for required variables
+# - Syntax: ${VAR_NAME:default_value} for variables with fallback defaults
+# - Variables are resolved at runtime by utilities/config_reader.py
+#
+# SECURITY NOTE:
+# - All sensitive credentials MUST be loaded from environment variables
+# - Never commit actual credentials to version control
+# - Use .env file for local development (see .env.example)
+# =============================================================================
 
+# -----------------------------------------------------------------------------
+# Browser Configuration
+# -----------------------------------------------------------------------------
+# Configures WebDriver browser settings for test execution
+# Corresponds to Driver.java line 27 browser selection logic
 browser:
+  # Browser type: 'chrome' or 'firefox'
+  # Maps to ConfigurationReader.getProperty("browser") in Driver.java
   type: chrome
+  
+  # Headless mode: true for CI/CD environments, false for local debugging
   headless: false
-  window_size:
-    width: 1920
-    height: 1080
+  
+  # Browser window size as [width, height] in pixels
+  # Ensures consistent viewport across test executions
+  window_size: [1920, 1080]
+  
+  # Implicit wait disabled (set to 0) per Agent Action Plan section 0.8.1
+  # Eliminates dangerous mixing of implicit and explicit waits from Driver.java line 34
+  # All waits should be explicit using WebDriverWait with expected_conditions
   implicit_wait: 0
 
+# -----------------------------------------------------------------------------
+# Timeout Configuration
+# -----------------------------------------------------------------------------
+# Standardized timeout values replacing inconsistent 2-20s ranges
+# in Java step definitions (LoginSD.java, Calendar.java, etc.)
 timeouts:
-  implicit: 0
+  # Default explicit wait timeout in seconds
+  # Replaces hardcoded WebDriverWait(driver, X) values
   explicit: 10
+  
+  # Page load timeout in seconds
+  # Maximum time to wait for page.load event
   page_load: 30
-  short: 5
-  medium: 10
-  long: 30
+  
+  # Element presence timeout in seconds
+  # For waiting until element is present in DOM
+  element_presence: 5
+  
+  # Element clickability timeout in seconds
+  # For waiting until element is clickable (visible and enabled)
+  clickability: 3
 
-test_data:
-  base_url: https://testinium.example.com
-  app_title: Testinium Test Application
+# -----------------------------------------------------------------------------
+# Application Configuration
+# -----------------------------------------------------------------------------
+# Application URLs and environment-specific settings
+# Supports ConfigurationReader.getProperty() calls throughout step definitions
+application:
+  # Base URL with environment variable override and default fallback
+  # Corresponds to LoginSD.java line 20 and EmployeeStage.java line 20
+  # ConfigurationReader.getProperty("web.table.url") references
+  base_url: ${BASE_URL:https://testinium.example.com}
+  
+  # Login URL derived from base_url
+  # Used in LoginSD.java for navigation
+  login_url: ${BASE_URL:https://testinium.example.com}/login
+  
+  # Web table URL for employee management tests
+  # Referenced in EmployeeStage.java line 20 and LoginSD.java line 20
+  # ConfigurationReader.getProperty("web.table.url")
+  web_table_url: ${BASE_URL:https://testinium.example.com}/web-tables
+  
+  # Employee page title for verification
+  # Used in EmployeeStage.java line 36 for title assertion
+  # driver.getTitle() comparison after navigation
+  empl_title: "Employee Management"
 
+# -----------------------------------------------------------------------------
+# Credentials Configuration
+# -----------------------------------------------------------------------------
+# User credentials loaded from environment variables for security
+# Remediates hardcoded credentials vulnerability from EmployeeP.java
+# All values MUST be provided via environment variables or .env file
 credentials:
-  # Sensitive credentials should be loaded from environment variables
-  # These are just placeholders for configuration structure
-  admin_username: ${ADMIN_USERNAME}
-  admin_password: ${ADMIN_PASSWORD}
-  pos_manager_username: ${POS_MANAGER_USERNAME}
-  pos_manager_password: ${POS_MANAGER_PASSWORD}
+  # Generic test user credentials
+  # Used in Session.java lines 16-17 for username/password property access
+  # ConfigurationReader.getProperty("username") and getProperty("password")
+  username: ${TEST_USERNAME}
+  password: ${TEST_PASSWORD}
+  
+  # Sales Manager role credentials
+  # Used in Login.feature scenarios with @SalesManager tag
+  # Example: Scenario Outline with Examples table for role-based testing
   sales_manager_username: ${SALES_MANAGER_USERNAME}
   sales_manager_password: ${SALES_MANAGER_PASSWORD}
+  
+  # POS Manager role credentials
+  # Used in Login.feature scenarios with @PosManager tag
+  # Enables multi-role test execution with different permission levels
+  pos_manager_username: ${POS_MANAGER_USERNAME}
+  pos_manager_password: ${POS_MANAGER_PASSWORD}
 
+# -----------------------------------------------------------------------------
+# Reporting Configuration
+# -----------------------------------------------------------------------------
+# Test execution reporting and artifact generation settings
+# Corresponds to Hooks.java screenshot capture and report generation
 reporting:
-  screenshots_on_failure: true
-  screenshot_dir: reports/screenshots
-  html_report: reports/cucumber-reports.html
-  json_report: reports/cucumber.json
+  # Enable automatic screenshot capture on test failure
+  # Implements after_scenario hook in features/environment.py
+  # Replaces Hooks.java @After screenshot logic
+  screenshot_on_failure: true
+  
+  # Base output directory for all test artifacts
+  # Contains JSON reports, HTML reports, and screenshots
+  output_directory: reports/
+  
+  # Report format list: json, html, allure
+  # - json: Behave JSON output (reports/cucumber.json)
+  # - html: Behave HTML report (reports/cucumber-reports.html)
+  # - allure: Allure test report format for enhanced visualization
+  formats:
+    - json
+    - html
+    - allure
+  
+  # Screenshot storage directory for failure diagnostics
+  # Screenshots named with timestamp and scenario name
+  # Attached to test reports for debugging failed scenarios
+  screenshot_directory: reports/screenshots/
 
-logging:
-  level: INFO
-  file: logs/test_execution.log
-  format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
-
-parallel:
-  enabled: true
-  max_workers: 4
-  mode: scenario
+# =============================================================================
+# Configuration Usage Examples
+# =============================================================================
+# Python access via utilities/config_reader.py:
+#   config = ConfigReader()
+#   browser_type = config.get_property("browser.type")
+#   timeout = config.get_property("timeouts.explicit")
+#
+# Python access via config/test_config.py dataclasses:
+#   config = Config()
+#   browser_type = config.browser.type
+#   timeout = config.timeouts.explicit
+#
+# Environment variable setup (.env file):
+#   BASE_URL=https://testinium.example.com
+#   TEST_USERNAME=test.user@example.com
+#   TEST_PASSWORD=secure_password_here
+#   SALES_MANAGER_USERNAME=sales.manager@example.com
+#   SALES_MANAGER_PASSWORD=secure_password_here
+#   POS_MANAGER_USERNAME=pos.manager@example.com
+#   POS_MANAGER_PASSWORD=secure_password_here
+# =============================================================================
