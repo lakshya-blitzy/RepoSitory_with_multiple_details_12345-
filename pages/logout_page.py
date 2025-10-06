@@ -16,7 +16,8 @@ Migration Context:
     Original Java implementation:
         - @FindBy(className = "o_user_menu") public WebElement popUpButton
         - @FindBy(xpath = "//a[.='Log out']") public WebElement logOutButton
-        - @FindBy(xpath = "//div[@class= 'o_dialog_warning modal-body']") public WebElement warningMess
+        - @FindBy(xpath = "//div[@class= 'o_dialog_warning modal-body']")
+          public WebElement warningMess
     
     Python implementation replaces public WebElement fields with property-based
     locators that return fresh element references on each access, preventing
@@ -50,7 +51,7 @@ Usage Example:
 """
 
 import logging
-from typing import Tuple, Optional
+from typing import Tuple
 from selenium.webdriver.remote.webdriver import WebDriver
 from selenium.webdriver.remote.webelement import WebElement
 from selenium.webdriver.common.by import By
@@ -348,13 +349,11 @@ class LogoutPage(BasePage):
 
 # Module-level execution for documentation and verification
 if __name__ == "__main__":
-    """
-    Module self-test demonstrating LogoutPage functionality.
-
-    Note: This requires a running Selenium WebDriver instance and authenticated
-    session. Primarily for documentation purposes. Actual usage should be in
-    Behave step definitions or test scripts.
-    """
+    # Module self-test demonstrating LogoutPage functionality.
+    #
+    # Note: This requires a running Selenium WebDriver instance and authenticated
+    # session. Primarily for documentation purposes. Actual usage should be in
+    # Behave step definitions or test scripts.
     print("LogoutPage module loaded successfully")
     print("\nLogoutPage provides:")
     print("  - popup_button: User menu dropdown trigger")
