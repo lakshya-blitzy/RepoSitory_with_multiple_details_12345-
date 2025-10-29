@@ -1,6 +1,39 @@
 # :fallen_leaf: :leaves: Testinium-QA :leaves: :fallen_leaf:
 Automating the Testinium browser (Python 3.9+, Selenium 4.x, Behave, pytest, Jira, Jenkins)
 
+[![Python Version](https://img.shields.io/badge/python-3.9%20%7C%203.10%20%7C%203.11%20%7C%203.12-blue)](https://www.python.org/downloads/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Documentation](https://img.shields.io/badge/docs-GitHub%20Pages-blue)](https://github.com/BalamiRR/Testinium-QA)
+[![Build Status](https://img.shields.io/badge/build-passing-brightgreen)](https://github.com/BalamiRR/Testinium-QA)
+
+## Quick Start
+
+Get up and running with Testinium-QA in under 5 minutes:
+
+```bash
+# 1. Clone the repository
+git clone https://github.com/BalamiRR/Testinium-QA.git
+cd Testinium-QA
+
+# 2. Set up Python virtual environment
+python3 -m venv venv
+source venv/bin/activate  # On Windows: venv\Scripts\activate
+
+# 3. Install dependencies
+pip install -r requirements.txt
+
+# 4. Configure environment (copy and edit .env file)
+cp .env.example .env
+
+# 5. Run your first test
+behave --tags=@Login
+
+# 6. View the test reports
+# Reports are generated in the reports/ directory
+```
+
+**What's Next?** Check out our [Complete Getting Started Guide](docs/getting-started/quick-start.md) for detailed setup instructions, configuration options, and advanced usage patterns.
+
 ### Tools
 
 <p align="left"> 
@@ -43,6 +76,8 @@ It generates JSON, HTML, and Allure reports. It also generates `screenshots` for
 `error screenshots` for failed test cases automatically.
 
 ### Installation (pre-requisites)
+
+**📚 For detailed platform-specific installation instructions, see the [Complete Installation Guide](docs/getting-started/installation.md)**
 
 1. **Python 3.9+** (Download from [python.org](https://www.python.org/downloads/))
 2. **pip** (Python package manager - included with Python 3.9+)
@@ -134,9 +169,19 @@ timeouts:
   page_load: 30
 ```
 
+**📚 Configuration Resources:**
+- [Complete Configuration Options Reference](docs/reference/configuration-options.md) - All config.yaml options explained
+- [Environment Variables Reference](docs/reference/environment-variables.md) - Complete .env variable documentation
+- [Advanced Configuration Management Guide](docs/guides/configuration-management.md) - Configuration patterns, precedence rules, and environment-specific setups
+
 
 
 ### Running Tests
+
+**📚 Test Execution Resources:**
+- [First Test Execution Guide](docs/getting-started/first-test.md) - Step-by-step guide for beginners
+- [Parallel Execution Guide](docs/guides/parallel-execution.md) - Running tests in parallel for faster execution
+- [Complete Command Reference](docs/reference/command-reference.md) - All CLI options and parameters
 
 #### Basic Test Execution
 
@@ -536,18 +581,32 @@ behave --tags=@Login
 
 ### Project Structure
 
+**📚 For detailed architecture documentation, see the [System Architecture Overview](docs/architecture/system-overview.md)**
+
 ```
 testinium-qa-python/
 ├── .env.example                    # Environment variable template
 ├── .gitignore                      # Python-specific ignores
 ├── README.md                       # This file
+├── CONTRIBUTING.md                 # Contributing guidelines
 ├── behave.ini                      # Behave configuration
 ├── requirements.txt                # Python dependencies
 ├── pyproject.toml                  # Poetry configuration (optional)
+├── mkdocs.yml                      # Documentation site configuration
 ├── config/
 │   ├── __init__.py
 │   ├── config.yaml                # Test configuration
 │   └── test_config.py             # Configuration management
+├── docs/                           # Comprehensive documentation
+│   ├── getting-started/           # Setup and installation guides
+│   ├── guides/                    # User guides and tutorials
+│   ├── api-reference/             # Complete API documentation
+│   ├── architecture/              # Architecture and design docs
+│   ├── deployment/                # Deployment guides (CI/CD, cloud)
+│   ├── reference/                 # Configuration and command reference
+│   ├── troubleshooting/           # Troubleshooting guides
+│   ├── contributing/              # Development guidelines
+│   └── migration/                 # Migration guides
 ├── features/
 │   ├── Calendar.feature           # Gherkin feature files
 │   ├── Contact.feature
@@ -601,7 +660,11 @@ testinium-qa-python/
 
 ### Troubleshooting
 
+**📚 For comprehensive troubleshooting guides covering all scenarios, see the [Complete Troubleshooting Documentation](docs/troubleshooting/index.md)**
+
 #### Common Issues and Solutions
+
+Below are the most frequently encountered issues. For detailed troubleshooting guides including installation issues, WebDriver problems, configuration errors, parallel execution issues, and report generation problems, please refer to the complete troubleshooting documentation.
 
 **Issue 1: Module Not Found Error**
 ```bash
@@ -630,38 +693,7 @@ pip install webdriver-manager
 behave --dry-run
 ```
 
-**Issue 4: Import Errors in Python**
-```bash
-# Error: ImportError: attempted relative import with no known parent package
-# Solution: Ensure __init__.py files exist in all package directories
-# Run tests from project root directory
-# Check PYTHONPATH if needed:
-export PYTHONPATH="${PYTHONPATH}:$(pwd)"
-```
-
-**Issue 5: Browser Not Starting**
-```bash
-# Error: SessionNotCreatedException: session not created
-# Solution: Browser and driver version mismatch
-# webdriver-manager will auto-update drivers, but ensure browser is updated:
-# Chrome: Help > About Google Chrome (auto-updates)
-# Firefox: Help > About Firefox (auto-updates)
-```
-
-**Issue 6: Stale Element Reference**
-```python
-# Error: StaleElementReferenceException
-# Solution: Use property-based element accessors (already implemented)
-# Elements are re-located on each access
-# If issue persists, add explicit waits:
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.support import expected_conditions as EC
-
-wait = WebDriverWait(driver, 10)
-element = wait.until(EC.presence_of_element_located(locator))
-```
-
-**Issue 7: Tests Failing in CI but Passing Locally**
+**Issue 4: Tests Failing in CI but Passing Locally**
 ```bash
 # Common cause: Headless mode not configured
 # Solution: Set headless mode in config/config.yaml for CI:
@@ -674,44 +706,15 @@ export HEADLESS=true
 behave
 ```
 
-**Issue 8: Screenshot Not Captured on Failure**
-```bash
-# Check: Is environment.py after_scenario hook properly configured?
-# Verify: reports/screenshots/ directory exists and is writable
-# Debug: Add logging to after_scenario function
-import logging
-logging.basicConfig(level=logging.DEBUG)
-```
+**For additional issues including:**
+- Import errors and PYTHONPATH configuration
+- Browser and driver version mismatches
+- Stale element reference exceptions
+- Screenshot capture problems
+- Parallel execution issues
+- Configuration precedence problems
 
-#### Debugging Tips
-
-1. **Enable Verbose Output:**
-   ```bash
-   behave --verbose --no-capture
-   ```
-
-2. **Run Specific Scenario:**
-   ```bash
-   behave features/Login.feature:15  # Run scenario at line 15
-   ```
-
-3. **Check Step Definitions:**
-   ```bash
-   behave --dry-run --no-summary
-   ```
-
-4. **Python Debugger (pdb):**
-   ```python
-   # Add to step definition for debugging
-   import pdb; pdb.set_trace()
-   ```
-
-5. **View WebDriver Logs:**
-   ```python
-   # In driver_manager.py, enable logging:
-   chrome_options.add_argument('--enable-logging')
-   chrome_options.add_argument('--v=1')
-   ```
+**Please see the [Complete Troubleshooting Guide](docs/troubleshooting/index.md)**
 
 ### Dependencies
 
@@ -737,17 +740,66 @@ logging.basicConfig(level=logging.DEBUG)
 
 See `requirements.txt` for complete dependency list.
 
+### Documentation
+
+This project includes comprehensive documentation covering all aspects of the Testinium-QA test automation framework. The documentation is organized into the following sections:
+
+**📚 [Complete Documentation Site](docs/index.md)** - Full documentation homepage with navigation to all sections
+
+#### Quick Access Links:
+
+**Getting Started:**
+- [Quick Start Guide](docs/getting-started/quick-start.md) - Get up and running in 5 minutes
+- [Installation Guide](docs/getting-started/installation.md) - Detailed setup instructions for all platforms
+- [Configuration Guide](docs/getting-started/configuration.md) - Initial configuration and setup
+- [First Test Execution](docs/getting-started/first-test.md) - Run your first test
+
+**User Guides:**
+- [Testing Guides](docs/guides/index.md) - Feature-specific testing guides (Login, CRM, Employee, Inventory, etc.)
+- [Page Object Model Guide](docs/guides/page-object-model.md) - Creating and using page objects
+- [Step Definitions Guide](docs/guides/step-definitions.md) - Writing step definitions
+- [Parallel Execution Guide](docs/guides/parallel-execution.md) - Running tests in parallel
+- [Configuration Management](docs/guides/configuration-management.md) - Advanced configuration patterns
+
+**API Reference:**
+- [Complete API Documentation](docs/api-reference/index.md) - Full API reference for all modules
+- [Utilities API](docs/api-reference/utilities/index.md) - DriverManager, ConfigReader, WaitHelpers, ScreenshotHelper
+- [Pages API](docs/api-reference/pages/index.md) - Page Object Model API reference
+- [Step Definitions API](docs/api-reference/steps/index.md) - All step definitions documented
+
+**Deployment Guides:**
+- [Deployment Options](docs/deployment/index.md) - Overview of all deployment options
+- [Jenkins Integration](docs/deployment/jenkins-integration.md) - CI/CD with Jenkins
+- [GitHub Actions](docs/deployment/github-actions.md) - CI/CD with GitHub Actions
+- [Docker Deployment](docs/deployment/docker.md) - Containerized test execution
+- [Kubernetes Deployment](docs/deployment/kubernetes.md) - Orchestrated test execution
+- [Cloud Deployment](docs/deployment/index.md) - AWS, Azure, GCP deployment guides
+
+**Additional Resources:**
+- [Architecture Documentation](docs/architecture/system-overview.md) - System architecture and design patterns
+- [Configuration Reference](docs/reference/configuration-options.md) - Complete configuration options
+- [Troubleshooting](docs/troubleshooting/index.md) - Comprehensive troubleshooting guides
+- [Contributing Guidelines](docs/contributing/index.md) - How to contribute to the project
+
+The documentation covers everything from basic setup to advanced topics like parallel execution, custom reporters, framework extension, and deployment to various environments.
+
 ### Contributing
+
+**📚 For detailed contributing guidelines, code style standards, and PR process, see [CONTRIBUTING.md](CONTRIBUTING.md)**
+
+#### Quick Start for Contributors:
 
 1. Fork the repository
 2. Create a feature branch (`git checkout -b feature/amazing-feature`)
-3. Follow Python best practices (PEP 8)
+3. Follow Python best practices (PEP 8) and project code style
 4. Write tests for new features
 5. Ensure all tests pass (`behave`)
 6. Run code quality checks (`pylint`, `black`)
 7. Commit your changes (`git commit -m 'Add amazing feature'`)
 8. Push to the branch (`git push origin feature/amazing-feature`)
 9. Open a Pull Request
+
+For comprehensive guidelines including development setup, testing requirements, documentation standards, and the complete PR process, please refer to the [Contributing Guide](CONTRIBUTING.md).
 
 ### Support
 
