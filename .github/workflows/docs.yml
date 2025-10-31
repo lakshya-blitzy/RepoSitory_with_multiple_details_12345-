@@ -1,0 +1,236 @@
+# GitHub Actions Workflow for Documentation Deployment
+#
+# This workflow automates the building, validation, and deployment of the
+# project documentation to GitHub Pages using MkDocs with Material theme.
+#
+# Workflow Triggers:
+# - Push to main branch when documentation files change
+# - Manual workflow dispatch for on-demand deployments
+#
+# Deployment Target: GitHub Pages (gh-pages branch)
+# Python Version: 3.11 (stable, recommended for MkDocs)
+# MkDocs Version: 1.5.3 with Material theme 9.5.3
+#
+# Quality Assurance:
+# - Strict build mode catches warnings and broken links
+# - Validates all internal documentation references
+# - Ensures Mermaid diagrams are properly formatted
+# - Verifies API documentation generation from docstrings
+#
+# Source: Agent Action Plan Section 0.9 - Documentation Build Infrastructure
+
+name: Deploy Documentation
+
+# Trigger Conditions
+on:
+  # Automatic deployment on push to main branch
+  push:
+    branches:
+      - main
+    paths:
+      # Documentation content changes
+      - 'docs/**'
+      # MkDocs configuration changes
+      - 'mkdocs.yml'
+      # Workflow configuration changes
+      - '.github/workflows/docs.yml'
+      # README changes (linked from documentation)
+      - 'README.md'
+      # Contributing guide changes (part of documentation)
+      - 'CONTRIBUTING.md'
+      # Python source code changes (for API documentation via mkdocstrings)
+      - 'config/**/*.py'
+      - 'utilities/**/*.py'
+      - 'pages/**/*.py'
+      - 'features/**/*.py'
+  
+  # Manual trigger for on-demand deployments
+  workflow_dispatch:
+    inputs:
+      deploy:
+        description: 'Deploy to GitHub Pages'
+        required: true
+        default: 'true'
+        type: boolean
+
+# Permissions required for deployment to GitHub Pages
+permissions:
+  contents: write  # Required to push to gh-pages branch
+  pages: write     # Required to deploy to GitHub Pages
+  id-token: write  # Required for GitHub Pages deployment
+
+# Ensure only one deployment runs at a time
+concurrency:
+  group: docs-deployment
+  cancel-in-progress: false  # Don't cancel in-progress deployments
+
+jobs:
+  # Documentation Build and Deployment Job
+  deploy-docs:
+    name: Build and Deploy Documentation
+    runs-on: ubuntu-latest
+    
+    steps:
+      # Step 1: Checkout Repository
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          # Fetch all history for git-revision-date-localized plugin
+          fetch-depth: 0
+      
+      # Step 2: Setup Python Environment
+      - name: Setup Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'  # Cache pip dependencies for faster builds
+      
+      # Step 3: Upgrade pip and setuptools
+      - name: Upgrade pip and setuptools
+        run: |
+          python -m pip install --upgrade pip setuptools wheel
+          pip --version
+      
+      # Step 4: Install Core MkDocs Dependencies
+      - name: Install MkDocs Core Dependencies
+        run: |
+          echo "Installing MkDocs and Material theme..."
+          pip install mkdocs==1.5.3
+          pip install mkdocs-material==9.5.3
+          echo "✓ Core MkDocs dependencies installed"
+      
+      # Step 5: Install MkDocs Plugins
+      - name: Install MkDocs Plugins
+        run: |
+          echo "Installing essential plugins..."
+          # API documentation from Python docstrings
+          pip install 'mkdocstrings[python]==0.24.0'
+          # Markdown extensions for syntax highlighting and admonitions
+          pip install pymdown-extensions==10.7
+          # Mermaid diagram support for architecture visualizations
+          pip install mkdocs-mermaid2-plugin==1.1.1
+          echo "✓ Essential plugins installed"
+      
+      # Step 6: Install Enhancement Plugins
+      - name: Install Enhancement Plugins
+        run: |
+          echo "Installing enhancement plugins..."
+          # Minify HTML/CSS/JS for faster page loads
+          pip install mkdocs-minify-plugin==0.7.2
+          # Add git revision dates to documentation pages
+          pip install mkdocs-git-revision-date-localized-plugin==1.2.2
+          # Simplify navigation configuration
+          pip install mkdocs-awesome-pages-plugin==2.9.2
+          echo "✓ Enhancement plugins installed"
+      
+      # Step 7: Verify Installation
+      - name: Verify MkDocs Installation
+        run: |
+          echo "Verifying MkDocs installation..."
+          mkdocs --version
+          echo ""
+          echo "Installed MkDocs packages:"
+          pip list | grep mkdocs
+          echo ""
+          echo "✓ Installation verified"
+      
+      # Step 8: Validate Documentation Configuration
+      - name: Validate MkDocs Configuration
+        run: |
+          if [ ! -f mkdocs.yml ]; then
+            echo "❌ Error: mkdocs.yml not found"
+            echo "Documentation configuration file is required"
+            exit 1
+          fi
+          echo "✓ MkDocs configuration file found"
+      
+      # Step 9: Build Documentation with Strict Validation
+      - name: Build Documentation (Strict Mode)
+        run: |
+          echo "Building documentation with strict validation..."
+          echo "This will fail on:"
+          echo "  - Broken internal links"
+          echo "  - Invalid Mermaid diagrams"
+          echo "  - Missing API documentation"
+          echo "  - Malformed markdown"
+          echo ""
+          mkdocs build --strict --verbose
+          echo ""
+          echo "✓ Documentation built successfully"
+      
+      # Step 10: Verify Build Artifacts
+      - name: Verify Build Output
+        run: |
+          echo "Verifying build artifacts..."
+          if [ ! -d site ]; then
+            echo "❌ Error: site/ directory not created"
+            exit 1
+          fi
+          if [ ! -f site/index.html ]; then
+            echo "❌ Error: site/index.html not found"
+            exit 1
+          fi
+          echo "Build artifact size:"
+          du -sh site/
+          echo ""
+          echo "Total files generated:"
+          find site -type f | wc -l
+          echo ""
+          echo "✓ Build artifacts verified"
+      
+      # Step 11: Configure Git for Deployment
+      - name: Configure Git
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+      
+      # Step 12: Deploy to GitHub Pages
+      - name: Deploy to GitHub Pages
+        run: |
+          echo "Deploying documentation to GitHub Pages..."
+          echo "Target: gh-pages branch"
+          echo ""
+          # Deploy with force to handle any conflicts
+          # This commits the site/ directory to gh-pages branch
+          mkdocs gh-deploy --force --message "Deploy documentation from ${GITHUB_SHA:0:7} [skip ci]"
+          echo ""
+          echo "✓ Documentation deployed successfully"
+      
+      # Step 13: Display Deployment Information
+      - name: Display Deployment Information
+        if: success()
+        run: |
+          echo "================================================================"
+          echo "Documentation Deployment Complete"
+          echo "================================================================"
+          echo ""
+          echo "Documentation Site:"
+          echo "  https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/"
+          echo ""
+          echo "Deployment Details:"
+          echo "  Branch: gh-pages"
+          echo "  Commit: ${GITHUB_SHA:0:7}"
+          echo "  Workflow: ${{ github.workflow }}"
+          echo "  Run ID: ${{ github.run_id }}"
+          echo ""
+          echo "Note: GitHub Pages may take a few minutes to update"
+          echo "================================================================"
+      
+      # Step 14: Report Deployment Failure
+      - name: Report Deployment Failure
+        if: failure()
+        run: |
+          echo "================================================================"
+          echo "Documentation Deployment Failed"
+          echo "================================================================"
+          echo ""
+          echo "Common issues:"
+          echo "  1. Broken internal links in documentation"
+          echo "  2. Invalid Mermaid diagram syntax"
+          echo "  3. Missing or malformed mkdocs.yml"
+          echo "  4. Python docstring syntax errors"
+          echo "  5. Missing required MkDocs plugins"
+          echo ""
+          echo "Review the build logs above for specific error messages"
+          echo "================================================================"
+          exit 1

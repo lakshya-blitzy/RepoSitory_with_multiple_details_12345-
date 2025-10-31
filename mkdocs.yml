@@ -1,0 +1,504 @@
+# MkDocs Configuration for Testinium QA - Python Test Automation Framework
+# This configuration file defines the complete documentation structure for the
+# Selenium + Behave BDD test automation framework migrated from Java to Python.
+#
+# Documentation Coverage:
+# - 105+ documentation files organized hierarchically
+# - API reference for all packages (config, utilities, pages, steps)
+# - User guides for all features and framework extension
+# - Architecture documentation with Mermaid diagrams
+# - Deployment guides for multiple environments
+# - Troubleshooting and contributing guides
+#
+# Source: Agent Action Plan Section 0.5, 0.6, 0.9
+
+# ==============================================================================
+# Site Metadata
+# ==============================================================================
+site_name: 'Testinium QA - Python Test Automation Framework'
+site_description: 'Comprehensive documentation for Python Selenium + Behave BDD test automation framework with Page Object Model, parallel execution support, and extensive reporting capabilities'
+site_author: 'Testinium QA Team'
+site_url: 'https://testinium.github.io/testinium-qa-python/'
+repo_url: 'https://github.com/testinium/testinium-qa-python'
+repo_name: 'testinium/testinium-qa-python'
+copyright: 'Copyright &copy; 2024 Testinium QA Team'
+edit_uri: 'edit/main/docs/'
+
+# ==============================================================================
+# Theme Configuration - Material Design
+# ==============================================================================
+theme:
+  name: material
+  language: en
+  
+  # Color Palette with Light/Dark Mode Toggle
+  palette:
+    # Light mode
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: indigo
+      accent: blue
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+    
+    # Dark mode
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: indigo
+      accent: blue
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+  
+  # Typography
+  font:
+    text: Roboto
+    code: Roboto Mono
+  
+  # Theme Features
+  features:
+    - navigation.tabs              # Top-level navigation tabs
+    - navigation.tabs.sticky       # Sticky navigation tabs
+    - navigation.sections          # Navigation sections
+    - navigation.expand            # Expand navigation by default
+    - navigation.path              # Breadcrumb navigation
+    - navigation.indexes           # Section index pages
+    - navigation.top               # Back to top button
+    - navigation.footer            # Footer navigation
+    - toc.follow                   # TOC follows scroll
+    - toc.integrate                # Integrate TOC into navigation
+    - search.suggest               # Search suggestions
+    - search.highlight             # Highlight search terms
+    - search.share                 # Share search results
+    - content.code.copy            # Copy code button
+    - content.code.annotate        # Code annotations
+    - content.tabs.link            # Link content tabs
+  
+  # Logo and Favicon
+  icon:
+    repo: fontawesome/brands/github
+    edit: material/pencil
+    view: material/eye
+  
+  # Custom 404 page
+  static_templates:
+    - 404.html
+
+# ==============================================================================
+# Navigation Structure - 105+ Documentation Pages
+# Organized hierarchically across 11 major sections per Agent Action Plan 0.5
+# ==============================================================================
+nav:
+  - Home: index.md
+  
+  - Getting Started:
+    - getting-started/index.md
+    - Quick Start: getting-started/quick-start.md
+    - Installation: getting-started/installation.md
+    - Configuration: getting-started/configuration.md
+    - First Test: getting-started/first-test.md
+  
+  - User Guides:
+    - guides/index.md
+    - Feature Testing:
+      - Authentication Testing: guides/authentication-testing.md
+      - CRM Testing: guides/crm-testing.md
+      - Employee Testing: guides/employee-testing.md
+      - Inventory Testing: guides/inventory-testing.md
+      - Contact Testing: guides/contact-testing.md
+      - Calendar Testing: guides/calendar-testing.md
+      - Notes Testing: guides/notes-testing.md
+      - Sales Testing: guides/sales-testing.md
+      - Session Testing: guides/session-testing.md
+    - Framework Development:
+      - Page Object Model: guides/page-object-model.md
+      - Step Definitions: guides/step-definitions.md
+      - Feature Files: guides/feature-files.md
+      - Parallel Execution: guides/parallel-execution.md
+      - Configuration Management: guides/configuration-management.md
+      - Wait Strategies: guides/wait-strategies.md
+      - Screenshot Management: guides/screenshot-management.md
+      - Custom Reporters: guides/custom-reporters.md
+      - Extending Framework: guides/extending-framework.md
+  
+  - API Reference:
+    - api-reference/index.md
+    - Configuration Package:
+      - api-reference/config/index.md
+      - TestConfig Module: api-reference/config/test-config.md
+    - Utilities Package:
+      - api-reference/utilities/index.md
+      - DriverManager: api-reference/utilities/driver-manager.md
+      - ConfigReader: api-reference/utilities/config-reader.md
+      - WaitHelpers: api-reference/utilities/wait-helpers.md
+      - ScreenshotHelper: api-reference/utilities/screenshot-helper.md
+    - Pages Package:
+      - api-reference/pages/index.md
+      - BasePage: api-reference/pages/base-page.md
+      - LoginPage: api-reference/pages/login-page.md
+      - CalendarPage: api-reference/pages/calendar-page.md
+      - ContactsPage: api-reference/pages/contacts-page.md
+      - CrmPage: api-reference/pages/crm-page.md
+      - EmployeePage: api-reference/pages/employee-page.md
+      - InventoryPage: api-reference/pages/inventory-page.md
+      - LogoutPage: api-reference/pages/logout-page.md
+      - NotesPage: api-reference/pages/notes-page.md
+      - SalesPage: api-reference/pages/sales-page.md
+      - SessionPage: api-reference/pages/session-page.md
+    - Step Definitions:
+      - api-reference/steps/index.md
+      - Login Steps: api-reference/steps/login-steps.md
+      - Calendar Steps: api-reference/steps/calendar-steps.md
+      - Contacts Steps: api-reference/steps/contacts-steps.md
+      - CRM Steps: api-reference/steps/crm-steps.md
+      - Employee Steps: api-reference/steps/employee-steps.md
+      - Inventory Steps: api-reference/steps/inventory-steps.md
+      - Logout Steps: api-reference/steps/logout-steps.md
+      - Notes Steps: api-reference/steps/notes-steps.md
+      - Sales Steps: api-reference/steps/sales-steps.md
+      - Session Steps: api-reference/steps/session-steps.md
+    - Features Package:
+      - api-reference/features/index.md
+      - Environment Hooks: api-reference/features/environment.md
+  
+  - Architecture:
+    - architecture/index.md
+    - System Overview: architecture/system-overview.md
+    - Component Interactions: architecture/component-interactions.md
+    - Test Execution Lifecycle: architecture/test-execution-lifecycle.md
+    - Parallel Execution: architecture/parallel-execution.md
+    - Configuration Management: architecture/configuration-management.md
+    - Wait Strategies: architecture/wait-strategies.md
+    - Page Object Model: architecture/page-object-model.md
+  
+  - Deployment:
+    - deployment/index.md
+    - Local Development: deployment/local-development.md
+    - Containerization:
+      - Docker: deployment/docker.md
+      - Docker Compose: deployment/docker-compose.md
+      - Kubernetes: deployment/kubernetes.md
+    - CI/CD Integration:
+      - Jenkins: deployment/jenkins-integration.md
+      - GitHub Actions: deployment/github-actions.md
+      - GitLab CI: deployment/gitlab-ci.md
+      - Azure DevOps: deployment/azure-devops.md
+    - Cloud Platforms:
+      - AWS: deployment/aws.md
+      - Azure: deployment/azure.md
+      - GCP: deployment/gcp.md
+    - Report Publishing: deployment/report-publishing.md
+  
+  - Reference:
+    - reference/index.md
+    - Configuration Options: reference/configuration-options.md
+    - Environment Variables: reference/environment-variables.md
+    - Behave Configuration: reference/behave-configuration.md
+    - Pytest Configuration: reference/pytest-configuration.md
+    - Dependencies: reference/dependencies.md
+    - Command Reference: reference/command-reference.md
+    - Gherkin Syntax: reference/gherkin-syntax.md
+  
+  - Troubleshooting:
+    - troubleshooting/index.md
+    - Installation Issues: troubleshooting/installation-issues.md
+    - WebDriver Issues: troubleshooting/webdriver-issues.md
+    - Configuration Issues: troubleshooting/configuration-issues.md
+    - Parallel Execution Issues: troubleshooting/parallel-execution-issues.md
+    - Report Generation Issues: troubleshooting/report-generation-issues.md
+    - Common Errors: troubleshooting/common-errors.md
+  
+  - Contributing:
+    - contributing/index.md
+    - Development Setup: contributing/development-setup.md
+    - Code Style Guide: contributing/code-style-guide.md
+    - Testing Guidelines: contributing/testing-guidelines.md
+    - Documentation Guidelines: contributing/documentation-guidelines.md
+    - Pull Request Process: contributing/pull-request-process.md
+  
+  - Migration:
+    - migration/index.md
+    - From Java/Cucumber: migration/from-java-cucumber.md
+    - Version Upgrades: migration/version-upgrades.md
+  
+  - Changelog: changelog.md
+
+# ==============================================================================
+# Plugins Configuration
+# ==============================================================================
+plugins:
+  # Built-in Search Plugin
+  - search:
+      lang: en
+      separator: '[\s\-,:!=\[\]()"/]+|(?!\b)(?=[A-Z][a-z])|\.(?!\d)|&[lg]t;'
+      prebuild_index: true
+  
+  # mkdocstrings - Auto-generate API documentation from Python docstrings
+  - mkdocstrings:
+      enabled: true
+      default_handler: python
+      handlers:
+        python:
+          paths: [.]
+          options:
+            # Display options
+            show_source: true
+            show_root_heading: true
+            show_root_toc_entry: true
+            show_root_full_path: false
+            show_object_full_path: false
+            show_category_heading: true
+            show_symbol_type_heading: true
+            show_symbol_type_toc: true
+            
+            # Documentation structure
+            heading_level: 2
+            show_bases: true
+            show_inheritance_diagram: false
+            
+            # Docstring parsing
+            docstring_style: google
+            docstring_section_style: table
+            merge_init_into_class: true
+            show_if_no_docstring: false
+            
+            # Signature rendering
+            show_signature: true
+            show_signature_annotations: true
+            separate_signature: true
+            line_length: 80
+            
+            # Member filtering
+            filters:
+              - "!^_"  # Exclude private members by default
+            members_order: source
+            group_by_category: true
+            
+            # Additional features
+            show_submodules: true
+  
+  # Mermaid2 - Render Mermaid diagrams for architecture visualization
+  - mermaid2:
+      version: 10.6.1
+      arguments:
+        theme: |
+          ^(window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) ? 'dark' : 'light'
+  
+  # Minify - Optimize HTML, CSS, and JS for faster loading
+  - minify:
+      minify_html: true
+      minify_js: true
+      minify_css: true
+      htmlmin_opts:
+        remove_comments: true
+        remove_empty_space: true
+      cache_safe: true
+  
+  # Git Revision Date - Show last update dates for documentation currency
+  - git-revision-date-localized:
+      enable_creation_date: true
+      type: timeago
+      fallback_to_build_date: true
+      enabled: true
+
+# ==============================================================================
+# Markdown Extensions
+# ==============================================================================
+markdown_extensions:
+  # Python Markdown Extensions
+  - abbr                           # Abbreviation support
+  - admonition                     # Note/warning/tip boxes
+  - attr_list                      # Add HTML attributes to elements
+  - def_list                       # Definition lists
+  - footnotes                      # Footnote support
+  - md_in_html                     # Markdown inside HTML
+  - tables                         # Table support
+  - toc:                           # Table of contents
+      permalink: true
+      permalink_title: Anchor link to this section
+      slugify: !!python/object/apply:pymdownx.slugs.slugify
+        kwds:
+          case: lower
+      toc_depth: 3
+  
+  # PyMdown Extensions for Enhanced Functionality
+  - pymdownx.arithmatex:           # Math notation support
+      generic: true
+  
+  - pymdownx.betterem:             # Better emphasis (bold/italic)
+      smart_enable: all
+  
+  - pymdownx.caret                 # Superscript and insert support
+  - pymdownx.mark                  # Highlight/mark text
+  - pymdownx.tilde                 # Subscript and delete support
+  
+  - pymdownx.critic:               # Critic markup for change tracking
+      mode: view
+  
+  - pymdownx.details               # Collapsible admonitions
+  
+  - pymdownx.emoji:                # Emoji support
+      emoji_index: !!python/name:material.extensions.emoji.twemoji
+      emoji_generator: !!python/name:material.extensions.emoji.to_svg
+  
+  - pymdownx.highlight:            # Syntax highlighting for code blocks
+      anchor_linenums: true
+      line_spans: __span
+      pygments_lang_class: true
+      auto_title: false
+      linenums: false
+      linenums_style: pymdownx-inline
+  
+  - pymdownx.inlinehilite          # Inline code highlighting
+  
+  - pymdownx.keys                  # Keyboard key styling
+  
+  - pymdownx.magiclink:            # Auto-link URLs and repository references
+      normalize_issue_symbols: true
+      repo_url_shorthand: true
+      user: testinium
+      repo: testinium-qa-python
+  
+  - pymdownx.smartsymbols          # Smart symbols (copyright, arrows, etc.)
+  
+  - pymdownx.snippets:             # Include external files/snippets
+      auto_append:
+        - includes/abbreviations.md
+      check_paths: true
+  
+  - pymdownx.superfences:          # Enhanced fenced code blocks
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:mermaid2.fence_mermaid_custom
+  
+  - pymdownx.tabbed:               # Tabbed content blocks
+      alternate_style: true
+      combine_header_slug: true
+      slugify: !!python/object/apply:pymdownx.slugs.slugify
+        kwds:
+          case: lower
+  
+  - pymdownx.tasklist:             # Task lists with checkboxes
+      custom_checkbox: true
+      clickable_checkbox: false
+
+# ==============================================================================
+# Extra Configuration
+# ==============================================================================
+extra:
+  # Social Links
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/testinium/testinium-qa-python
+      name: Testinium QA Python on GitHub
+    - icon: fontawesome/brands/python
+      link: https://www.python.org
+      name: Python Official Website
+    - icon: fontawesome/solid/book
+      link: https://testinium.github.io/testinium-qa-python/
+      name: Documentation
+  
+  # Version Information
+  version:
+    provider: mike
+    default: latest
+  
+  # Analytics (placeholder - add Google Analytics ID when available)
+  analytics:
+    provider: google
+    property: G-XXXXXXXXXX  # Replace with actual Google Analytics ID
+    feedback:
+      title: Was this page helpful?
+      ratings:
+        - icon: material/emoticon-happy-outline
+          name: This page was helpful
+          data: 1
+          note: >-
+            Thanks for your feedback!
+        - icon: material/emoticon-sad-outline
+          name: This page could be improved
+          data: 0
+          note: >-
+            Thanks for your feedback! Help us improve by
+            <a href="https://github.com/testinium/testinium-qa-python/issues/new/?title=[Feedback]+{title}+-+{url}" target="_blank" rel="noopener">opening an issue</a>.
+  
+  # Consent for analytics (GDPR compliance)
+  consent:
+    title: Cookie consent
+    description: >-
+      We use cookies to recognize your repeated visits and preferences, as well
+      as to measure the effectiveness of our documentation and whether users
+      find what they're searching for. With your consent, you're helping us to
+      make our documentation better.
+    actions:
+      - accept
+      - reject
+      - manage
+
+# Extra CSS and JavaScript (if needed for customization)
+extra_css:
+  # - stylesheets/extra.css  # Uncomment and add custom CSS if needed
+
+extra_javascript:
+  # MathJax for mathematical notation (if needed)
+  # - javascripts/mathjax.js
+  # - https://polyfill.io/v3/polyfill.min.js?features=es6
+  # - https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js
+
+# ==============================================================================
+# Build Configuration
+# ==============================================================================
+# Directories
+docs_dir: docs
+site_dir: site
+
+# Strict mode - fail build on warnings (recommended for CI/CD)
+strict: true
+
+# Validation settings
+validation:
+  nav:
+    omitted_files: warn
+    not_found: warn
+    absolute_links: warn
+  links:
+    not_found: warn
+    absolute_links: warn
+    unrecognized_links: warn
+
+# Watch additional files for changes during development
+watch:
+  - includes
+
+# Use directory URLs (e.g., /page/ instead of /page.html)
+use_directory_urls: true
+
+# ==============================================================================
+# Development Server Configuration
+# ==============================================================================
+dev_addr: 127.0.0.1:8000
+
+# ==============================================================================
+# Build Optimization
+# ==============================================================================
+# Exclude patterns
+exclude_docs: |
+  *.tmp
+  *.swp
+  *~
+  .DS_Store
+  .git/
+  .gitignore
+
+# ==============================================================================
+# Hooks (if custom build hooks are needed)
+# ==============================================================================
+# hooks:
+#   - hooks/on_page_markdown.py
+
+# ==============================================================================
+# End of Configuration
+# ==============================================================================
+
