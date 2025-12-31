@@ -28,6 +28,22 @@
                     </includes>
                 </configuration>
             </plugin>
+            <!-- Maven JavaDoc Plugin for generating API documentation -->
+            <!-- Usage: mvn javadoc:javadoc (generates to target/site/apidocs/) -->
+            <!-- Usage: mvn site (generates full project documentation site) -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-javadoc-plugin</artifactId>
+                <version>3.4.1</version>
+                <configuration>
+                    <!-- Java 8 source compatibility (matches maven.compiler.source) -->
+                    <source>8</source>
+                    <!-- Allow build to continue even if JavaDoc has warnings -->
+                    <failOnError>false</failOnError>
+                    <!-- Generate documentation for public APIs only -->
+                    <show>public</show>
+                </configuration>
+            </plugin>
         </plugins>
     </build>
 
