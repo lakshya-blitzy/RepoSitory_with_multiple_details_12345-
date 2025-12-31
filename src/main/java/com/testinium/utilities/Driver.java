@@ -16,13 +16,12 @@ import java.util.concurrent.TimeUnit;
  * each requiring an independent browser session.</p>
  * 
  * <h2>Design Pattern</h2>
- * <p>This class follows the <strong>Singleton-per-Thread</strong> pattern with lazy initialization:
+ * <p>This class follows the <strong>Singleton-per-Thread</strong> pattern with lazy initialization:</p>
  * <ul>
  *   <li>A single WebDriver instance is created per thread on first access</li>
  *   <li>Subsequent calls from the same thread return the existing instance</li>
  *   <li>Child threads inherit their parent's WebDriver reference via {@link InheritableThreadLocal}</li>
  * </ul>
- * </p>
  * 
  * <h2>Non-Instantiability</h2>
  * <p>This class cannot be instantiated. The private constructor enforces static-only access
@@ -43,12 +42,11 @@ import java.util.concurrent.TimeUnit;
  * 
  * <h2>Browser Configuration</h2>
  * <p>Browser type is determined by reading the "browser" property from configuration.properties
- * via {@link ConfigurationReader#getProperty(String)}. Supported values:
+ * via {@link ConfigurationReader#getProperty(String)}. Supported values:</p>
  * <ul>
  *   <li>{@code "chrome"} - Creates a ChromeDriver instance</li>
  *   <li>{@code "firefox"} - Creates a FirefoxDriver instance</li>
  * </ul>
- * </p>
  * 
  * @see ConfigurationReader
  * @see WebDriverManager
@@ -103,8 +101,8 @@ public class Driver {
      * instance is created and configured. Subsequent calls from the same thread return the
      * existing instance without creating a new browser.</p>
      * 
-     * <h3>Initialization Process</h3>
-     * <p>When creating a new WebDriver instance:</p>
+     * <p><strong>Initialization Process:</strong>
+     * When creating a new WebDriver instance:</p>
      * <ol>
      *   <li>Browser type is read from configuration via {@code ConfigurationReader.getProperty("browser")}</li>
      *   <li>{@link WebDriverManager} automatically downloads and configures the browser driver executable</li>
@@ -113,7 +111,7 @@ public class Driver {
      *   <li>Implicit wait of 10 seconds is configured using {@link java.util.concurrent.TimeUnit#SECONDS}</li>
      * </ol>
      * 
-     * <h3>Supported Browser Types</h3>
+     * <p><strong>Supported Browser Types:</strong></p>
      * <table border="1">
      *   <caption>Browser Configuration Options</caption>
      *   <tr><th>Config Value</th><th>Driver Class</th><th>WebDriverManager Setup</th></tr>
@@ -121,7 +119,7 @@ public class Driver {
      *   <tr><td>{@code "firefox"}</td><td>{@link FirefoxDriver}</td><td>Note: Currently calls chromedriver setup (potential bug)</td></tr>
      * </table>
      * 
-     * <h3>Important Notes</h3>
+     * <p><strong>Important Notes:</strong></p>
      * <ul>
      *   <li><strong>Firefox configuration issue:</strong> The firefox branch currently calls
      *       {@code WebDriverManager.chromedriver().setup()} instead of
@@ -179,8 +177,8 @@ public class Driver {
      *       {@link InheritableThreadLocal#remove()}, ensuring the thread-local slot is cleared</li>
      * </ol>
      * 
-     * <h3>Importance of Proper Cleanup</h3>
-     * <p>Calling this method is essential for:</p>
+     * <p><strong>Importance of Proper Cleanup:</strong>
+     * Calling this method is essential for:</p>
      * <ul>
      *   <li><strong>Resource management:</strong> Releases browser processes and associated
      *       system resources (memory, file handles, network connections)</li>
@@ -191,8 +189,8 @@ public class Driver {
      *       state when combined with {@link #getDriver()}</li>
      * </ul>
      * 
-     * <h3>Typical Usage</h3>
-     * <p>This method is typically invoked in Cucumber's {@code @After} hook to ensure browser
+     * <p><strong>Typical Usage:</strong>
+     * This method is typically invoked in Cucumber's {@code @After} hook to ensure browser
      * cleanup occurs after each scenario, regardless of test success or failure:</p>
      * <pre>{@code
      * @After
@@ -201,8 +199,8 @@ public class Driver {
      * }
      * }</pre>
      * 
-     * <h3>Null-Safety</h3>
-     * <p>This method is null-safe and performs no action if no WebDriver exists for the
+     * <p><strong>Null-Safety:</strong>
+     * This method is null-safe and performs no action if no WebDriver exists for the
      * current thread (i.e., if {@link #getDriver()} was never called or the driver was
      * already closed).</p>
      * 

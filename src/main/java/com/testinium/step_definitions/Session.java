@@ -81,8 +81,8 @@ public class Session {
      * an authenticated session. It should be invoked early in test scenarios that need
      * logged-in user access to the application.</p>
      * 
-     * <h3>Required Configuration Keys</h3>
-     * <p>The following keys must be defined in {@code configuration.properties}:</p>
+     * <p><strong>Required Configuration Keys:</strong>
+     * The following keys must be defined in {@code configuration.properties}:</p>
      * <table border="1">
      *     <caption>Configuration Properties</caption>
      *     <tr><th>Key</th><th>Description</th><th>Example</th></tr>
@@ -91,7 +91,7 @@ public class Session {
      *     <tr><td>{@code password}</td><td>The login password</td><td>********</td></tr>
      * </table>
      * 
-     * <h3>Benefits Over Hard-Coded Login</h3>
+     * <p><strong>Benefits Over Hard-Coded Login:</strong></p>
      * <ul>
      *     <li><strong>Security:</strong> Credentials are not committed to source control</li>
      *     <li><strong>Flexibility:</strong> Environment-specific configuration is easily achieved</li>

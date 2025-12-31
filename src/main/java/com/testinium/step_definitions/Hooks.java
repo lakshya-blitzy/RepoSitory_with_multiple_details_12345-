@@ -56,8 +56,8 @@ public class Hooks {
      * 
      * <p>This method performs two critical operations:</p>
      * 
-     * <h3>1. Conditional Screenshot Capture (on failure)</h3>
-     * <p>When a scenario fails ({@code scenario.isFailed()} returns {@code true}), this method:</p>
+     * <p><strong>1. Conditional Screenshot Capture (on failure):</strong>
+     * When a scenario fails ({@code scenario.isFailed()} returns {@code true}), this method:</p>
      * <ol>
      *   <li>Retrieves the current WebDriver instance via {@link Driver#getDriver()}</li>
      *   <li>Casts the WebDriver to the {@link TakesScreenshot} interface</li>
@@ -68,8 +68,8 @@ public class Hooks {
      *       the scenario name as the attachment identifier</li>
      * </ol>
      * 
-     * <h3>2. Unconditional Driver Cleanup</h3>
-     * <p>After processing any screenshot capture, this method always calls {@link Driver#closeDriver()}
+     * <p><strong>2. Unconditional Driver Cleanup:</strong>
+     * After processing any screenshot capture, this method always calls {@link Driver#closeDriver()}
      * to clean up the WebDriver session. This cleanup:</p>
      * <ul>
      *   <li>Calls {@code WebDriver.quit()} to close the browser and end the WebDriver session</li>
@@ -82,7 +82,7 @@ public class Hooks {
      * cleanup, threads could accumulate stale browser sessions, leading to resource exhaustion
      * and test instability.</p>
      * 
-     * <h3>Implementation Details</h3>
+     * <p><strong>Implementation Details:</strong></p>
      * <pre>{@code
      * // Pseudo-code flow:
      * if (scenario.isFailed()) {
