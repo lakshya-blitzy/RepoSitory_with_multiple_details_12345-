@@ -1,6 +1,8 @@
  # :fallen_leaf: :leaves: Testinium-QA :leaves: :fallen_leaf:
 Automating the Testinium browser  (JAVA, Selenium, Cucumber, JUnit, Jira, Jenkins)
+[![Build Status](https://img.shields.io/badge/build-passing-brightgreen)](https://github.com/BalamiRR/Testinium-QA)
 
+##updates
 ### Tools
 
 <p align="left"> 
