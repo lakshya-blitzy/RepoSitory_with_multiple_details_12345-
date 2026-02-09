@@ -192,12 +192,12 @@ public class Driver {
      * <p><strong>Typical Usage:</strong>
      * This method is typically invoked in Cucumber's {@code @After} hook to ensure browser
      * cleanup occurs after each scenario, regardless of test success or failure:</p>
-     * <pre>{@code
-     * @After
+     * <pre>
+     * &#64;After
      * public void tearDown() {
      *     Driver.closeDriver();
      * }
-     * }</pre>
+     * </pre>
      * 
      * <p><strong>Null-Safety:</strong>
      * This method is null-safe and performs no action if no WebDriver exists for the

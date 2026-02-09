@@ -35,14 +35,14 @@ import org.openqa.selenium.TakesScreenshot;
  * <p>This class is automatically discovered and executed by Cucumber through the glue path
  * configuration in the test runner. No explicit instantiation is required.</p>
  * 
- * <pre>{@code
+ * <pre>
  * // Example CukesRunner configuration that includes this hooks class:
- * @CucumberOptions(
+ * &#64;CucumberOptions(
  *     glue = "com/testinium/step_definitions",
  *     // ... other options
  * )
  * public class CukesRunner {}
- * }</pre>
+ * </pre>
  * 
  * @see com.testinium.utilities.Driver
  * @see io.cucumber.java.Scenario
