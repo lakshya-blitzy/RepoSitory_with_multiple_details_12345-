@@ -10,6 +10,9 @@
   "dependencies": {
     "express": "^5.2.1"
   },
+  "engines": {
+    "node": ">=18"
+  },
   "keywords": [
     "express",
     "nodejs",
