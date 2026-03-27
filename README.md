@@ -169,3 +169,39 @@ To generate a Txt report Use `mvn test -Dcucumber.options="–plugin rerun:targe
 
 ### THE END
 
+---
+
+## Node.js Express Server
+
+This repository also includes a lightweight Node.js server built with [Express.js](https://expressjs.com/) that serves two HTTP endpoints.
+
+### Prerequisites
+
+- **Node.js** ≥ 18 (Express 5.x requires Node.js 18 or higher)
+- **npm** (bundled with Node.js)
+
+### Installation
+
+```bash
+npm install
+```
+
+### Running the Server
+
+```bash
+npm start
+```
+
+The server will start on port `3000` by default. You can override the port by setting the `PORT` environment variable:
+
+```bash
+PORT=8080 npm start
+```
+
+### API Endpoints
+
+| Method | Path       | Response Body  | Status Code |
+|--------|------------|----------------|-------------|
+| GET    | `/`        | `Hello world`  | 200         |
+| GET    | `/evening` | `Good evening` | 200         |
+
