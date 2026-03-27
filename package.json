@@ -1,0 +1,19 @@
+{
+  "name": "testinium-qa-server",
+  "version": "1.0.0",
+  "description": "A simple Express.js server with Hello world and Good evening endpoints",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "test": "node server.test.js"
+  },
+  "dependencies": {
+    "express": "^5.2.1"
+  },
+  "keywords": [
+    "express",
+    "nodejs",
+    "tutorial"
+  ],
+  "license": "ISC"
+}
