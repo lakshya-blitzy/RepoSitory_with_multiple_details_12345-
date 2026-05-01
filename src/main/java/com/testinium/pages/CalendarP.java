@@ -6,6 +6,8 @@ import org.openqa.selenium.support.FindBy;
 import org.openqa.selenium.support.PageFactory;
 
 public class CalendarP {
+     // * Page Object class representing the Meetings/Calendar module in Odoo ERP application.
+    
     public CalendarP(){
         PageFactory.initElements(Driver.getDriver(),this);
     }
