@@ -51,7 +51,7 @@ graph LR
     CR -->|getProperty()| SD
 ```
 
-*Source: src/main/java/com/testinium/utilities/ConfigurationReader.java:1-30*
+*Source: src/main/java/com/testinium/utilities/ConfigurationReader.java:1-133*
 
 ---
 
@@ -92,7 +92,7 @@ static {
 }
 ```
 
-*Source: src/main/java/com/testinium/utilities/ConfigurationReader.java:9-25*
+*Source: src/main/java/com/testinium/utilities/ConfigurationReader.java:54-94*
 
 ### Key Loading Characteristics
 
@@ -115,7 +115,7 @@ java.io.FileNotFoundException: configuration.properties (No such file or directo
     ...
 ```
 
-*Source: src/main/java/com/testinium/utilities/ConfigurationReader.java:22*
+*Source: src/main/java/com/testinium/utilities/ConfigurationReader.java:91*
 
 > **Important**: Ensure `configuration.properties` exists at the project root before running tests. Missing configuration will cause `NullPointerException` when accessing properties.
 
@@ -209,7 +209,11 @@ switch(browserType){
         driverPool.get().manage().timeouts().implicitlyWait(10, TimeUnit.SECONDS);
         break;
     case "firefox":
-        WebDriverManager.firefoxdriver().setup();
+        // KNOWN ISSUE: This branch currently calls chromedriver().setup() instead of
+        // firefoxdriver().setup(). Tests run with browser=firefox may fail or fall back
+        // to a Chrome driver setup if a Firefox-compatible driver is unavailable.
+        // The recommended call is: WebDriverManager.firefoxdriver().setup();
+        WebDriverManager.chromedriver().setup();
         driverPool.set(new FirefoxDriver());
         driverPool.get().manage().window().maximize();
         driverPool.get().manage().timeouts().implicitlyWait(10, TimeUnit.SECONDS);
@@ -217,7 +221,7 @@ switch(browserType){
 }
 ```
 
-*Source: src/main/java/com/testinium/utilities/Driver.java:27-41*
+*Source: src/main/java/com/testinium/utilities/Driver.java:142-166*
 
 ### Browser Configuration Details
 
@@ -225,17 +229,19 @@ switch(browserType){
 
 | Setting | Value | Source |
 |---------|-------|--------|
-| Driver Setup | `WebDriverManager.chromedriver().setup()` | Driver.java:31 |
-| Window State | Maximized | Driver.java:33 |
-| Implicit Wait | 10 seconds | Driver.java:34 |
+| Driver Setup | `WebDriverManager.chromedriver().setup()` | Driver.java:152 |
+| Window State | Maximized | Driver.java:154 |
+| Implicit Wait | 10 seconds | Driver.java:155 |
 
 #### Firefox Configuration
 
 | Setting | Value | Source |
 |---------|-------|--------|
-| Driver Setup | `WebDriverManager.firefoxdriver().setup()` | Driver.java:37 |
-| Window State | Maximized | Driver.java:39 |
-| Implicit Wait | 10 seconds | Driver.java:40 |
+| Driver Setup | `WebDriverManager.chromedriver().setup()` (KNOWN BUG - should be `firefoxdriver().setup()`) | Driver.java:158 |
+| Window State | Maximized | Driver.java:160 |
+| Implicit Wait | 10 seconds | Driver.java:161 |
+
+> **Known Issue**: The Firefox case in `Driver.java` currently invokes `WebDriverManager.chromedriver().setup()` rather than `WebDriverManager.firefoxdriver().setup()`. This is documented in the {@link Driver} JavaDoc and may cause Firefox-based test runs to fail if a Chrome driver is not available on the system. The recommended fix is to update line 158 of `Driver.java` to call `firefoxdriver().setup()`.
 
 ### Headless Mode (Advanced)
 
@@ -260,7 +266,7 @@ The framework uses [WebDriverManager](https://bonigarcia.dev/webdrivermanager/) 
 - **Version Management**: Ensures compatibility between browser and driver versions
 - **No Manual Setup**: Eliminates need to download and configure drivers manually
 
-*Source: Driver.java:31, 37; pom.xml dependency: io.github.bonigarcia:webdrivermanager:5.1.0*
+*Source: Driver.java:152, 158; pom.xml dependency: io.github.bonigarcia:webdrivermanager:5.1.0*
 
 ---
 
@@ -286,7 +292,7 @@ public void user_is_on_the_upgenix_login_page() {
 }
 ```
 
-*Source: src/main/java/com/testinium/step_definitions/LoginSD.java:21-23*
+*Source: src/main/java/com/testinium/step_definitions/LoginSD.java:108-109*
 
 ### URL Configuration Examples
 
@@ -369,7 +375,7 @@ The framework configures a **10-second implicit wait** on all WebDriver instance
 driverPool.get().manage().timeouts().implicitlyWait(10, TimeUnit.SECONDS);
 ```
 
-*Source: src/main/java/com/testinium/utilities/Driver.java:34, 40*
+*Source: src/main/java/com/testinium/utilities/Driver.java:155, 161*
 
 ### Implicit Wait Behavior
 
@@ -389,7 +395,7 @@ WebDriverWait wait = new WebDriverWait(Driver.getDriver(), 3);
 wait.until(ExpectedConditions.visibilityOf(element));
 ```
 
-*Source: src/main/java/com/testinium/step_definitions/LoginSD.java:17, 43*
+*Source: src/main/java/com/testinium/step_definitions/LoginSD.java:87, 197*
 
 ### Explicit Wait Examples
 
@@ -703,7 +709,7 @@ String browser = ConfigurationReader.getProperty("browser");
 String url = ConfigurationReader.getProperty("web.table.url");
 ```
 
-*Source: src/main/java/com/testinium/utilities/ConfigurationReader.java:27-29*
+*Source: src/main/java/com/testinium/utilities/ConfigurationReader.java:130-132*
 
 ### Method Signature
 
@@ -731,7 +737,7 @@ public class LoginSD {
 }
 ```
 
-*Source: src/main/java/com/testinium/step_definitions/LoginSD.java:19-24*
+*Source: src/main/java/com/testinium/step_definitions/LoginSD.java:105-110*
 
 #### In Driver Initialization
 
@@ -745,7 +751,7 @@ public static WebDriver getDriver() {
 }
 ```
 
-*Source: src/main/java/com/testinium/utilities/Driver.java:21-27*
+*Source: src/main/java/com/testinium/utilities/Driver.java:142-148*
 
 ### Return Value Handling
 
@@ -775,7 +781,7 @@ The `ConfigurationReader` is **thread-safe** for read operations:
 - The `Properties` object is never modified after initialization
 - Multiple threads can safely call `getProperty()` concurrently
 
-*Source: src/main/java/com/testinium/utilities/ConfigurationReader.java:11-25*
+*Source: src/main/java/com/testinium/utilities/ConfigurationReader.java:80-94*
 
 ---
 

@@ -37,7 +37,7 @@ The Testinium-QA framework is a **UI test automation solution** designed for tes
 | Maven | 3.x | Build and dependency management |
 | Cucumber Reporting Plugin | 7.2.0 | HTML/JSON report generation |
 
-*Source: pom.xml:34-81*
+*Source: pom.xml:50-81*
 
 ### Build Configuration
 
@@ -197,7 +197,7 @@ public class LoginP {
 }
 ```
 
-*Source: src/main/java/com/testinium/pages/LoginP.java:1-33*
+*Source: src/main/java/com/testinium/pages/LoginP.java:1-228*
 
 ### Key Components
 
@@ -211,7 +211,7 @@ public LoginP() {
 }
 ```
 
-*Source: LoginP.java:9-11*
+*Source: LoginP.java:59-61*
 
 This provides **lazy initialization** - elements are located only when first accessed.
 
@@ -278,7 +278,7 @@ public class CukesRunner {
 }
 ```
 
-*Source: src/main/java/com/testinium/runners/CukesRunner.java:1-25*
+*Source: src/main/java/com/testinium/runners/CukesRunner.java:1-136*
 
 ### @CucumberOptions Parameters
 
@@ -321,7 +321,7 @@ public class FailedTestRunner {
 }
 ```
 
-*Source: src/main/java/com/testinium/runners/FailedTestRunner.java:1-15*
+*Source: src/main/java/com/testinium/runners/FailedTestRunner.java:1-96*
 
 The `@target/rerun.txt` file contains paths to failed scenarios from the previous run.
 
@@ -352,7 +352,7 @@ public class Hooks {
 }
 ```
 
-*Source: src/main/java/com/testinium/step_definitions/Hooks.java:1-20*
+*Source: src/main/java/com/testinium/step_definitions/Hooks.java:1-124*
 
 #### Hook Functionality
 
@@ -500,7 +500,7 @@ public class Driver {
 }
 ```
 
-*Source: src/main/java/com/testinium/utilities/Driver.java:1-57*
+*Source: src/main/java/com/testinium/utilities/Driver.java:1-218*
 
 ### Thread Safety
 
@@ -511,7 +511,7 @@ The `InheritableThreadLocal<WebDriver>` pattern ensures:
 - **No State Leakage**: WebDriver state is not shared between threads
 - **Child Thread Support**: Child threads inherit parent's WebDriver reference
 
-*Source: Driver.java:17*
+*Source: Driver.java:94*
 
 ### Browser Configuration
 
@@ -520,7 +520,7 @@ The `InheritableThreadLocal<WebDriver>` pattern ensures:
 | Chrome | `WebDriverManager.chromedriver().setup()` | Maximized | 10 seconds |
 | Firefox | `WebDriverManager.firefoxdriver().setup()` | Maximized | 10 seconds |
 
-*Source: Driver.java:31-40*
+*Source: Driver.java:152-163*
 
 ### Key Methods
 
@@ -531,7 +531,7 @@ The `InheritableThreadLocal<WebDriver>` pattern ensures:
 - Configures window maximization and implicit wait
 - Returns: `WebDriver` instance
 
-*Source: Driver.java:21-45*
+*Source: Driver.java:142-166*
 
 #### closeDriver()
 
@@ -539,7 +539,7 @@ The `InheritableThreadLocal<WebDriver>` pattern ensures:
 - Removes WebDriver from ThreadLocal storage
 - Ensures clean state for next test
 
-*Source: Driver.java:50-55*
+*Source: Driver.java:211-216*
 
 ---
 
@@ -582,7 +582,7 @@ public class ConfigurationReader {
 }
 ```
 
-*Source: src/main/java/com/testinium/utilities/ConfigurationReader.java:1-30*
+*Source: src/main/java/com/testinium/utilities/ConfigurationReader.java:1-133*
 
 ### Configuration Loading
 
@@ -593,7 +593,7 @@ public class ConfigurationReader {
 | **Error Handling** | Prints error message and stack trace |
 | **Thread Safety** | Read-only after initialization |
 
-*Source: ConfigurationReader.java:11-25*
+*Source: ConfigurationReader.java:80-94*
 
 ### Key Method: getProperty()
 
@@ -603,7 +603,7 @@ public static String getProperty(String keyword) {
 }
 ```
 
-*Source: ConfigurationReader.java:27-29*
+*Source: ConfigurationReader.java:130-132*
 
 - **Parameter**: `keyword` - the property key to look up
 - **Returns**: Property value as String, or `null` if not found
@@ -636,7 +636,7 @@ String url = ConfigurationReader.getProperty("web.table.url");
 Driver.getDriver().get(url);
 ```
 
-*Source: Driver.java:27, LoginSD.java:22-23*
+*Source: Driver.java:148, LoginSD.java:108-109*
 
 ---
 
@@ -776,7 +776,7 @@ src/main/java/com/testinium/
 - Each test thread maintains its own browser instance
 - Surefire plugin configured with `<parallel>methods</parallel>`
 
-*Source: Driver.java:17, pom.xml:22*
+*Source: Driver.java:94, pom.xml:22*
 
 ### 2. PageFactory for Lazy Element Initialization
 
@@ -787,7 +787,7 @@ src/main/java/com/testinium/
 - Clean separation of locator definitions from test logic
 - Reduced boilerplate compared to manual `driver.findElement()` calls
 
-*Source: LoginP.java:9-11*
+*Source: LoginP.java:59-61*
 
 ### 3. Implicit Wait as Default Synchronization
 
@@ -798,7 +798,7 @@ src/main/java/com/testinium/
 - Reduces timing-related test flakiness
 - Supplements explicit waits for specific conditions
 
-*Source: Driver.java:34, 40*
+*Source: Driver.java:155, 161*
 
 ### 4. Screenshot on Failure for Debugging
 
@@ -809,7 +809,7 @@ src/main/java/com/testinium/
 - Automatically embedded in Cucumber reports
 - Accelerates debugging and root cause analysis
 
-*Source: Hooks.java:13-15*
+*Source: Hooks.java:117-119*
 
 ### 5. JSON/HTML Report Generation for CI Integration
 
@@ -820,7 +820,7 @@ src/main/java/com/testinium/
 - JSON format for CI/CD tool integration
 - Rerun file enables failed test retry workflows
 
-*Source: CukesRunner.java:9-13*
+*Source: CukesRunner.java:120-125*
 
 ### 6. WebDriverManager for Automatic Driver Management
 
@@ -831,7 +831,7 @@ src/main/java/com/testinium/
 - Version compatibility management
 - Eliminates manual driver maintenance
 
-*Source: Driver.java:31, 37; pom.xml:42-46*
+*Source: Driver.java:152, 158; pom.xml:58-62*
 
 ### 7. BDD with Cucumber for Business Readability
 

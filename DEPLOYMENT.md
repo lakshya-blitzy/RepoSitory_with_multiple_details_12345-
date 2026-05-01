@@ -370,7 +370,7 @@ The framework is configured for parallel test execution in `pom.xml`:
 The framework ensures thread-safety for parallel execution through `InheritableThreadLocal`:
 
 ```java
-// Source: src/main/java/com/testinium/utilities/Driver.java:17
+// Source: src/main/java/com/testinium/utilities/Driver.java:94
 private static InheritableThreadLocal<WebDriver> driverPool = new InheritableThreadLocal<>();
 ```
 
@@ -445,7 +445,7 @@ graph LR
 ### Report Configuration in CukesRunner
 
 ```java
-// Source: src/main/java/com/testinium/runners/CukesRunner.java:8-14
+// Source: src/main/java/com/testinium/runners/CukesRunner.java:119-126
 @CucumberOptions(
     plugin = {
         "html:target/cucumber-reports.html",
@@ -471,7 +471,7 @@ graph LR
 The Hooks class automatically captures screenshots when tests fail:
 
 ```java
-// Source: src/main/java/com/testinium/step_definitions/Hooks.java:11-17
+// Source: src/main/java/com/testinium/step_definitions/Hooks.java:115-121
 @After
 public void teardownScenario(Scenario scenario){
     if(scenario.isFailed()){

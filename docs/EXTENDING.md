@@ -76,7 +76,7 @@ public LoginP() {
 }
 ```
 
-*Source: src/main/java/com/testinium/pages/LoginP.java:9-11*
+*Source: src/main/java/com/testinium/pages/LoginP.java:59-61*
 
 This provides **lazy initialization** - elements are located only when first accessed, improving performance and reducing flaky tests.
 
@@ -104,7 +104,7 @@ public WebElement inputEmail;
 public WebElement inputPassword;
 ```
 
-*Source: src/main/java/com/testinium/pages/LoginP.java:13-17*
+*Source: src/main/java/com/testinium/pages/LoginP.java:77-99*
 
 **Using `id` attribute** (most stable locator):
 
@@ -113,7 +113,7 @@ public WebElement inputPassword;
 public WebElement dashboard;
 ```
 
-*Source: src/main/java/com/testinium/pages/LoginP.java:25-26*
+*Source: src/main/java/com/testinium/pages/LoginP.java:166-167*
 
 **Using `className` attribute** (for CSS class-based locators):
 
@@ -122,7 +122,7 @@ public WebElement dashboard;
 public WebElement alertErrorMessage;
 ```
 
-*Source: src/main/java/com/testinium/pages/LoginP.java:28-29*
+*Source: src/main/java/com/testinium/pages/LoginP.java:196-197*
 
 **Using `xpath`** (for complex element queries):
 
@@ -134,7 +134,7 @@ public WebElement button;
 public WebElement resetPass;
 ```
 
-*Source: src/main/java/com/testinium/pages/LoginP.java:19-23*
+*Source: src/main/java/com/testinium/pages/LoginP.java:122-142*
 
 ### Complete Page Object Template
 
@@ -287,7 +287,7 @@ Instantiate Page Objects as instance variables:
 LoginP loginP = new LoginP();
 ```
 
-*Source: src/main/java/com/testinium/step_definitions/LoginSD.java:16*
+*Source: src/main/java/com/testinium/step_definitions/LoginSD.java:70*
 
 ### WebDriverWait Setup
 
@@ -297,7 +297,7 @@ Set up explicit waits for synchronization:
 WebDriverWait wait = new WebDriverWait(Driver.getDriver(), 3);
 ```
 
-*Source: src/main/java/com/testinium/step_definitions/LoginSD.java:17*
+*Source: src/main/java/com/testinium/step_definitions/LoginSD.java:87*
 
 The timeout (3 seconds in this example) should be appropriate for your application's responsiveness.
 
@@ -322,7 +322,7 @@ public void user_is_on_the_upgenix_login_page() {
 }
 ```
 
-*Source: src/main/java/com/testinium/step_definitions/LoginSD.java:19-24*
+*Source: src/main/java/com/testinium/step_definitions/LoginSD.java:105-110*
 
 #### @When - Action Steps
 
@@ -333,7 +333,7 @@ public void user_clicks_the_login_button() {
 }
 ```
 
-*Source: src/main/java/com/testinium/step_definitions/LoginSD.java:36-39*
+*Source: src/main/java/com/testinium/step_definitions/LoginSD.java:169-172*
 
 #### @Then - Assertion Steps
 
@@ -347,7 +347,7 @@ public void user_should_see_the_dashboard() {
 }
 ```
 
-*Source: src/main/java/com/testinium/step_definitions/LoginSD.java:41-47*
+*Source: src/main/java/com/testinium/step_definitions/LoginSD.java:195-201*
 
 ### Parameterized Steps
 
@@ -365,7 +365,7 @@ public void user_enters_password(String password) {
 }
 ```
 
-*Source: src/main/java/com/testinium/step_definitions/LoginSD.java:26-34*
+*Source: src/main/java/com/testinium/step_definitions/LoginSD.java:129-132*
 
 Common Cucumber expression types:
 
@@ -387,7 +387,7 @@ The framework uses JUnit `Assert` for verifications:
 Assert.assertEquals("The title is not same as the expected! ", expectedDashboard, actualDashboard);
 ```
 
-*Source: src/main/java/com/testinium/step_definitions/LoginSD.java:46*
+*Source: src/main/java/com/testinium/step_definitions/LoginSD.java:200*
 
 **assertTrue** - Verify a condition is true:
 
@@ -395,7 +395,7 @@ Assert.assertEquals("The title is not same as the expected! ", expectedDashboard
 Assert.assertTrue(loginP.alertErrorMessage.isDisplayed());
 ```
 
-*Source: src/main/java/com/testinium/step_definitions/LoginSD.java:51*
+*Source: src/main/java/com/testinium/step_definitions/LoginSD.java:218*
 
 **assertEquals with custom message**:
 
@@ -404,7 +404,7 @@ String expectedMessage = Driver.getDriver().findElement(By.name("login")).getAtt
 Assert.assertEquals(expectedMessage, alertMessage);
 ```
 
-*Source: src/main/java/com/testinium/step_definitions/LoginSD.java:56-57*
+*Source: src/main/java/com/testinium/step_definitions/LoginSD.java:245-246*
 
 **assertTrue with attribute comparison**:
 
@@ -412,7 +412,7 @@ Assert.assertEquals(expectedMessage, alertMessage);
 Assert.assertTrue(loginP.bulletPass.getAttribute("type").equals("password"));
 ```
 
-*Source: src/main/java/com/testinium/step_definitions/LoginSD.java:62*
+*Source: src/main/java/com/testinium/step_definitions/LoginSD.java:270*
 
 ### Complete Step Definition Template
 
@@ -771,7 +771,7 @@ The framework configures a **10-second implicit wait** for all element lookups:
 driverPool.get().manage().timeouts().implicitlyWait(10, TimeUnit.SECONDS);
 ```
 
-*Source: src/main/java/com/testinium/utilities/Driver.java:34, 40*
+*Source: src/main/java/com/testinium/utilities/Driver.java:155, 161*
 
 This means Selenium will wait up to 10 seconds for elements to appear before throwing `NoSuchElementException`.
 
@@ -784,7 +784,7 @@ WebDriverWait wait = new WebDriverWait(Driver.getDriver(), 3);
 wait.until(ExpectedConditions.visibilityOf(loginP.dashboard));
 ```
 
-*Source: src/main/java/com/testinium/step_definitions/LoginSD.java:17, 43*
+*Source: src/main/java/com/testinium/step_definitions/LoginSD.java:87, 197*
 
 ### Common ExpectedConditions
 
@@ -984,7 +984,7 @@ public class CukesRunner {
 }
 ```
 
-*Source: src/main/java/com/testinium/runners/CukesRunner.java:8-20*
+*Source: src/main/java/com/testinium/runners/CukesRunner.java:119-132*
 
 ### Dry Run to Validate Step Mappings
 
@@ -994,7 +994,7 @@ Before running actual tests, validate that all steps have definitions:
 dryRun = true  // Validates step mappings without executing
 ```
 
-*Source: src/main/java/com/testinium/runners/CukesRunner.java:17*
+*Source: src/main/java/com/testinium/runners/CukesRunner.java:129*
 
 This will:
 - Check that all Gherkin steps have matching Java methods

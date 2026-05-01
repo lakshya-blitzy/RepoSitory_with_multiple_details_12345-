@@ -64,11 +64,11 @@ This troubleshooting guide is specific to the Testinium-QA framework, which uses
 
 | Component | Version | Configuration Location |
 |-----------|---------|----------------------|
-| Selenium WebDriver | 3.141.59 | `pom.xml:38` |
-| WebDriverManager | 5.1.0 | `pom.xml:49` |
-| Implicit Wait | 10 seconds | `Driver.java:34` |
+| Selenium WebDriver | 3.141.59 | `pom.xml:54` |
+| WebDriverManager | 5.1.0 | `pom.xml:60` |
+| Implicit Wait | 10 seconds | `Driver.java:155` |
 | Browser Selection | Config-driven | `configuration.properties` |
-| Screenshot on Failure | Automatic | `Hooks.java:13-15` |
+| Screenshot on Failure | Automatic | `Hooks.java:117-119` |
 
 *Source: pom.xml, src/main/java/com/testinium/utilities/Driver.java*
 
@@ -121,7 +121,7 @@ WebDriverWait wait = new WebDriverWait(Driver.getDriver(), 10);
 WebElement element = wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("submit")));
 ```
 
-*Reference: src/main/java/com/testinium/step_definitions/LoginSD.java:17, 43*
+*Reference: src/main/java/com/testinium/step_definitions/LoginSD.java:87, 197*
 
 **3. Check for iframes**
 
@@ -199,7 +199,7 @@ WebDriverWait wait = new WebDriverWait(Driver.getDriver(), 3);
 wait.until(ExpectedConditions.visibilityOf(loginP.dashboard));
 ```
 
-*Source: src/main/java/com/testinium/step_definitions/LoginSD.java:43*
+*Source: src/main/java/com/testinium/step_definitions/LoginSD.java:197*
 
 **3. Use Retry Logic**
 
@@ -258,7 +258,7 @@ WebDriverWait wait = new WebDriverWait(Driver.getDriver(), 3);
 WebDriverWait wait = new WebDriverWait(Driver.getDriver(), 15);
 ```
 
-*Reference: src/main/java/com/testinium/step_definitions/LoginSD.java:17*
+*Reference: src/main/java/com/testinium/step_definitions/LoginSD.java:87*
 
 **2. Verify Element Exists**
 
@@ -327,7 +327,7 @@ WebDriverManager.chromedriver().setup();
 driverPool.set(new ChromeDriver());
 ```
 
-*Source: src/main/java/com/testinium/utilities/Driver.java:31-32*
+*Source: src/main/java/com/testinium/utilities/Driver.java:152-153*
 
 **2. Verify Browser Installation**
 
@@ -569,7 +569,7 @@ The framework configures a **10-second implicit wait** globally:
 driverPool.get().manage().timeouts().implicitlyWait(10, TimeUnit.SECONDS);
 ```
 
-*Source: src/main/java/com/testinium/utilities/Driver.java:34*
+*Source: src/main/java/com/testinium/utilities/Driver.java:155*
 
 #### Comparison
 
@@ -584,7 +584,7 @@ driverPool.get().manage().timeouts().implicitlyWait(10, TimeUnit.SECONDS);
 #### Recommendations
 
 ```java
-// Implicit wait is already configured globally (Driver.java:34)
+// Implicit wait is already configured globally (Driver.java:155)
 // Use explicit waits for specific conditions:
 
 WebDriverWait wait = new WebDriverWait(Driver.getDriver(), 3);
@@ -596,7 +596,7 @@ wait.until(ExpectedConditions.visibilityOf(element));
 wait.until(ExpectedConditions.elementToBeClickable(element));
 ```
 
-*Source: src/main/java/com/testinium/step_definitions/LoginSD.java:17, 43*
+*Source: src/main/java/com/testinium/step_definitions/LoginSD.java:87, 197*
 
 ---
 
@@ -631,7 +631,7 @@ wait.until(ExpectedConditions.visibilityOf(loginP.dashboard));
 loginP.dashboard.click();
 ```
 
-*Source: src/main/java/com/testinium/step_definitions/LoginSD.java:43*
+*Source: src/main/java/com/testinium/step_definitions/LoginSD.java:197*
 
 #### When Thread.sleep Might Be Acceptable
 
@@ -658,7 +658,7 @@ WebDriverWait wait = new WebDriverWait(Driver.getDriver(), 3);
 wait.until(ExpectedConditions.visibilityOf(loginP.dashboard));
 ```
 
-*Source: src/main/java/com/testinium/step_definitions/LoginSD.java:17, 43*
+*Source: src/main/java/com/testinium/step_definitions/LoginSD.java:87, 197*
 
 #### Common WebDriverWait Patterns
 
@@ -827,7 +827,7 @@ WebDriverManager.chromedriver().setup();  // BUG: Should be firefoxdriver()
 driverPool.set(new FirefoxDriver());
 ```
 
-*Source: src/main/java/com/testinium/utilities/Driver.java:31-38*
+*Source: src/main/java/com/testinium/utilities/Driver.java:152-159*
 
 #### How WebDriverManager Works
 
@@ -916,13 +916,13 @@ google-chrome --version
 **IMPORTANT**: The current framework has a **bug in Firefox configuration**:
 
 ```java
-// BUG in Driver.java:37 - uses chromedriver for Firefox!
+// BUG in Driver.java:158 - uses chromedriver for Firefox!
 case "firefox":
     WebDriverManager.chromedriver().setup();  // Should be firefoxdriver()
     driverPool.set(new FirefoxDriver());
 ```
 
-*Source: src/main/java/com/testinium/utilities/Driver.java:37*
+*Source: src/main/java/com/testinium/utilities/Driver.java:158*
 
 #### Corrected Firefox Configuration
 
@@ -1066,7 +1066,7 @@ File is not found in the ConfigurationReader class
 java.io.FileNotFoundException: configuration.properties (No such file or directory)
 ```
 
-*Source: src/main/java/com/testinium/utilities/ConfigurationReader.java:22-23*
+*Source: src/main/java/com/testinium/utilities/ConfigurationReader.java:91-92*
 
 #### Common Causes
 
@@ -1111,7 +1111,7 @@ The configuration file path is hardcoded:
 FileInputStream file = new FileInputStream("configuration.properties");
 ```
 
-*Source: src/main/java/com/testinium/utilities/ConfigurationReader.java:14*
+*Source: src/main/java/com/testinium/utilities/ConfigurationReader.java:83*
 
 This expects the file at the project root (where `pom.xml` is located).
 
@@ -1150,8 +1150,8 @@ java.lang.NullPointerException: Cannot invoke "String.equals(Object)" because th
 
 | Property | Usage Location | Purpose |
 |----------|----------------|---------|
-| `browser` | `Driver.java:27` | Browser type selection |
-| `web.table.url` | `LoginSD.java:22` | Application URL |
+| `browser` | `Driver.java:148` | Browser type selection |
+| `web.table.url` | `LoginSD.java:108` | Application URL |
 
 #### Solutions
 
@@ -1308,7 +1308,7 @@ public void teardownScenario(Scenario scenario){
 }
 ```
 
-*Source: src/main/java/com/testinium/step_definitions/Hooks.java:11-18*
+*Source: src/main/java/com/testinium/step_definitions/Hooks.java:115-122*
 
 #### How It Works
 
@@ -1460,8 +1460,8 @@ Effective debugging strategies help identify issues quickly and reduce time spen
 
 | Location | Purpose |
 |----------|---------|
-| `Driver.java:22` | Inspect driver creation |
-| `Driver.java:27` | Check browser type read from config |
+| `Driver.java:143` | Inspect driver creation |
+| `Driver.java:148` | Check browser type read from config |
 | Step definition method start | Verify step is matched |
 | Before `click()` calls | Verify element state |
 | Before assertions | Inspect actual values |
@@ -1673,7 +1673,7 @@ public void tearDown(Scenario scenario) {
 }
 ```
 
-*Source: src/main/java/com/testinium/step_definitions/Hooks.java:11-18*
+*Source: src/main/java/com/testinium/step_definitions/Hooks.java:115-122*
 
 #### Run Single Scenario
 

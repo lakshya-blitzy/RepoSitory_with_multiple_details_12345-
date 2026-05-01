@@ -93,9 +93,10 @@ public class Hooks {
      * Driver.closeDriver(); // Always executed
      * }</pre>
      * 
-     * <p><strong>Note:</strong> The {@code @After} annotation used in this class is from the
-     * {@code io.cucumber.java} package for Cucumber hooks functionality, not from
-     * {@code org.junit} which is used for JUnit lifecycle methods.</p>
+     * <p><strong>Note:</strong> This class imports {@code @After} from the {@code org.junit}
+     * package (see import statement). Cucumber 7.x also provides {@code io.cucumber.java.After}
+     * for Cucumber-native hook semantics; ensure the import in use matches the desired hook
+     * behavior for your test framework setup.</p>
      * 
      * @param scenario the Cucumber {@link Scenario} object providing scenario context including:
      *                 <ul>
