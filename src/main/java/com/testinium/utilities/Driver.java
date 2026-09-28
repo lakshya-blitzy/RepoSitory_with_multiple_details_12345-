@@ -12,11 +12,11 @@ import java.util.concurrent.TimeUnit;
  * Utility-layer factory and lifecycle manager for the Selenium {@link org.openqa.selenium.WebDriver}
  * shared by all Page Objects and Step Definitions that drive the Odoo/Upgenix ERP UI.
  *
- * <p>The class keeps one {@code WebDriver} per thread in an {@link InheritableThreadLocal} pool.
- * The pool exists because Maven Surefire is configured to run tests in parallel
- * ({@code parallel=methods} in the {@code pom.xml} Surefire configuration), so each test thread
- * holds its own browser session. Because the pool is inheritable, a child thread started after
- * its parent thread obtained a driver inherits the parent's driver reference.
+ * <p>The class keeps one {@code WebDriver} per thread in an {@link InheritableThreadLocal} pool, set up
+ * for parallel runs ({@code parallel=methods} in the {@code pom.xml} Surefire configuration). A thread
+ * that inherits no entry creates its own browser. A child thread created after its parent obtained a
+ * driver inherits the same {@code WebDriver} object, not a copy, so both drive one browser session; if
+ * either calls {@link #closeDriver()}, that browser quits and the other thread still holds the quit driver.
  *
  * <p>Consumers:
  * <ul>
@@ -24,7 +24,7 @@ import java.util.concurrent.TimeUnit;
  *       {@code PageFactory.initElements(Driver.getDriver(), this)}.</li>
  *   <li>Step Definitions call {@link #getDriver()} for browser-level actions such as navigation,
  *       title checks and explicit waits.</li>
- *   <li>{@code Hooks.teardownScenario(Scenario)} calls {@link #closeDriver()} to end the session.</li>
+ *   <li>{@code Hooks.teardownScenario(Scenario)} is written to call {@link #closeDriver()}; see that method.</li>
  * </ul>
  *
  * <p>All members are static and the class cannot be instantiated.
@@ -54,7 +54,7 @@ public class Driver {
      *   <li>{@code firefox}: creates a {@code FirefoxDriver}.</li>
      * </ul>
      * In both cases the browser window is maximized and a 10-second implicit wait is set.
-     * Later calls from the same thread return the same instance until {@link #closeDriver()} runs.
+     * Later calls from the same thread return the same instance until {@link #closeDriver()} clears it.
      *
      * <p>Usage:
      * <pre>{@code
@@ -110,12 +110,12 @@ public class Driver {
     /**
      * Ends the browser session bound to the current thread and clears the thread's pool entry.
      *
-     * <p>If the current thread holds a driver, this method calls {@code quit()} on it to close the
-     * browser session and then {@code driverPool.remove()}, so the next {@link #getDriver()} call
-     * on this thread creates a fresh session. If the thread holds no driver, it does nothing.
+     * <p>With a driver present, it calls {@code quit()} on it and then {@code driverPool.remove()}, so the
+     * next {@link #getDriver()} on this thread creates a fresh session; with none, it does nothing. If
+     * {@code quit()} throws, {@code remove()} is skipped and the thread keeps returning that driver.
      *
-     * <p>{@code Hooks.teardownScenario(Scenario)} invokes this method after it attaches a
-     * screenshot for a failed scenario.
+     * <p>Only {@code Hooks.teardownScenario(Scenario)} calls it, and only if its failure screenshot does
+     * not throw; Cucumber does not register that hook as written, so nothing calls this at run time.
      */
     public static void closeDriver(){
         if (driverPool.get() != null){

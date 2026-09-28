@@ -14,8 +14,8 @@ import org.junit.runner.RunWith;
  *     <ul>
  *       <li>{@code "html:target/cucumber-reports.html"}: the HTML report.</li>
  *       <li>{@code "json:target/cucumber.json"}: the JSON report. The Jenkins "Generate report" stage
- *           publishes it through the {@code cucumber} step ({@code fileIncludePattern}
- *           <code>'**&#47;*.json'</code>).</li>
+ *           is configured to publish it, when present, through the {@code cucumber} step
+ *           ({@code fileIncludePattern} <code>'**&#47;*.json'</code>); see Execution below.</li>
  *       <li>{@code "rerun:target/rerun.txt"}: the failed-scenario locations consumed by
  *           {@link FailedTestRunner}.</li>
  *       <li>{@code "me.jvt.cucumber.report.PrettyReports:target/cucumber"}: the PrettyReports HTML
@@ -28,9 +28,9 @@ import org.junit.runner.RunWith;
  *   <li>{@code tags = "@Smoke"}: only scenarios tagged {@code @Smoke} run.</li>
  * </ul>
  *
- * <p>Execution: the Maven Surefire configuration in {@code pom.xml} includes
- * <code>**&#47;CukesRunner*.java</code>, with {@code testFailureIgnore=true} and
- * {@code parallel=methods}. The Jenkins "Run tests" stage runs {@code mvn clean test}.
+ * <p>Execution: Surefire in {@code pom.xml} includes <code>**&#47;CukesRunner*.java</code> with
+ * {@code parallel=methods} and {@code testFailureIgnore=true}, but it scans only compiled test classes and this
+ * class compiles from {@code src/main/java}, so the Jenkins {@code mvn clean test} runs no scenario.
  *
  * @see FailedTestRunner
  */

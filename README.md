@@ -1,7 +1,7 @@
  # :fallen_leaf: :leaves: Testinium-QA :leaves: :fallen_leaf:
 Automating the Testinium browser  (JAVA, Selenium, Cucumber, JUnit, Jira, Jenkins)
 
-### Tools
+## Tools
 
 <p align="left"> 
 
@@ -13,18 +13,18 @@ Automating the Testinium browser  (JAVA, Selenium, Cucumber, JUnit, Jira, Jenkin
   <img src="https://selenium.dev/images/selenium_logo_square_green.png" alt="selenium" width="60" height="60"/> 
 </a>    
 
-<a href="https://www.oracle.com/" target="_blank" rel="noreferrer"> 
-  <img src="https://lisacrispin.com/wp-content/uploads/2019/01/Screen-Shot-2019-01-17-at-12.13.33-PM.png" alt="oracle" width="60" height="60"/> 
+<a href="https://cucumber.io/" target="_blank" rel="noreferrer"> 
+  <img src="https://lisacrispin.com/wp-content/uploads/2019/01/Screen-Shot-2019-01-17-at-12.13.33-PM.png" alt="cucumber" width="60" height="60"/> 
 </a>
 
-<a href="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSPEOYG6Ap6vFoqv5bNXkDvnCa1yAqbDr_f_YQhXa97QwYXvNqWIvnCzpFJJz1ZwcLrwbM&usqp=CAU" rel="noreferrer">
-  <img src="https://www.codeaffine.com/wp-content/uploads/2016/02/junit-lambda.png" width="115" height="60"/> 
+<a href="https://junit.org/junit4/" rel="noreferrer">
+  <img src="https://junit.org/junit4/images/junit-logo.png" alt="junit" width="115" height="60"/> 
 </a> 
-<a href="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSPEOYG6Ap6vFoqv5bNXkDvnCa1yAqbDr_f_YQhXa97QwYXvNqWIvnCzpFJJz1ZwcLrwbM&usqp=CAU" rel="noreferrer">
-  <img src="https://i0.wp.com/invotra.com/wp-content/uploads/2019/09/jira_software_logo-e1571063680300.png?fit=768%2C216&ssl=1" width="160" height="60"/> 
+<a href="https://www.atlassian.com/software/jira" rel="noreferrer">
+  <img src="https://i0.wp.com/invotra.com/wp-content/uploads/2019/09/jira_software_logo-e1571063680300.png?fit=768%2C216&ssl=1" alt="jira" width="160" height="60"/> 
 </a> 
-<a href="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSPEOYG6Ap6vFoqv5bNXkDvnCa1yAqbDr_f_YQhXa97QwYXvNqWIvnCzpFJJz1ZwcLrwbM&usqp=CAU" rel="noreferrer">
-  <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/e/e9/Jenkins_logo.svg/1200px-Jenkins_logo.svg.png" width="50" height="80"/> 
+<a href="https://www.jenkins.io/" rel="noreferrer">
+  <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/e/e9/Jenkins_logo.svg/500px-Jenkins_logo.svg.png" alt="jenkins" width="50" height="80"/> 
 </a> 
 </p>
 
@@ -37,11 +37,16 @@ Automating the Testinium browser  (JAVA, Selenium, Cucumber, JUnit, Jira, Jenkin
 
 ## Overview
 
-This repository contains a collection of sample `Testinium-QA` projects and libraries that demonstrate how to
-use the tool and develop automation scripts using the Cucumber BDD framework with Java as the programming language.
-It generates JSON, HTML and Txt reports as well. It also generates `screen shots` for your tests if you enable it and
-is designed to generate `error shots` for your failed test cases as well (the failure-screenshot hook is currently not
-registered by Cucumber, see [Known Findings](#known-findings)).
+This repository contains `Testinium-QA`, a single Java 8 Maven module (`org.example:testinium-qa`) that implements a
+Selenium WebDriver and Cucumber BDD UI test-automation framework. It demonstrates how to develop automation scripts
+with the Cucumber BDD framework, using Java as the programming language. Each `CukesRunner` run writes an HTML report,
+a JSON report and a PrettyReports HTML site, plus a plain-text list of the failed scenarios (`target/rerun.txt`) that
+`FailedTestRunner` replays. Screenshots are limited to failures: the `Hooks` class is written to attach an `error shot`
+to each failed scenario, and no code path captures screenshots of passing scenarios. That hook is currently not
+registered by Cucumber, so today no screenshot is taken at all (see [Known Findings](#known-findings)).
+Source: `pom.xml:L7-L14`; `src/main/java/com/testinium/runners/CukesRunner.java:L39-L44`;
+`src/main/java/com/testinium/runners/FailedTestRunner.java:L38`; `src/main/java/com/testinium/step_definitions/Hooks.java:L5`,
+`L45-L52`
 
 The framework drives the web UI of an **Odoo/Upgenix ERP** instance (the system under test) through Selenium WebDriver.
 It exposes no HTTP/REST endpoints: its API is the Java framework itself (utilities, runners, Page Objects, Step
@@ -60,6 +65,7 @@ also carries Javadoc in source.
 
 ## Table of Contents
 
+- [Tools](#tools)
 - [Overview](#overview)
 - [Architecture](#architecture)
 - [Prerequisites](#prerequisites)
@@ -78,10 +84,24 @@ also carries Javadoc in source.
   - [Report Output](#report-output)
 - [API Reference](#api-reference)
   - [Utilities](#utilities)
+    - [`Driver`](#driver)
+    - [`ConfigurationReader`](#configurationreader)
   - [Runners](#runners)
+    - [`CukesRunner`](#cukesrunner)
+    - [`FailedTestRunner`](#failedtestrunner)
   - [Hooks](#hooks)
   - [Page Objects](#page-objects)
   - [Step Definitions](#step-definitions)
+    - [`Calendar`](#calendar)
+    - [`Contacts`](#contacts)
+    - [`Crm`](#crm)
+    - [`EmployeeStage`](#employeestage)
+    - [`Inventory`](#inventory)
+    - [`LoginSD`](#loginsd)
+    - [`LogOutSD`](#logoutsd)
+    - [`Notes`](#notes)
+    - [`Sales`](#sales)
+    - [`Session`](#session)
   - [Gherkin Feature Catalog](#gherkin-feature-catalog)
   - [Writing Scenarios with Cucumber BDD](#writing-scenarios-with-cucumber-bdd)
 - [Deployment & CI](#deployment--ci)
@@ -98,6 +118,10 @@ also carries Javadoc in source.
   - [Login Flow Sequence](#login-flow-sequence)
   - [Failure Hook Sequence](#failure-hook-sequence)
 - [Reports](#reports)
+  - [Jenkins Cucumber Reports](#jenkins-cucumber-reports)
+  - [HTML Report](#html-report)
+  - [Failed-Scenario Rerun List](#failed-scenario-rerun-list)
+  - [Jira Test Execution](#jira-test-execution)
 - [Project Structure](#project-structure)
 - [Known Findings & Troubleshooting](#known-findings--troubleshooting)
   - [Known Findings](#known-findings)
@@ -113,35 +137,41 @@ Page Objects, and two utilities manage the browser session and the external conf
 flowchart TB
     Feature["Gherkin Feature Files<br/>src/main/resources/features"] --> Runner["CukesRunner / FailedTestRunner<br/>JUnit 4 + Cucumber"]
     Runner --> Steps["Step Definitions<br/>Given / When / Then methods"]
-    Steps --> Hooks["Hooks<br/>failure screenshot + driver teardown"]
     Steps --> Pages["Page Objects<br/>FindBy fields + PageFactory"]
     Steps --> Driver
     Pages --> Driver["Driver<br/>InheritableThreadLocal WebDriver"]
-    Hooks --> Driver
     Driver --> Config["ConfigurationReader<br/>configuration.properties"]
     Steps --> Config
     Driver --> SUT["Odoo / Upgenix ERP<br/>system under test"]
+    Runner -.->|"intended after-scenario callback, not registered"| Hooks["Hooks: inactive<br/>written to attach a failure screenshot and close the driver"]
+    Hooks -.->|"intended: getDriver for the screenshot, then closeDriver"| Driver
+    HookNote["teardownScenario is annotated with JUnit's org.junit.After,<br/>imported at Hooks.java L5, not io.cucumber.java.After.<br/>Cucumber 7 registers only io.cucumber.java hooks, so this path does not run."] -.- Hooks
+    classDef inactive fill:#f5f5f5,stroke:#888,stroke-dasharray:5 5,color:#555
+    class Hooks,HookNote inactive
 ```
 
 | Layer | Package / location | Responsibility | Source |
 |-------|--------------------|----------------|--------|
-| Feature | `src/main/resources/features` (10 files) | Gherkin scenarios for the ERP modules under test | `src/main/java/com/testinium/runners/CukesRunner.java:L45` |
+| Feature | `src/main/resources/features` (10 files) | Gherkin scenarios for the ERP modules under test | The ten `Feature:` lines under `src/main/resources/features/`: `Calendar.feature:L2`, `Contact.feature:L1`, `Crm.feature:L2`, `EmployeeFc.feature:L2`, `Inventory.feature:L1`, `Login.feature:L2`, `Logout.feature:L2`, `Notes.feature:L1`, `Sales.feature:L1`, `Session.feature:L1`; scanned folder: `src/main/java/com/testinium/runners/CukesRunner.java:L45` |
 | Runner | `com.testinium.runners` | JUnit 4 entry points: `@RunWith(Cucumber.class)` plus `@CucumberOptions` (features, glue, tags, report plugins) | `src/main/java/com/testinium/runners/CukesRunner.java:L37-L51`; `src/main/java/com/testinium/runners/FailedTestRunner.java:L35-L40` |
 | Step Definition | `com.testinium.step_definitions` (glue) | Binds each Gherkin step to a Java method; navigates, waits and asserts | `src/main/java/com/testinium/runners/CukesRunner.java:L46` |
 | Hook | `com.testinium.step_definitions.Hooks` | Written to attach a screenshot to failed scenarios and close the driver | `src/main/java/com/testinium/step_definitions/Hooks.java:L45-L52` |
-| Page Object | `com.testinium.pages` (10 classes) | `@FindBy` element containers initialized with `PageFactory`; no waits or assertions | `src/main/java/com/testinium/pages/LoginP.java:L25-L55` |
-| Utility | `com.testinium.utilities` | `Driver` (one WebDriver per thread) and `ConfigurationReader` (`configuration.properties` accessor) | `src/main/java/com/testinium/utilities/Driver.java:L34-L125`; `src/main/java/com/testinium/utilities/ConfigurationReader.java:L41-L72` |
+| Page Object | `com.testinium.pages` (10 classes) | `@FindBy` element containers initialized with `PageFactory`; no waits or assertions | The ten class declarations under `src/main/java/com/testinium/pages/`: `CalendarP.java:L16`, `ContactsP.java:L16`, `CrmP.java:L17`, `EmployeeP.java:L18`, `InventoryP.java:L17`, `LogOutP.java:L16`, `LoginP.java:L16`, `NotesP.java:L16`, `SalesP.java:L20`, `SessionP.java:L17`; constructor and `@FindBy` fields, for example: `src/main/java/com/testinium/pages/LoginP.java:L25-L55` |
+| Utility | `com.testinium.utilities` | `Driver` (one WebDriver per thread; a child thread shares the driver its parent held when the child was created) and `ConfigurationReader` (`configuration.properties` accessor) | `src/main/java/com/testinium/utilities/Driver.java:L34-L125`; `src/main/java/com/testinium/utilities/ConfigurationReader.java:L41-L72` |
 | System under test | external | Odoo/Upgenix ERP web application reached at the configured URLs | `src/main/java/com/testinium/step_definitions/LoginSD.java:L46-L51` |
 
 Execution order for one scenario:
 
 1. The runner collects the feature files under `features` and keeps the scenarios matching `tags`
-   (Source: `src/main/java/com/testinium/runners/CukesRunner.java:L45-L48`).
+   (Source: `src/main/java/com/testinium/runners/CukesRunner.java:L45` (features), `L48` (tags)).
 2. Cucumber matches every step's text against the `@Given`/`@When`/`@Then`/`@And` expressions in the glue package
    (Source: `src/main/java/com/testinium/runners/CukesRunner.java:L46`).
-3. The step class is instantiated for the scenario. Its field initializers create the Page Object and a
-   `WebDriverWait`, both of which call `Driver.getDriver()`, so the browser opens on first use
-   (Source: `src/main/java/com/testinium/step_definitions/LoginSD.java:L34-L36`).
+3. The step class is instantiated for the scenario. Its field initializers create its Page Object (two in `Notes`) and,
+   in every step class except `Session`, a `WebDriverWait`. Each calls `Driver.getDriver()`, which opens a browser if
+   the thread has none yet and otherwise reuses the thread's open browser, for example one opened by the `Session`
+   login step or left open by an earlier scenario, because the unregistered hook never closes it
+   (Source: `src/main/java/com/testinium/step_definitions/LoginSD.java:L34-L36`;
+   `src/main/java/com/testinium/step_definitions/Session.java:L30`; `src/main/java/com/testinium/utilities/Driver.java:L82`).
 4. `Driver.getDriver()` reads `browser` through `ConfigurationReader` and creates the WebDriver for the current thread
    (Source: `src/main/java/com/testinium/utilities/Driver.java:L81-L105`).
 5. Step methods act on Page Object elements and assert on the resulting page
@@ -149,20 +179,46 @@ Execution order for one scenario:
 
 ## Prerequisites
 
+Required to build the project and to run a [dry run](#dry-run), which executes no step and opens no browser:
+
 1. JDK 1.8+ (the compiler source and target are Java 8). Source: `pom.xml:L11-L14`
-2. Maven 3.x
-3. IntelliJ
-4. IntelliJ Plugins for
-    - Maven
-    - Cucumber for Java (with Gherkin)
-5. Google Chrome or Mozilla Firefox installed locally. You do not need to download a driver or set a driver class
+2. Maven 3.6.3 or a later 3.x release (tested with Maven 3.9.16). The pom pins no `maven-dependency-plugin` version,
+   so the `dependency:build-classpath` goal used in [Run from the Command Line](#run-from-the-command-line) and the
+   [API Reference](#api-reference) runs the version that the super-POM of your Maven release sets: 3.7.0 under 3.9.16.
+   That plugin requires Maven 3.6.3, the plugin baseline of Apache's
+   [Maven compatibility plan](https://maven.apache.org/developers/compatibility-plan.html). Source: `pom.xml:L15-L32`
+    - To run exactly that plugin with any 3.6.3+ release, replace `dependency:build-classpath` in those commands with
+      `org.apache.maven.plugins:maven-dependency-plugin:3.7.0:build-classpath`.
+    - Maven 4 is not covered: it [needs Java 17 to run](https://maven.apache.org/whatsnewinmaven4.html), and this
+      project uses JDK 8.
+3. Access to a Maven artifact repository for the first build, which downloads the declared dependencies and the Maven
+   plugins. The pom declares no `<repositories>`, so Maven uses Maven Central (`https://repo.maven.apache.org/maven2`)
+   unless `settings.xml` routes it through an approved [mirror](https://maven.apache.org/guides/mini/guide-mirror-settings.html).
+   Without that access, use a prewarmed local repository (`~/.m2/repository`) and pass `-o` (offline) to every `mvn`
+   command. Source: `pom.xml:L1-L82`; `pom.xml:L34-L81`
+
+Additionally required for live runs, which drive a browser against the system under test:
+
+4. Google Chrome or Mozilla Firefox installed locally. You do not need to download a driver or set a driver class
    path: WebDriverManager 5.1.0 provisions the driver binary at runtime through
    `WebDriverManager.chromedriver().setup()`. The Firefox branch also calls the chromedriver setup, see
    [Known Findings](#known-findings). Source: `pom.xml:L42-L46`; `src/main/java/com/testinium/utilities/Driver.java:L90-L101`
-6. Network access to the Odoo/Upgenix instance under test, and to the driver download hosts that WebDriverManager
+5. Network access to the Odoo/Upgenix instance under test, and to the driver download hosts that WebDriverManager
    contacts when it resolves a driver.
 
+Optional, for IDE use only. [Run from the Command Line](#run-from-the-command-line) needs no IDE:
+
+- IntelliJ
+- IntelliJ Plugins for
+    - Maven
+    - Cucumber for Java (with Gherkin)
+
 ## Setup & Configuration
+
+Preparing a working copy takes three steps: clone the repository, compile it with Maven, and create the untracked
+`configuration.properties` file in the project root. That file supplies the browser, the login URLs, the shared login
+account and the expected Employees page title that the tests read at run time.
+Source: `src/main/java/com/testinium/utilities/ConfigurationReader.java:L46`
 
 ### Clone the Repository
 
@@ -196,8 +252,17 @@ Source: `pom.xml:L11-L14`; `pom.xml:L60-L65`; `pom.xml:L76-L80`
 
 > **Note:** a snapshot of `target/` (compiled classes and the reports of an earlier run) is committed to the
 > repository, so any Maven build shows modified or deleted files under `target/` in `git status`. If you do not intend
-> to commit them, restore the snapshot with
-> `git restore --source=HEAD --worktree -- target && git clean -fdq -- target`.
+> to commit them, first review `git status --short -- target` and copy any report you want to keep out of `target/`,
+> because both cleanup options below discard output:
+>
+> - Tracked files only: `git restore --source=HEAD --worktree -- target` overwrites every tracked file under `target/`
+>   with the committed snapshot, including reports that a run regenerates, such as `target/cucumber-reports.html`,
+>   `target/cucumber.json` and `target/rerun.txt`. Untracked output, such as `target/classpath.txt` and new `.class`
+>   files, is kept.
+> - Full reset: appending `&& git clean -fdq -- target` also **permanently deletes** every untracked file and
+>   directory under `target/`. Preview what it would remove with `git clean -nd -- target`.
+>
+> Source: `src/main/java/com/testinium/runners/CukesRunner.java:L39-L44` (the report outputs that a run regenerates)
 
 ### Create `configuration.properties`
 
@@ -210,6 +275,13 @@ If the file is missing, the console prints `File is not found in the Configurati
 class still loads, every `getProperty` call returns `null`, and the first `Driver.getDriver()` call fails with a
 `NullPointerException` at its `switch`. Source: `src/main/java/com/testinium/utilities/ConfigurationReader.java:L53-L56`;
 `src/main/java/com/testinium/utilities/ConfigurationReader.java:L70-L72`; `src/main/java/com/testinium/utilities/Driver.java:L87-L89`
+
+Values follow `java.util.Properties` escaping, so write a literal backslash as `\\` (or use `/` in paths). A `\u` that is
+not followed by four hex digits, such as an unescaped Windows path like `C:\users\...`, makes `properties.load` throw
+an `IllegalArgumentException`. The initializer catches only `IOException`, so the class fails to initialize
+(`ExceptionInInitializerError`), and every later use throws
+`NoClassDefFoundError: Could not initialize class com.testinium.utilities.ConfigurationReader`.
+Source: `src/main/java/com/testinium/utilities/ConfigurationReader.java:L49`, `L53`
 
 | Key | Used by (Source) | Purpose | Example (placeholder) |
 |-----|------------------|---------|-----------------------|
@@ -239,6 +311,13 @@ the `Examples` tables of their feature files, and `EmployeeP.login()` types an a
 > its credentials are never committed.
 
 ## Running Tests
+
+Scenarios run through two JUnit 4 classes: `CukesRunner` executes the scenarios of the feature directory that match its
+`@Smoke` tag filter and writes the reports, and `FailedTestRunner` replays the scenarios that failed in the previous
+`CukesRunner` run. The subsections explain which launch modes execute scenarios today, then cover the IDE and JUnit
+command-line launches, the configured Maven command, tag subsets, reruns, dry runs and additional report output.
+Source: `src/main/java/com/testinium/runners/CukesRunner.java:L37-L48`;
+`src/main/java/com/testinium/runners/FailedTestRunner.java:L35-L40`
 
 ### How Execution Works Today
 
@@ -273,8 +352,30 @@ mvn -B clean compile dependency:build-classpath -Dmdep.outputFile=target/classpa
 java -cp "target/classes:$(cat target/classpath.txt)" org.junit.runner.JUnitCore com.testinium.runners.CukesRunner
 ```
 
-JUnit prints `OK (<n> tests)` or the list of failures. On Windows, use `;` instead of `:` as the classpath separator.
-Source: `src/main/java/com/testinium/runners/CukesRunner.java:L45-L48`; `src/main/resources/features/Crm.feature:L1`
+On Windows, run these commands from PowerShell: `cmd.exe` has no `$(...)` command substitution, so it cannot run them.
+PowerShell expands [`$( )`](https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_operators)
+inside the quoted classpath. Use `;` as the classpath separator, the
+[separator](https://maven.apache.org/plugins/maven-dependency-plugin/build-classpath-mojo.html#pathSeparator) that
+`build-classpath` also writes into `target/classpath.txt` on Windows, and quote each `-D` argument as a whole,
+because PowerShell splits an unquoted argument that starts with `-` at its first `.`
+([PowerShell issue #6291](https://github.com/PowerShell/PowerShell/issues/6291)):
+
+```powershell
+mvn -B clean compile dependency:build-classpath "-Dmdep.outputFile=target/classpath.txt"
+java -cp "target/classes;$(Get-Content target/classpath.txt)" org.junit.runner.JUnitCore com.testinium.runners.CukesRunner
+```
+
+The other `java` and `mvn` commands in this README take the same changes in PowerShell: `;` after `target/classes`
+in each `java` classpath, and each `-D` argument quoted as a whole, for example
+`"-Dcucumber.filter.tags=@Smoke or not @Smoke"`.
+Their `$(cat target/classpath.txt)` can stay, because PowerShell on Windows defines `cat` as an alias of
+[`Get-Content`](https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.management/get-content).
+
+JUnit prints `OK (<n> tests)` or the list of failures.
+Source: `src/main/java/com/testinium/runners/CukesRunner.java:L48` (`tags = "@Smoke"`);
+`src/main/resources/features/Crm.feature:L1` (the only `@Smoke` tag, see the tag table in
+[Run a Tag Subset](#run-a-tag-subset)); `src/main/resources/features/Crm.feature:L9`, `L16`, `L26`, `L31` (the four
+scenario headings; the `L16` outline has a single `Examples` row, `L24`)
 
 ### Configured Maven Command
 
@@ -323,6 +424,10 @@ tags with `and`, `or`, `not` and parentheses:
 | `"not @LogOut"` | Every scenario except `Logout.feature` |
 | `"@Smoke or not @Smoke"` | Every scenario (87 in total), including the untagged features |
 
+Source: the 23 scenarios are the `@SalesManager` `Examples` rows of `Login.feature` (13 + 5 + 1 + 1 + 3, at
+`src/main/resources/features/Login.feature:L23-L35`, `L68-L72`, `L94`, `L113`, `L133-L135`), and the 87 are the Runs
+total of the scenario index in [Gherkin Feature Catalog](#gherkin-feature-catalog).
+
 To run one feature file, override `cucumber.features` as well. The annotation's `@Smoke` filter still applies unless
 you also override the tags:
 
@@ -357,19 +462,30 @@ java -Dcucumber.execution.dry-run=true -Dcucumber.filter.tags="@Smoke or not @Sm
 
 With every feature selected, the dry run reports `OK (87 tests)`. An unmatched step fails its scenario with an
 `UndefinedStepException` that prints a snippet for the missing step definition.
-Source: `src/main/java/com/testinium/runners/CukesRunner.java:L47`
+Source: `src/main/java/com/testinium/runners/CukesRunner.java:L47` (`dryRun = false`); the 87 tests are the sum of
+the Runs column of the scenario index in [Gherkin Feature Catalog](#gherkin-feature-catalog); undefined steps:
+cucumber-junit 7.3.4 (the effective version, `pom.xml:L76-L80`) records an `UndefinedStepException` for an
+`UNDEFINED` step result in
+[`JUnitReporter.java:L121-L123`](https://github.com/cucumber/cucumber-jvm/blob/v7.3.4/junit/src/main/java/io/cucumber/junit/JUnitReporter.java#L121-L123)
+and builds its message, with the snippet, in
+[`UndefinedStepException.java:L16-L41`](https://github.com/cucumber/cucumber-jvm/blob/v7.3.4/junit/src/main/java/io/cucumber/junit/UndefinedStepException.java#L16-L41)
 
 ### Report Output
 
-Every `CukesRunner` run writes the four report artifacts configured in its `plugin` list, see
-[Report Artifacts](#report-artifacts). To add another output, pass `cucumber.plugin`, the Cucumber 7 property. It is
-added to the annotation's plugins; it does not replace them.
+Every `CukesRunner` run already writes the four report artifacts configured in its `plugin` list, so no option is
+needed to get them, see [Report Artifacts](#report-artifacts). To write an **additional** output, pass the Cucumber 7
+property `cucumber.plugin` with a plugin or path that the annotation does not list. Cucumber adds it to the
+annotation's plugins and still writes the four configured artifacts. This run also writes a JUnit XML report of the
+selected scenarios to `target/cucumber-junit.xml`:
 
 ```bash
-java -Dcucumber.plugin="html:target/cucumber-reports.html" -cp "target/classes:$(cat target/classpath.txt)" org.junit.runner.JUnitCore com.testinium.runners.CukesRunner
+java -Dcucumber.plugin="junit:target/cucumber-junit.xml" -cp "target/classes:$(cat target/classpath.txt)" org.junit.runner.JUnitCore com.testinium.runners.CukesRunner
 ```
 
-Source: `src/main/java/com/testinium/runners/CukesRunner.java:L39-L44`
+Cucumber keeps the plugins in a set in which two entries are equal when they name the same plugin with the same
+argument. Repeating an annotation entry, such as `html:target/cucumber-reports.html`, therefore adds no report.
+Source: `src/main/java/com/testinium/runners/CukesRunner.java:L39-L44`; cucumber-core 7.2.3
+`io.cucumber.core.options.RuntimeOptions` (the `plugins` set) and `io.cucumber.core.options.PluginOption.equals`
 
 
 ## API Reference
@@ -388,18 +504,25 @@ Open `target/apidocs/index.html` in a browser.
 
 ### Utilities
 
+`com.testinium.utilities` holds the two classes that every scenario depends on; callers use only their static
+methods. `Driver` creates, returns and closes the current thread's Selenium `WebDriver` session, which Page Objects and
+step definitions obtain through `Driver.getDriver()`. `ConfigurationReader` returns values from
+`configuration.properties`, including the `browser` key that `Driver` reads to choose the browser.
+Source: `src/main/java/com/testinium/utilities/Driver.java:L81-L105`, `L87`, `L120-L125`;
+`src/main/java/com/testinium/utilities/ConfigurationReader.java:L70-L72`
+
 #### `Driver`
 
 Package `com.testinium.utilities`, file [`Driver.java`](src/main/java/com/testinium/utilities/Driver.java)
 (documented with Javadoc in source). The factory and lifecycle manager of the Selenium `WebDriver`, holding one
-session per thread. All members are static.
+driver per thread; a child thread shares the driver its parent held when the child was created. All members are static.
 
 | Member | Signature | Behavior | Source |
 |--------|-----------|----------|--------|
 | Constructor | `private Driver()` | Prevents instantiation | `Driver.java:L37-L39` |
-| Field | `private static InheritableThreadLocal<WebDriver> driverPool` | One `WebDriver` per thread. A child thread inherits the reference its parent held when the child started | `Driver.java:L42` |
+| Field | `private static InheritableThreadLocal<WebDriver> driverPool` | One `WebDriver` per thread. A thread that inherits no entry creates its own browser. A child thread created after its parent obtained a driver inherits the same `WebDriver` object, not a copy, so parent and child share one browser session, and a `closeDriver()` on either quits it for both | `Driver.java:L42` |
 | Method | `public static WebDriver getDriver()` | Creates the thread's driver lazily from the `browser` key (`chrome` or `firefox`), maximizes the window and sets a 10-second implicit wait. Later calls on the same thread return the same instance. Returns `null` for an unsupported `browser` value | `Driver.java:L81-L105` |
-| Method | `public static void closeDriver()` | Calls `quit()` on the thread's driver, then `driverPool.remove()`, so the next `getDriver()` opens a fresh session. Does nothing when the thread holds no driver | `Driver.java:L120-L125` |
+| Method | `public static void closeDriver()` | Calls `quit()` on the thread's driver, then `driverPool.remove()`, so the next `getDriver()` opens a fresh session. Does nothing when the thread holds no driver. There is no `finally`: if `quit()` throws, `remove()` is skipped and later `getDriver()` calls return that same driver. Its only caller is the unregistered `Hooks.teardownScenario` | `Driver.java:L120-L125` |
 
 #### `ConfigurationReader`
 
@@ -411,10 +534,17 @@ in source). Read-only accessor for `configuration.properties`; see
 | Member | Signature | Behavior | Source |
 |--------|-----------|----------|--------|
 | Field | `private static Properties properties` | In-memory snapshot of the file | `ConfigurationReader.java:L41` |
-| Static initializer | `static { ... }` | Loads `configuration.properties` from the working directory once, at class load. On an `IOException` it prints a message and the stack trace and does not rethrow | `ConfigurationReader.java:L43-L57` |
-| Method | `public static String getProperty(String keyword)` | Returns the value for `keyword`, or `null` when the key is absent or the file failed to load. No reload happens during a run | `ConfigurationReader.java:L70-L72` |
+| Static initializer | `static { ... }` | Loads `configuration.properties` from the working directory once, at class load. On an `IOException` it prints a message and the stack trace and does not rethrow. Any other exception, such as the `IllegalArgumentException` from a malformed `\uXXXX` escape, propagates and the class fails to initialize | `ConfigurationReader.java:L43-L57` |
+| Method | `public static String getProperty(String keyword)` | Returns the value for `keyword`, or `null` when the key is not in the loaded snapshot: absent from the file, or lost because the file could not be opened or its read failed partway. No reload happens during a run | `ConfigurationReader.java:L70-L72` |
 
 ### Runners
+
+`com.testinium.runners` holds the two JUnit 4 entry points. Their class bodies are empty: all behavior is declared in
+`@RunWith(Cucumber.class)` and `@CucumberOptions`. `CukesRunner` runs the feature directory through the `@Smoke` filter
+and writes the reports, and `FailedTestRunner` replays the scenario locations listed in `target/rerun.txt`. Both use
+the same glue package, `com/testinium/step_definitions`.
+Source: `src/main/java/com/testinium/runners/CukesRunner.java:L37-L55`;
+`src/main/java/com/testinium/runners/FailedTestRunner.java:L35-L42`
 
 #### `CukesRunner`
 
@@ -455,7 +585,7 @@ Source: `src/main/java/com/testinium/runners/CukesRunner.java:L1-L6`, `L37-L55`
 | `@CucumberOptions` element | Value | Effect | Source |
 |----------------------------|-------|--------|--------|
 | `plugin` | `"html:target/cucumber-reports.html"` | Single-file HTML report | `CukesRunner.java:L40` |
-| `plugin` | `"json:target/cucumber.json"` | JSON report, published by the Jenkins `cucumber` step | `CukesRunner.java:L41` |
+| `plugin` | `"json:target/cucumber.json"` | JSON report. The Jenkins `cucumber` step is configured to publish it when present; the pipeline's `mvn clean test` produces none today (see [CI Caveats](#ci-caveats)) | `CukesRunner.java:L41` |
 | `plugin` | `"rerun:target/rerun.txt"` | Locations of failed scenarios, read by `FailedTestRunner` | `CukesRunner.java:L42` |
 | `plugin` | `"me.jvt.cucumber.report.PrettyReports:target/cucumber"` | PrettyReports HTML bundle under `target/cucumber/` | `CukesRunner.java:L43` |
 | `features` | `"src/main/resources/features"` | Directory scanned for `.feature` files | `CukesRunner.java:L45` |
@@ -495,7 +625,7 @@ declares no fields and uses no Page Objects.
 
 | Method | Signature | Behavior | Source |
 |--------|-----------|----------|--------|
-| `teardownScenario` | `@After public void teardownScenario(Scenario scenario)` | If `scenario.isFailed()`, captures `getScreenshotAs(OutputType.BYTES)` from `Driver.getDriver()` and attaches it as `image/png`, named after the scenario. It then always calls `Driver.closeDriver()` | `Hooks.java:L45-L52` |
+| `teardownScenario` | `@After public void teardownScenario(Scenario scenario)` | If `scenario.isFailed()`, captures `getScreenshotAs(OutputType.BYTES)` from `Driver.getDriver()` (which starts a new browser if the thread holds none) and attaches it as `image/png`, named after the scenario. It then calls `Driver.closeDriver()` only if nothing before it throws: there is no `finally`, so an exception from `getDriver()`, the screenshot or `attach` skips the cleanup and leaves any browser already open (none exists when `getDriver()` itself failed to create one) | `Hooks.java:L45-L52` |
 
 > **Finding:** `@After` is imported from JUnit (`org.junit.After`, L5), not from Cucumber (`io.cucumber.java.After`).
 > Cucumber 7 registers hooks only from `io.cucumber.java` annotations, so as written this method never runs: no failure
@@ -539,8 +669,11 @@ Worked example, the `LoginP` elements:
 All step classes live in the glue package `com.testinium.step_definitions` and are documented with Javadoc in source.
 Cucumber matches a feature step by its **text** against every class in the glue package; the keyword (`Given`,
 `When`, `Then`, `And`) does not have to match the annotation. Cucumber's default object factory creates a new instance
-of a step class for each scenario, and the field initializers create that class's Page Object and `WebDriverWait`.
-Source: `src/main/java/com/testinium/runners/CukesRunner.java:L46`; `src/main/java/com/testinium/step_definitions/LoginSD.java:L25-L36`
+of a step class for each scenario. Its field initializers create the class's Page Object (two in `Notes`) and, in every
+class except `Session`, a `WebDriverWait`; `LoginSD`, for example, declares `loginP` and a 3-second `wait`, while
+`Session` declares only its `session` Page Object.
+Source: `src/main/java/com/testinium/runners/CukesRunner.java:L46`; `src/main/java/com/testinium/step_definitions/LoginSD.java:L25-L36`;
+`src/main/java/com/testinium/step_definitions/Notes.java:L36-L41`; `src/main/java/com/testinium/step_definitions/Session.java:L30`
 
 > **Shared step:** `User login to test other features` (`Session.java:L47-L53`) logs in with the `web.table.url`,
 > `username` and `password` keys. The Backgrounds of `Calendar.feature` (L9), `Contact.feature` (L5), `Crm.feature`
@@ -735,22 +868,80 @@ Source: `src/main/java/com/testinium/step_definitions/Session.java`
 The 10 feature files define 34 scenarios and scenario outlines. With every `Examples` row expanded, they produce 87
 executable scenarios (the count reported by a dry run over all features).
 
-| File | Feature title | Feature-level tag | Scenarios | Background step (Source) |
-|------|---------------|-------------------|-----------|--------------------------|
-| `Calendar.feature` | Testinium app Calendar Module | `@Calendar` | 4 (1 outline) | `Given User login to test other features` (L9) |
-| `Contact.feature` | Testinium app Inventory feature | none | 4 (2 outlines) | `Given User login to test other features`, `Given User is at Contact dashboard` (L5-L6) |
-| `Crm.feature` | Testinium app CRM Module | `@Smoke` | 4 (1 outline) | `Given User login to test other features` (L7) |
-| `EmployeeFc.feature` | Testinium app Employees module | `@UPGN-344` | 4 (2 outlines) | none; the Background has a description only (L5) |
-| `Inventory.feature` | Testinium app Inventory feature | none | 4 | `Given User login to test other features` (L9) |
-| `Login.feature` | Testinium app login feature | `@Login` | 5 (all outlines) | `Given User is on the upgenix login page` (L10) |
-| `Logout.feature` | Testinium app logout feature | `@LogOut` | 2 (all outlines) | `Given User is on the upgenix login page` (L10) |
-| `Notes.feature` | Testinium app login feature | none | 3 | `Given User login to test other features` (L8) |
-| `Sales.feature` | .... app Sales feature | none | 3 (1 outline) | `Given User login to test other features` (L10) |
-| `Session.feature` | Default | none | 1 | no Background; its scenario runs `When User login to test other features` (L4) |
+| File | Feature title | Feature-level tag | Scenarios | Executable | Background step (Source) |
+|------|---------------|-------------------|-----------|------------|--------------------------|
+| `Calendar.feature` | Testinium app Calendar Module | `@Calendar` | 4 (1 outline) | 4 | `Given User login to test other features` (L9) |
+| `Contact.feature` | Testinium app Inventory feature | none | 4 (2 outlines) | 4 | `Given User login to test other features`, `Given User is at Contact dashboard` (L5-L6) |
+| `Crm.feature` | Testinium app CRM Module | `@Smoke` | 4 (1 outline) | 4 | `Given User login to test other features` (L7) |
+| `EmployeeFc.feature` | Testinium app Employees module | `@UPGN-344` | 4 (2 outlines) | 4 | none; the Background has a description only (L5) |
+| `Inventory.feature` | Testinium app Inventory feature | none | 4 | 4 | `Given User login to test other features` (L9) |
+| `Login.feature` | Testinium app login feature | `@Login` | 5 (all outlines) | 48 | `Given User is on the upgenix login page` (L10) |
+| `Logout.feature` | Testinium app logout feature | `@LogOut` | 2 (all outlines) | 12 | `Given User is on the upgenix login page` (L10) |
+| `Notes.feature` | Testinium app login feature | none | 3 | 3 | `Given User login to test other features` (L8) |
+| `Sales.feature` | .... app Sales feature | none | 3 (1 outline) | 3 | `Given User login to test other features` (L10) |
+| `Session.feature` | Default | none | 1 | 1 | no Background; its scenario runs `When User login to test other features` (L4) |
+| **Total** | | | **34 (14 outlines)** | **87** | |
 
-Source: `src/main/resources/features/*.feature` (line 1 or 2 holds each feature title).
+Source: the ten `Feature:` lines under `src/main/resources/features/`: `Calendar.feature:L2`, `Contact.feature:L1`,
+`Crm.feature:L2`, `EmployeeFc.feature:L2`, `Inventory.feature:L1`, `Login.feature:L2`, `Logout.feature:L2`,
+`Notes.feature:L1`, `Sales.feature:L1`, `Session.feature:L1`; the scenario and `Examples` lines behind the 34 and 87
+counts are listed row by row in the scenario index below.
 The titles of `Contact.feature`, `Notes.feature` and `Sales.feature` do not match their modules, see
 [Known Findings](#known-findings), item 8.
+
+**Scenario index.** Every scenario and scenario outline under `src/main/resources/features/`, in file and line order.
+Source is the line of the `Scenario:` or `Scenario Outline:` keyword, and the title is copied verbatim from it. Own tags
+are the tags written on the scenario itself; the file's feature-level tag in the table above applies to every row of
+that file as well. For an outline, Examples lists each `Examples:` block as its tag (when it has one), its heading line
+(the `Examples:` keyword line) and its data-row lines; Runs counts those data rows. A plain Scenario runs once. The row
+contents are not reproduced here, because the `Login.feature` and `Logout.feature` rows hold test-account data.
+
+| # | Source | Keyword | Title (verbatim) | Own tags | Examples (tag, heading line: data rows) | Runs |
+|---|--------|---------|------------------|----------|------------------------------------------|------|
+| 1 | `Calendar.feature:L11` | Scenario | Verify that all buttons work as expected at the Calendar stage | — | — | 1 |
+| 2 | `Calendar.feature:L18` | Scenario | User can change display between Day-Week-Month | — | — | 1 |
+| 3 | `Calendar.feature:L23` | Scenario Outline | User can create event by clicking on daily time box | — | L29: 1 row (L31) | 1 |
+| 4 | `Calendar.feature:L33` | Scenario | User can edit a created event | — | — | 1 |
+| 5 | `Contact.feature:L8` | Scenario Outline | Verify that the user can create a new contact | — | L15: 1 row (L17) | 1 |
+| 6 | `Contact.feature:L19` | Scenario | Verify that the user can delete a contact from 2 different side | — | — | 1 |
+| 7 | `Contact.feature:L26` | Scenario Outline | Verify that the user can edit the contact | — | L34: 1 row (L36) | 1 |
+| 8 | `Contact.feature:L38` | Scenario | Verify that the user can print for his due payments | — | — | 1 |
+| 9 | `Crm.feature:L9` | Scenario | User can create pipeline in the displayed dashboard | — | — | 1 |
+| 10 | `Crm.feature:L16` | Scenario Outline | User can change information in dashboard | — | L22: 1 row (L24) | 1 |
+| 11 | `Crm.feature:L26` | Scenario | User can change the situation in progress | — | — | 1 |
+| 12 | `Crm.feature:L31` | Scenario | User can register new customer and can print the profile | — | — | 1 |
+| 13 | `EmployeeFc.feature:L8` | Scenario | Verify that all buttons work as expected at the employees stage | `@UPGN-340` | — | 1 |
+| 14 | `EmployeeFc.feature:L16` | Scenario Outline | Verify that the "Employee created" message appears under full profile | `@UPGN-341` | L21: 1 row (L23) | 1 |
+| 15 | `EmployeeFc.feature:L26` | Scenario Outline | Verify that the user should be able to see created employee is listed after clicking the Employees module | `@UPGN-342` | L31: 1 row (L33) | 1 |
+| 16 | `EmployeeFc.feature:L36` | Scenario | Verify that the user can edit a new employee from "Employees" module | `@UPGN-343` | — | 1 |
+| 17 | `Inventory.feature:L11` | Scenario | Verify that User can reach New Products Form by clicking Inventory --> Products --> Create | — | — | 1 |
+| 18 | `Inventory.feature:L18` | Scenario | Verify that after creating a Product, the page title includes the Product name. | — | — | 1 |
+| 19 | `Inventory.feature:L26` | Scenario | Verify that if Product name field leaves blank, an error message 'The following fields are invalid:' is appeared | — | — | 1 |
+| 20 | `Inventory.feature:L33` | Scenario | Verify that the user should be able to see created Product is listed after clicking the Products module. | — | — | 1 |
+| 21 | `Login.feature:L14` | Scenario Outline | Users log in with valid credentials | `@UPGN-286` | `@SalesManager` L21: 13 rows (L23-L35); `@PosManager` L38: 15 rows (L40-L54) | 28 |
+| 22 | `Login.feature:L59` | Scenario Outline | Users log in with invalid email or invalid password credentials | `@UPGN-287` | `@SalesManager` L66: 5 rows (L68-L72); `@PosManager` L75: 5 rows (L77-L81) | 10 |
+| 23 | `Login.feature:L86` | Scenario Outline | Users log in with invalid email or invalid password credentials | `@UPGN-288` | `@SalesManager` L92: 1 row (L94); `@PosManager` L97: 1 row (L99) | 2 |
+| 24 | `Login.feature:L106` | Scenario Outline | User should see the password in bullet signs by default | `@UPGN-289` | `@SalesManager` L111: 1 row (L113); `@PosManager` L116: 1 row (L118) | 2 |
+| 25 | `Login.feature:L123` | Scenario Outline | User tries whether enter button works on the login page. | `@UPGN-290` | `@SalesManager` L131: 3 rows (L133-L135); `@PosManager` L138: 3 rows (L140-L142) | 6 |
+| 26 | `Logout.feature:L14` | Scenario Outline | For the scenarios in the feature file, user is expected to be on logout page | `@UPGN-291` | `@SalesManager` L22: 3 rows (L24-L26); `@PosManager` L29: 3 rows (L31-L33) | 6 |
+| 27 | `Logout.feature:L38` | Scenario Outline | For the scenarios in the feature file, user is expected to be clicked the step back button on logout page | `@UPGN-292` | `@SalesManager` L48: 3 rows (L50-L52); `@PosManager` L55: 3 rows (L57-L59) | 6 |
+| 28 | `Notes.feature:L10` | Scenario | Verify that User can create new Notes and see the created notes on the list | — | — | 1 |
+| 29 | `Notes.feature:L18` | Scenario | Verify that User can edit the Notes | — | — | 1 |
+| 30 | `Notes.feature:L26` | Scenario | Verify that User can move element from New section to Today section | — | — | 1 |
+| 31 | `Sales.feature:L12` | Scenario | Verify that User can reach New Customer Form by clicking Sales --> Customers --> Create | — | — | 1 |
+| 32 | `Sales.feature:L19` | Scenario | Verify that if customer name field leaves blank, an error message "The following fields are invalid:" is appeared. | — | — | 1 |
+| 33 | `Sales.feature:L25` | Scenario Outline | Verify that after creating a new customer, the page title includes the customer name. | — | L30: 1 row (L32) | 1 |
+| 34 | `Session.feature:L3` | Scenario | Users log in to access additional feature | — | — | 1 |
+| **Total** | | | **34 scenarios (14 outlines)** | | | **87** |
+
+`Login.feature:L59` (`@UPGN-287`) and `Login.feature:L86` (`@UPGN-288`) share the same title; only the tag and line tell
+them apart, and the comment above the second one (`Login.feature:L84`) states the empty-field check it covers.
+`Login.feature:L86` and `Inventory.feature:L26` have no space after the keyword's colon; Gherkin reads the title the
+same way with or without that space.
+Source: the `Scenario:`, `Scenario Outline:`, `Examples:` and data-row lines cited in each row, under
+`src/main/resources/features/`; each tag sits on the line directly above the keyword it tags (see the tag table in
+[Run a Tag Subset](#run-a-tag-subset)). The Runs total of 87 matches the `OK (87 tests)` of the dry run in
+[Dry Run](#dry-run).
 
 ### Writing Scenarios with Cucumber BDD
 
@@ -820,7 +1011,11 @@ Source: `src/main/resources/features/Login.feature:L1-L22`, `L37-L39` (account r
 ## Deployment & CI
 
 The suite is delivered through a Jenkins **scripted pipeline** stored in the `Jenkins` file at the repository root.
-Nothing is deployed: the pipeline clones the repository, runs Maven and publishes the Cucumber results.
+Nothing is deployed: the pipeline clones the repository and runs `mvn clean test`, and its `Generate report` stage is
+**configured** to publish the Cucumber JSON files (`**/*.json`) that a run produced. In the current layout it cannot:
+`mvn clean test` runs no scenario (see [How Execution Works Today](#how-execution-works-today)), and `clean` removes
+the committed `target/cucumber.json`, so the pipeline publishes no scenario results.
+Source: `Jenkins:L6-L16`; `pom.xml:L17-L30`
 
 ### Jenkins Pipeline
 
@@ -835,26 +1030,29 @@ flowchart LR
         Bat["bat: mvn clean test"]
     end
     subgraph Report["Stage: Generate report"]
-        Cuc["cucumber step<br/>fileIncludePattern: **/*.json<br/>sortingMethod: ALPHABETICAL<br/>all thresholds: -1"]
+        Cuc["cucumber step<br/>publishes **/*.json if present<br/>sortingMethod: ALPHABETICAL<br/>all thresholds: -1"]
     end
     Git --> Unix
     Unix -- "yes" --> Sh
     Unix -- "no" --> Bat
-    Sh --> Cuc
-    Bat --> Cuc
+    Sh -- "No tests to run.<br/>no cucumber.json" --> Cuc
+    Bat -- "No tests to run.<br/>no cucumber.json" --> Cuc
 ```
 
 | Stage | Jenkins step | What it does | Source |
 |-------|--------------|--------------|--------|
 | `Clone code` | `git 'https://github.com/BalamiRR/Upgenix-QA.git'` | Clones the repository into the workspace | `Jenkins:L2-L4` |
-| `Run tests` | `sh "mvn clean test"` on Unix agents, `bat "mvn clean test"` otherwise, chosen by `isUnix()` | Runs the Maven build and Surefire | `Jenkins:L6-L12` |
-| `Generate report` | `cucumber` with `fileIncludePattern: '**/*.json'`, `sortingMethod: 'ALPHABETICAL'` and `failedFeaturesNumber`, `failedScenariosNumber`, `failedStepsNumber`, `pendingStepsNumber`, `skippedStepsNumber`, `undefinedStepsNumber` all set to `-1` | Publishes every JSON file in the workspace with the Cucumber Reports plugin. A threshold of `-1` skips that rule, so the step never changes the build result because of test counts | `Jenkins:L14-L16` |
+| `Run tests` | `sh "mvn clean test"` on Unix agents, `bat "mvn clean test"` otherwise, chosen by `isUnix()` | Runs the Maven build. Surefire reports `No tests to run.`, so no scenario executes and no Cucumber JSON is written | `Jenkins:L6-L12`; `pom.xml:L17-L30` |
+| `Generate report` | `cucumber` with `fileIncludePattern: '**/*.json'`, `sortingMethod: 'ALPHABETICAL'` and `failedFeaturesNumber`, `failedScenariosNumber`, `failedStepsNumber`, `pendingStepsNumber`, `skippedStepsNumber`, `undefinedStepsNumber` all set to `-1` | Configured to publish every `**/*.json` file in the workspace with the Cucumber Reports plugin. None exists after `mvn clean test`: `clean` deletes the only committed one, `target/cucumber.json`, and the `Run tests` stage writes none. A threshold of `-1` skips that rule, so the step never changes the build result because of test counts | `Jenkins:L14-L16` |
 
 ### Setting Up the Jenkins Job
 
-1. Install the Git, Pipeline, Maven Integration and Cucumber Reports plugins. Configure a JDK 8 and a Maven 3
-   installation. The pipeline calls `mvn` directly through `sh`/`bat`, so `java` and `mvn` must be on the agent's
-   `PATH`. Source: `Jenkins:L8`, `L10`
+1. Install the Git (`git` step), Pipeline (`node`, `stage`, `isUnix`, `sh`, `bat`) and Cucumber Reports (`cucumber`)
+   plugins. The Maven Integration plugin is not required: the pipeline calls `mvn` through plain `sh`/`bat` and has no
+   `withMaven` or `tool` step. That plugin is optional, for other job styles such as Maven project jobs. Install a
+   JDK 8 and Maven on the agent as listed in [Prerequisites](#prerequisites), and keep `java` and `mvn` on the agent's
+   `PATH`. JDK and Maven installations managed by Jenkins are not applied, because the script has no `tool` step.
+   Source: `Jenkins:L1-L17`; `Jenkins:L8`, `L10`
 2. Install Chrome or Firefox on the agent. `Driver` starts a regular, non-headless browser and maximizes its window,
    so a Linux agent needs a display (for example a virtual X server). Source:
    `src/main/java/com/testinium/utilities/Driver.java:L90-L101`
@@ -863,14 +1061,19 @@ flowchart LR
 4. Provide `configuration.properties` in the workspace root before the `Run tests` stage, for example with a
    managed file or a secret-file credential. Never commit it. See
    [Create `configuration.properties`](#create-configurationproperties).
-5. Run **Build Now**, then open the **Cucumber reports** link on the build page.
+5. Run **Build Now** to execute the three stages. The build shows Cucumber scenario results only if a Cucumber JSON
+   file is in the workspace when the `Generate report` stage runs, and the committed `Jenkins` and `pom.xml` do not
+   produce one (see [CI Caveats](#ci-caveats)). To generate the reports, run `CukesRunner` with `JUnitCore` from the
+   project root as in [Run from the Command Line](#run-from-the-command-line) and [Report Output](#report-output);
+   that run writes the artifacts listed in [Report Artifacts](#report-artifacts).
+   Source: `Jenkins:L6-L16`; `pom.xml:L17-L30`
 
 ### Report Artifacts
 
 | Artifact | Produced by (`plugin`) | Content | Consumer | Source |
 |----------|------------------------|---------|----------|--------|
 | `target/cucumber-reports.html` | `html:target/cucumber-reports.html` | Single-file Cucumber HTML report | Browser | `src/main/java/com/testinium/runners/CukesRunner.java:L40` |
-| `target/cucumber.json` | `json:target/cucumber.json` | Cucumber JSON results | Jenkins `cucumber` step (`fileIncludePattern: '**/*.json'`) | `src/main/java/com/testinium/runners/CukesRunner.java:L41`; `Jenkins:L15` |
+| `target/cucumber.json` | `json:target/cucumber.json` | Cucumber JSON results | Jenkins `cucumber` step (`fileIncludePattern: '**/*.json'`), when the file is in the workspace at the `Generate report` stage | `src/main/java/com/testinium/runners/CukesRunner.java:L41`; `Jenkins:L15` |
 | `target/rerun.txt` | `rerun:target/rerun.txt` | `path:line` of each failed scenario | `FailedTestRunner` | `src/main/java/com/testinium/runners/CukesRunner.java:L42`; `src/main/java/com/testinium/runners/FailedTestRunner.java:L38` |
 | `target/cucumber/` | `me.jvt.cucumber.report.PrettyReports:target/cucumber` | PrettyReports HTML site (`cucumber-html-reports/`) | Browser | `src/main/java/com/testinium/runners/CukesRunner.java:L43` |
 
@@ -878,22 +1081,32 @@ flowchart LR
 
 - In the current layout `mvn clean test` runs no scenario (see
   [How Execution Works Today](#how-execution-works-today)). `mvn clean` also deletes the committed `target/`
-  snapshot, so the `Generate report` stage has no fresh `cucumber.json` to publish. Source: `pom.xml:L17-L30`;
-  `Jenkins:L6-L16`
-- `testFailureIgnore=true` keeps the Maven build green when tests fail, and the `-1` thresholds leave the build
-  result unchanged, so failures show only in the published report. Source: `pom.xml:L25`; `Jenkins:L15`
+  snapshot, including `target/cucumber.json`, the only committed JSON file, so the `Generate report` stage has no
+  `cucumber.json` to publish. Source: `pom.xml:L17-L30`; `Jenkins:L6-L16`
+- Once Surefire executes the runner and a run produces `target/cucumber.json`, `testFailureIgnore=true` would keep
+  the Maven build green when tests fail, and the `-1` thresholds would leave the build result unchanged. Failed
+  tests would still be listed in Maven's console test summary, in Surefire's reports (its default
+  `target/surefire-reports`) and in the published Cucumber report.
+  Source: `pom.xml:L17-L30`; `Jenkins:L15`
+- Today the reports are generated by running `CukesRunner` with `JUnitCore` from the project root, see
+  [Run from the Command Line](#run-from-the-command-line) and [Report Output](#report-output). The `Jenkins` file is
+  documented as found and left unchanged; see [Known Findings](#known-findings), item 6.
 - The `Clone code` stage uses the `Upgenix-QA` remote. Source: `Jenkins:L3`
 
 ## Inline Code Explanations
 
-The excerpts below are copied from the current sources; Javadoc blocks are omitted unless a line range says
-otherwise.
+The excerpts below are copied verbatim from the current sources, original `//` and `/* */` comments included. Each
+excerpt's `Source:` line lists the line ranges it shows. A code block that joins several ranges skips only the
+Javadoc blocks between them; separate code blocks show separate parts of a file, and Javadoc that falls inside a
+listed range is shown.
 
 ### Thread-Local WebDriver: `Driver`
 
 ```java
     private static InheritableThreadLocal<WebDriver> driverPool = new InheritableThreadLocal<>();
-
+    /*
+    Create a re-usable utility method which will return same driver instance when we call it
+    */
     public static WebDriver getDriver(){
         if(driverPool.get() == null){
             /*
@@ -920,6 +1133,9 @@ otherwise.
         return driverPool.get();
     }
 
+    /*
+       This method will make sure our driver value is always null after using quit() method
+    */
     public static void closeDriver(){
         if (driverPool.get() != null){
             driverPool.get().quit();
@@ -928,14 +1144,19 @@ otherwise.
     }
 ```
 
-Source: `src/main/java/com/testinium/utilities/Driver.java:L42`, `L81-L105`, `L120-L125`
+Source: `src/main/java/com/testinium/utilities/Driver.java:L42-L45`, `L81-L109`, `L120-L125`
 
-1. **One driver per thread (L42).** `driverPool` is an `InheritableThreadLocal`, so every thread sees its own
-   `WebDriver`. Surefire is configured with `parallel=methods` and `useUnlimitedThreads` (`pom.xml:L22-L23`); when
-   tests run on several threads, each thread gets its own browser and no scenario touches another scenario's session.
-   A thread started by a thread that already holds a driver inherits that driver reference.
-2. **Lazy creation (L82).** A browser is created only on the first `getDriver()` call of a thread; later calls return
-   the same instance (L104).
+1. **One driver per thread (L42).** `driverPool` is an `InheritableThreadLocal`, so each thread reads its own pool
+   entry. Surefire is configured with `parallel=methods` and `useUnlimitedThreads` (`pom.xml:L22-L23`). Separate
+   browsers are not guaranteed:
+   - **Independent threads.** A thread that inherits no entry creates its own browser on its first `getDriver()` call.
+   - **Child threads.** A thread created by a thread that already holds a driver inherits the **same** `WebDriver`
+     object, not a copy. Parent and child then drive one shared browser session and see each other's navigation, and
+     a `closeDriver()` on either quits that browser while the other thread still holds the quit driver.
+   - **Scenarios on one thread.** Scenarios that run one after another on a thread share its browser until
+     `closeDriver()` runs, which today never happens (see [Known Findings](#known-findings), item 3).
+2. **Lazy creation (L82).** A browser is created only when `getDriver()` finds no driver for the thread, its own or
+   inherited; later calls return the same instance (L104).
 3. **Externalized browser choice (L87-L89).** The `browser` key selects the branch, so switching browsers needs no
    code change. The `switch` has no `default`: an unknown value returns `null`, and a missing key throws a
    `NullPointerException` (see [Known Findings](#known-findings), item 5).
@@ -944,12 +1165,14 @@ Source: `src/main/java/com/testinium/utilities/Driver.java:L42`, `L81-L105`, `L1
 5. **Session defaults (L93-L94, L99-L100).** The window is maximized and a 10-second implicit wait applies to every
    `findElement`, including the lazy `@FindBy` proxies.
 6. **Teardown (L120-L125).** `closeDriver()` quits the browser and calls `remove()`, so the thread's next
-   `getDriver()` starts a fresh session instead of returning a dead driver. Its only caller is
-   `Hooks.teardownScenario` (`Hooks.java:L51`).
+   `getDriver()` starts a fresh session instead of returning a dead driver. `remove()` (L123) runs only after
+   `quit()` (L122) returns; if `quit()` throws, the entry stays and `getDriver()` keeps returning that driver. Its only
+   caller is `Hooks.teardownScenario` (`Hooks.java:L51`), which Cucumber does not register.
 
 ### Externalized Configuration: `ConfigurationReader`
 
 ```java
+    //1- Create the object of Properties
     private static Properties properties = new Properties();
 
     static {
@@ -973,14 +1196,18 @@ Source: `src/main/java/com/testinium/utilities/Driver.java:L42`, `L81-L105`, `L1
     }
 ```
 
-Source: `src/main/java/com/testinium/utilities/ConfigurationReader.java:L41-L57`, `L70-L72`
+Source: `src/main/java/com/testinium/utilities/ConfigurationReader.java:L39`, `L41-L58`, `L70-L72`
 
 1. **Load once (L43).** The static initializer runs when the class is first used, typically from
    `Driver.getDriver()` or a step reading a URL, and fills the shared `properties` object.
 2. **Working-directory path (L46).** `"configuration.properties"` is relative, so the JVM must start in the project
    root, which is the default for Maven and for IntelliJ run configurations.
-3. **Errors are swallowed (L53-L55).** A missing or unreadable file prints a message and a stack trace but does not
-   stop the run; `getProperty` then returns `null` for every key. The stream is closed only on the success path (L52).
+3. **I/O errors are swallowed (L53-L55).** Any `IOException` prints a message and a stack trace but does not stop the
+   run. A file that cannot be opened (L46) leaves the snapshot empty, so `getProperty` returns `null` for every key. A
+   read that fails partway through `properties.load` (L49) keeps the pairs parsed before the failure, so only the keys
+   after that point return `null`. The stream is closed only on the success path (L52). Nothing else is caught: a
+   malformed `\uXXXX` escape makes `load` throw an `IllegalArgumentException`, and the class fails to initialize (see
+   [Create `configuration.properties`](#create-configurationproperties)).
 4. **Plain lookup (L70-L72).** `getProperty` reads the snapshot and never reloads, so edits made during a run take
    effect on the next JVM start.
 
@@ -1015,7 +1242,9 @@ Source: `src/main/java/com/testinium/step_definitions/LoginSD.java:L34-L36`, `L4
 
 1. **Field initializers (L34, L36).** Creating `LoginP` binds its `@FindBy` fields to the thread's driver, and the
    `WebDriverWait` gives explicit waits a 3-second timeout. Both call `Driver.getDriver()`, so the first step of a
-   scenario that uses this class opens the browser.
+   scenario that uses this class opens the browser if the thread has none, or reuses the thread's open browser, for
+   example one the `Session` Background step already opened in `Inventory.feature` or one left by an earlier scenario
+   (`Driver.java:L82`; `Session.java:L30`; `src/main/resources/features/Inventory.feature:L9`, `L16`).
 2. **Binding (L46).** The annotation text must equal the Gherkin step text; the method name is free.
 3. **Navigation (L49-L50).** The login URL comes from `web.table.url`, keeping environments out of the code. The
    commented-out line (L48) is inactive.
@@ -1045,9 +1274,15 @@ Source: `src/main/java/com/testinium/step_definitions/Hooks.java:L5`, `L45-L52`
 
 1. **Failure check (L47).** `scenario.isFailed()` is true when any step of the scenario failed.
 2. **Screenshot (L48).** The driver is cast to Selenium's `TakesScreenshot`, and the page is captured as PNG bytes.
+   `Driver.getDriver()` returns the thread's existing driver; when the thread holds none, it starts a new browser at
+   this point and captures that blank session instead (`Driver.java:L81-L105`).
 3. **Attachment (L49).** `scenario.attach(bytes, "image/png", name)` embeds the image in the Cucumber HTML and JSON
    reports, named after the scenario.
-4. **Teardown (L51).** `Driver.closeDriver()` runs for passed and failed scenarios alike.
+4. **Teardown (L51).** `Driver.closeDriver()` is reached for passed scenarios and for failed ones whose screenshot and
+   attachment succeed. There is no `try`/`finally`: an exception at L48 or L49 skips it and leaves any browser already
+   open. When no driver could be created, no browser exists: a missing `browser` value makes `getDriver()` throw, and
+   an unsupported one makes it return `null`, so the screenshot call throws (`Driver.java:L87-L104`). Inside
+   `closeDriver()`, a `quit()` that throws skips `driverPool.remove()` (`Driver.java:L122-L123`).
 5. **Registration caveat (L5, L45).** The annotation is JUnit's `org.junit.After`, which Cucumber does not register
    as a hook, so none of the steps above run today (see [Known Findings](#known-findings), item 3).
 
@@ -1126,41 +1361,70 @@ sequenceDiagram
         H->>H: TakesScreenshot.getScreenshotAs(OutputType.BYTES)
         H->>Sc: attach(screenshot, "image/png", scenario name)
     end
-    H->>D: closeDriver()
-    D->>D: quit() then driverPool.remove()
+    alt nothing above threw
+        H->>D: closeDriver()
+        D->>D: quit()
+        alt quit() returns
+            D->>D: driverPool.remove()
+        else quit() throws
+            Note over D: remove() is skipped, so the thread keeps its pool entry
+        end
+    else getDriver(), getScreenshotAs() or attach() threw
+        H-->>Cu: exception propagates and closeDriver() is skipped, so any browser already open stays open
+    end
 ```
 
 Source: `src/main/java/com/testinium/step_definitions/Hooks.java:L5`, `L45-L52`; `src/main/java/com/testinium/utilities/Driver.java:L120-L125`
 
 ## Reports
 
+Each `CukesRunner` run writes its results under `target/` (the full list is in [Report Artifacts](#report-artifacts)).
+The Jenkins `Generate report` stage publishes every `**/*.json` file it finds with the Cucumber Reports plugin; see
+[CI Caveats](#ci-caveats) for why the current pipeline produces no fresh JSON to publish. The Jira screenshot shows a
+Jira test execution listing Cucumber tests with the keys `UPGN-341` to `UPGN-343`. The feature files reference Jira
+keys only through their `@UPGN-...` tags: the scenario tags `@UPGN-341` to `@UPGN-343` of `EmployeeFc.feature` match
+the screenshot. No Jira integration is configured: neither `pom.xml`, the `Jenkins` pipeline nor the Java sources
+mention Jira. The subsections below show both screenshots, how to open or add an HTML report, and what the
+failed-scenario rerun list contains.
+Source: `src/main/java/com/testinium/runners/CukesRunner.java:L39-L44`; `Jenkins:L14-L16`;
+`src/main/resources/features/EmployeeFc.feature:L15`, `L25`, `L35`
+
 ### Jenkins Cucumber Reports
 ![alt text](./image/Jenkins-Cucumber-Reports.png)
 
 ### HTML Report
 
-`CukesRunner` already writes the HTML report to `target/cucumber-reports.html` on every run. Cucumber 7 no longer
-reads `cucumber.options`; to request the report explicitly, use the `cucumber.plugin` property:
+`CukesRunner` already writes the single-file HTML report to `target/cucumber-reports.html`, and the PrettyReports HTML
+site to `target/cucumber/`, on every run, so no option is needed: open the file in a browser after the run. The
+`cucumber.options` commands of earlier versions of this README no longer work, because Cucumber 7 does not read that
+property. To keep a separate HTML report, for example one per tag selection, pass an `html` plugin with a **new** path:
 
 ```bash
-mvn test -Dcucumber.plugin="html:target/cucumber-reports.html"
+java -Dcucumber.filter.tags="@Login" -Dcucumber.plugin="html:target/login-report.html" -cp "target/classes:$(cat target/classpath.txt)" org.junit.runner.JUnitCore com.testinium.runners.CukesRunner
 ```
 
-Source: `src/main/java/com/testinium/runners/CukesRunner.java:L40`
+This run writes `target/login-report.html` for the `@Login` scenarios, next to the four configured artifacts. Passing
+the configured `html:target/cucumber-reports.html` again adds nothing, see [Report Output](#report-output). The Maven
+form, `mvn test -Dcucumber.plugin="html:target/login-report.html"`, passes the same property but runs no scenario until
+Surefire can see the runner, see [How Execution Works Today](#how-execution-works-today).
+Source: `src/main/java/com/testinium/runners/CukesRunner.java:L40`, `L43`, `L48`
 
-### Txt Report
+### Failed-Scenario Rerun List
 
-`CukesRunner` already writes the rerun (Txt) report to `target/rerun.txt` on every run. To request it explicitly:
+`target/rerun.txt` is not an execution report. It is a plain-text list that the `rerun:target/rerun.txt` plugin of
+`CukesRunner` rewrites on every run, holding one line per feature file with the locations of its failed scenarios. For
+example, `file:src/main/resources/features/Crm.feature:9:24` names the scenario at line 9 of `Crm.feature` and the
+Scenario Outline example row at line 24. The file is empty when no scenario failed. Its only consumer is
+`FailedTestRunner`, which reads it through `features = "@target/rerun.txt"`, see
+[Rerun Failed Scenarios](#rerun-failed-scenarios). The plugin is already configured, so no option is needed to produce
+the list. To see which scenarios the next rerun will replay:
 
 ```bash
-mvn test -Dcucumber.plugin="rerun:target/rerun.txt"
+cat target/rerun.txt
 ```
 
-Source: `src/main/java/com/testinium/runners/CukesRunner.java:L42`
-
-Both Maven commands take effect only once Surefire executes the runner (see
-[How Execution Works Today](#how-execution-works-today)). Until then, pass the same `-Dcucumber.plugin` option to
-the command-line run in [Report Output](#report-output).
+Source: `src/main/java/com/testinium/runners/CukesRunner.java:L42`;
+`src/main/java/com/testinium/runners/FailedTestRunner.java:L38`; `src/main/resources/features/Crm.feature:L9`, `L24`
 
 ### Jira Test Execution
 
@@ -1200,6 +1464,10 @@ created locally in the project root and is not part of the repository.
 
 ## Known Findings & Troubleshooting
 
+This section records what documenting the code, build, pipeline and feature files turned up. Known Findings lists the
+discrepancies that affect how the suite builds and runs. Troubleshooting maps the symptoms that those discrepancies,
+or an incomplete setup, produce to their causes and fixes.
+
 ### Known Findings
 
 The items below are documented as found; this documentation does not change the code, build or pipeline.
@@ -1237,6 +1505,7 @@ The items below are documented as found; this documentation does not change the 
 | Symptom | Cause | Fix |
 |---------|-------|-----|
 | Console shows `File is not found in the ConfigurationReader class`, then a `NullPointerException` in `Driver.getDriver()` | `configuration.properties` is missing, or the JVM working directory is not the project root (`ConfigurationReader.java:L46`, `L54`; `Driver.java:L89`) | Create the file in the project root with the keys in [Create `configuration.properties`](#create-configurationproperties), and set the IDE run configuration's working directory to the project root |
+| `ExceptionInInitializerError` caused by `IllegalArgumentException: Malformed \uxxxx encoding.`, then `NoClassDefFoundError: Could not initialize class com.testinium.utilities.ConfigurationReader` | A value in `configuration.properties` contains `\u` not followed by four hex digits, such as an unescaped Windows path; the initializer catches only `IOException` (`ConfigurationReader.java:L49`, `L53`) | Write each literal backslash as `\\`, or use `/` in paths |
 | `getDriver()` returns `null` and steps fail with a `NullPointerException` | `browser` is neither `chrome` nor `firefox`; the match is case-sensitive (`Driver.java:L89-L102`) | Set `browser=chrome` or `browser=firefox` |
 | The browser does not start; WebDriverManager errors or a `SessionNotCreatedException` about the driver version | WebDriverManager 5.1.0 cannot download the driver (no network or proxy), or it resolves a chromedriver older than the installed Chrome (`pom.xml:L42-L46`; `Driver.java:L91`) | Allow access to the driver download hosts, and use a Chrome version that the resolved chromedriver supports. Upgrading WebDriverManager would require a `pom.xml` change |
 | `firefox` is configured but Firefox does not start | The Firefox branch provisions chromedriver, not geckodriver (`Driver.java:L97`) | Put a geckodriver matching your Firefox on the `PATH`, or use `browser=chrome` |

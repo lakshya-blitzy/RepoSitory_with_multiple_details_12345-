@@ -16,10 +16,10 @@ import java.util.Properties;
  * <p>{@code configuration.properties} is not committed to the repository. Create it at the
  * project root before running the suite.
  *
- * <p>Error handling: if the file cannot be opened or read, the initializer catches the
- * {@link java.io.IOException}, prints a message and the stack trace to standard output and
- * standard error, and does not rethrow it. The class still loads, the snapshot stays empty,
- * and every later {@link #getProperty(String)} call returns {@code null}.
+ * <p>Error handling: the initializer catches any {@link java.io.IOException}, prints a message and a
+ * stack trace, and does not rethrow it. If the file cannot be opened, every {@link #getProperty(String)}
+ * call returns {@code null}; if reading fails partway, pairs parsed earlier are kept. Any other exception,
+ * such as the one from a malformed <code>&#92;uXXXX</code> escape, propagates and class initialization fails.
  *
  * <p>Keys read by the codebase (names only):
  * <ul>
@@ -64,8 +64,8 @@ public class ConfigurationReader {
      * effect only on the next JVM start.
      *
      * @param keyword the property key to look up, for example {@code "browser"}
-     * @return the property value, or {@code null} if the key is absent or the file failed
-     *         to load
+     * @return the property value, or {@code null} if the key is not in the loaded snapshot; see the
+     *         class comment for how a load failure empties or truncates it
      */
     public static String getProperty(String keyword){
         return properties.getProperty(keyword);
