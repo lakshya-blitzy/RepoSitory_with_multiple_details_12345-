@@ -54,8 +54,8 @@ public class Notes {
     }
 
     /**
-     * Waits up to 20 seconds for {@code notesP.creatingNotes} to become visible, then clicks it to
-     * open a new note form.
+     * Waits for {@code notesP.creatingNotes} to become visible with a 20-second configured explicit timeout (the
+     * 10-second implicit wait can extend the elapsed time), then clicks it to open a new note form.
      * <p>
      * Gherkin: {@code User clicks create button in Notes module}
      */
@@ -90,8 +90,8 @@ public class Notes {
         notesP.saveBtn.click();
     }
     /**
-     * Waits up to 20 seconds for {@code notesP.saveBtn} to become visible, then clicks it to save the open
-     * form. The locator is not note-specific, and {@code Contact.feature} also uses this step to save a contact.
+     * Waits for {@code notesP.saveBtn} to become visible with a 20-second configured explicit timeout (the 10-second implicit wait can extend the elapsed
+     * time), then clicks it to save the open form. The locator is not note-specific, and {@code Contact.feature} also uses this step to save a contact.
      * <p>
      * Gherkin: {@code User clicks save button}
      */
@@ -144,8 +144,8 @@ public class Notes {
     }
 
     /**
-     * Waits up to 20 seconds for {@code notesP.notesModule} to become visible, clicks it, and asserts
-     * that it is displayed. The assertion checks the Notes menu link, not the contents of the list.
+     * Waits for {@code notesP.notesModule} to become visible with a 20-second configured explicit timeout (the 10-second implicit wait can extend
+     * the elapsed time), clicks it, and asserts that it is displayed. The assertion checks the Notes menu link, not the contents of the list.
      * <p>
      * Gherkin: {@code User should see the Notes list}
      */

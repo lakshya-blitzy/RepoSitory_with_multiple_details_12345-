@@ -10,8 +10,8 @@ import java.util.Properties;
  * <p>A static initializer loads {@code configuration.properties} exactly once, when the class is
  * first initialized (normally by the first {@link #getProperty(String)} call), into an in-memory
  * {@link java.util.Properties} snapshot; edits made after that initialization are not reloaded. The
- * file is opened with {@code new FileInputStream("configuration.properties")}, a path resolved against
- * the JVM working directory, which is normally the project root when Maven runs the tests.
+ * file is opened with {@code new FileInputStream("configuration.properties")}, relative to the JVM working
+ * directory, which must be the project root: set it in the IDE run configuration or start {@code JUnitCore} there.
  *
  * <p>{@code configuration.properties} is not committed to the repository. Create it at the
  * project root before running the suite.

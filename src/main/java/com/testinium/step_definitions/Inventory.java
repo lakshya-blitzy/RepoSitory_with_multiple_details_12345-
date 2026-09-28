@@ -42,8 +42,8 @@ public class Inventory {
     }
 
     /**
-     * Waits up to 20 seconds for the Products menu link ({@code inventory.products}) to be
-     * visible, then clicks it.
+     * Waits for the Products menu link ({@code inventory.products}) to be visible with a 20-second configured
+     * explicit timeout (the 10-second implicit wait can extend the elapsed time), then clicks it.
      * <p>
      * Gherkin: {@code User clicks on Product module}
      */
@@ -75,8 +75,8 @@ public class Inventory {
     }
 
     /**
-     * Waits up to 20 seconds for the Save button ({@code inventory.saveBtn}) to be visible,
-     * then clicks it.
+     * Waits for the Save button ({@code inventory.saveBtn}) to be visible with a 20-second configured explicit
+     * timeout (the 10-second implicit wait can extend the elapsed time), then clicks it.
      * <p>
      * Gherkin: {@code User clicks the save button}
      */

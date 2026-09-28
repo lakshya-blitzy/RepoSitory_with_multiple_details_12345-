@@ -54,7 +54,7 @@ public class CalendarP {
     @FindBy(className= "ui-state-highlight")
     public WebElement dayCalendar;
 
-    /** Current-day cell of the side date picker; step definitions read its zero-based {@code data-month} and {@code data-year} attributes. The locator matches the exact {@code class} attribute string, so it is fragile. */
+    /** Current-day cell of the side date picker; step definitions read its zero-based {@code data-month} attribute (adding 1 to get the month number) and its {@code data-year} attribute (the full year, used as-is). The locator matches the exact {@code class} attribute string, so it is fragile. */
     @FindBy(xpath = "//td[@class=' ui-datepicker-days-cell-over  ui-datepicker-current-day ui-datepicker-today']")
     public WebElement monthAndYearCalendar;
 

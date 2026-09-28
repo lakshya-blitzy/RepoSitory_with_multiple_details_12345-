@@ -216,6 +216,13 @@ Additionally required for live runs, which drive a browser against the system un
    [Known Findings](#known-findings). Source: `pom.xml:L42-L46`; `src/main/java/com/testinium/utilities/Driver.java:L90-L101`
 5. Network access to the Odoo/Upgenix instance under test, and to the driver download hosts that WebDriverManager
    contacts when it resolves a driver.
+   Source: navigation to the configured URLs: `src/main/java/com/testinium/step_definitions/LoginSD.java:L49-L50`,
+   `src/main/java/com/testinium/step_definitions/Session.java:L49` (`web.table.url`) and
+   `src/main/java/com/testinium/step_definitions/EmployeeStage.java:L68` (`url`); driver resolution:
+   `src/main/java/com/testinium/utilities/Driver.java:L91`, `L97` (`WebDriverManager.chromedriver().setup()`) and
+   `pom.xml:L42-L46`; the download hosts: WebDriverManager 5.1.0
+   [`webdrivermanager.properties:L23-L24`](https://github.com/bonigarcia/webdrivermanager/blob/webdrivermanager-5.1.0/src/main/resources/webdrivermanager.properties#L23-L24)
+   (the chromedriver download URL and its mirror)
 
 Optional, for IDE use only. [Run from the Command Line](#run-from-the-command-line) needs no IDE:
 
@@ -437,7 +444,8 @@ Surefire can see the runner. Source: `src/main/java/com/testinium/runners/CukesR
 | `@UPGN-340` … `@UPGN-343` | Scenario | `src/main/resources/features/EmployeeFc.feature:L7`, `L15`, `L25`, `L35` |
 | `@UPGN-286` … `@UPGN-290` | Scenario Outline | `src/main/resources/features/Login.feature:L13`, `L58`, `L85`, `L105`, `L122` |
 | `@UPGN-291`, `@UPGN-292` | Scenario Outline | `src/main/resources/features/Logout.feature:L13`, `L37` |
-| `@SalesManager`, `@PosManager` | Examples | `src/main/resources/features/Login.feature`, `src/main/resources/features/Logout.feature` |
+| `@SalesManager` | Examples | `src/main/resources/features/Login.feature:L20`, `L65`, `L91`, `L110`, `L130`; `src/main/resources/features/Logout.feature:L21`, `L47` |
+| `@PosManager` | Examples | `src/main/resources/features/Login.feature:L37`, `L74`, `L96`, `L115`, `L137`; `src/main/resources/features/Logout.feature:L28`, `L54` |
 
 `Contact.feature`, `Inventory.feature`, `Notes.feature`, `Sales.feature` and `Session.feature` carry no tag. Combine
 tags with `and`, `or`, `not` and parentheses:
@@ -1014,7 +1022,8 @@ definitions, listed in the [Step Definitions](#step-definitions) catalog. Reuse 
 new Java code; the login steps are packaged in `step_definitions/LoginSD.java`. A new step needs a method in a glue
 class and, usually, new `@FindBy` fields on the matching Page Object.
 
-The `@Smoke` feature that `CukesRunner` runs by default (verbatim):
+The opening of the `@Smoke` feature that `CukesRunner` runs by default, verbatim: its header, Background and the first
+of its four scenarios:
 
 ```gherkin
 @Smoke
@@ -1033,7 +1042,8 @@ Feature: Testinium app CRM Module
     Then User can see new pipeline
 ```
 
-Source: `src/main/resources/features/Crm.feature:L1-L14`
+Source: `src/main/resources/features/Crm.feature:L1-L14`; the four scenarios:
+`src/main/resources/features/Crm.feature:L9`, `L16`, `L26`, `L31`
 
 A login Scenario Outline with tagged `Examples`. The header, Background and outline are verbatim; the account rows
 are elided so that no test-account data is repeated here:
@@ -1122,6 +1132,8 @@ flowchart LR
    `src/main/java/com/testinium/utilities/Driver.java:L90-L101`
 3. Create the job: **New Item**, then **Pipeline**. Either paste the contents of `Jenkins` as the *Pipeline script*,
    or choose *Pipeline script from SCM* and set *Script Path* to `Jenkins` (the file is not named `Jenkinsfile`).
+   Source: `Jenkins:L1-L17` (the pipeline script at the repository root; `git ls-files` lists `Jenkins` and no
+   `Jenkinsfile`)
 4. Provide `configuration.properties`, which holds the ERP login account, only for the duration of the test command.
    The committed pipeline provisions no secrets: it has no credentials binding, no permission restriction and no
    cleanup step, so do not run it with live ERP credentials as written. The `Jenkins` file is documented as found and
@@ -1344,7 +1356,8 @@ above `getDriver()` and `closeDriver()` are README annotations standing in for t
    code change. The `switch` has no `default`: an unknown value returns `null`, and a missing key throws a
    `NullPointerException` (see [Known Findings](#known-findings), item 5).
 4. **Driver provisioning (L91, L97).** `WebDriverManager.chromedriver().setup()` downloads and registers the
-   chromedriver binary. The Firefox branch calls the same chromedriver setup (item 4).
+   chromedriver binary. The Firefox branch calls the same chromedriver setup (see [Known Findings](#known-findings),
+   item 4).
 5. **Session defaults (L93-L94, L99-L100).** The window is maximized and a 10-second implicit wait applies to every
    `findElement`, including the lazy `@FindBy` proxies.
 6. **Teardown (L120-L125).** `closeDriver()` quits the browser and calls `remove()`, so the thread's next
@@ -1512,15 +1525,19 @@ sequenceDiagram
     R->>S: create step class for the scenario
     S->>P: new LoginP() in a field initializer
     P->>D: PageFactory.initElements(Driver.getDriver(), this)
-    D->>C: getProperty("browser")
-    D->>B: start browser, maximize, 10 s implicit wait
+    opt thread holds no driver
+        D->>C: getProperty("browser")
+        D->>B: start browser, maximize, 10 s implicit wait
+    end
     S->>D: new WebDriverWait(Driver.getDriver(), 3)
     R->>S: Given User is on the upgenix login page
     S->>C: getProperty("web.table.url")
     S->>D: getDriver().get(url)
     D->>B: open the login page
-    R->>S: When User enters username and password
-    S->>P: inputEmail.sendKeys(username) and inputPassword.sendKeys(password)
+    R->>S: When User enters "#lt;username#gt;" username
+    S->>P: inputEmail.sendKeys(username)
+    R->>S: And User enters "#lt;password#gt;" password
+    S->>P: inputPassword.sendKeys(password)
     R->>S: And User clicks the login button
     S->>P: button.click()
     P->>B: submit the login form
@@ -1543,7 +1560,7 @@ sequenceDiagram
     participant H as Hooks
     participant Sc as Scenario
     participant D as Driver
-    Note over Cu,H: teardownScenario is annotated with org.junit.After, Hooks.java L5 and L45. Cucumber 7 registers only io.cucumber.java hooks, so as written this flow does not run.
+    Note over Cu,H: teardownScenario is annotated with org.junit.After, Hooks.java L5 and L45.<br/>Cucumber 7 registers only io.cucumber.java hooks,<br/>so as written this flow does not run.
     Cu->>H: teardownScenario(scenario) after the scenario ends
     H->>Sc: isFailed()
     alt scenario failed
@@ -1586,8 +1603,9 @@ Source: `src/main/java/com/testinium/runners/CukesRunner.java:L39-L44`; `Jenkins
 
 `CukesRunner` already writes the single-file HTML report to `target/cucumber-reports.html`, and the PrettyReports HTML
 site to `target/cucumber/`, on every run, so no option is needed: open the file in a browser after the run. The
-`cucumber.options` commands of earlier versions of this README no longer work, because Cucumber 7 does not read that
-property. To keep a separate HTML report, for example one per tag selection, pass an `html` plugin with a **new** path:
+`cucumber.options` commands of earlier versions of this README no longer work: Cucumber-JVM removed that property in
+6.0.0, so the cucumber-core 7.2.3 that this project resolves does not read it. To keep a separate HTML report, for
+example one per tag selection, pass an `html` plugin with a **new** path:
 
 ```bash
 java -Dcucumber.filter.tags="@Login" -Dcucumber.plugin="html:target/login-report.html" -cp "target/classes:$(cat target/classpath.txt)" org.junit.runner.JUnitCore com.testinium.runners.CukesRunner
@@ -1597,7 +1615,16 @@ This run writes `target/login-report.html` for the `@Login` scenarios, next to t
 the configured `html:target/cucumber-reports.html` again adds nothing, see [Report Output](#report-output). The Maven
 form, `mvn test -Dcucumber.plugin="html:target/login-report.html"`, passes the same property but runs no scenario until
 Surefire can see the runner, see [How Execution Works Today](#how-execution-works-today).
-Source: `src/main/java/com/testinium/runners/CukesRunner.java:L40`, `L43`, `L48`
+Source: `src/main/java/com/testinium/runners/CukesRunner.java:L40`, `L43`, `L48`; `pom.xml:L54-L58` (`cucumber-java`
+7.2.3, which resolves cucumber-core 7.2.3); cucumber-jvm v7.2.3
+[`CHANGELOG.md:L372`](https://github.com/cucumber/cucumber-jvm/blob/v7.2.3/CHANGELOG.md?plain=1#L372)
+(the 6.0.0-RC2 entry "Remove `cucumber.options` property", tracked by
+[cucumber-jvm#1779](https://github.com/cucumber/cucumber-jvm/issues/1779), milestone 6.0.0); cucumber-core 7.2.3
+[`Constants.java:L79`](https://github.com/cucumber/cucumber-jvm/blob/v7.2.3/core/src/main/java/io/cucumber/core/options/Constants.java#L79),
+[`L101`](https://github.com/cucumber/cucumber-jvm/blob/v7.2.3/core/src/main/java/io/cucumber/core/options/Constants.java#L101)
+and [`L143`](https://github.com/cucumber/cucumber-jvm/blob/v7.2.3/core/src/main/java/io/cucumber/core/options/Constants.java#L143)
+(the supported `cucumber.features`, `cucumber.filter.tags` and `cucumber.plugin` names; the file defines no
+`cucumber.options` constant)
 
 ### Failed-Scenario Rerun List
 

@@ -10,8 +10,8 @@ import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
 /**
- * Step Definition for the Calendar (Meetings) module of the Odoo/Upgenix ERP, bound to the steps of
- * {@code Calendar.feature}.
+ * Step Definition for the Calendar (Meetings) module of the Odoo/Upgenix ERP, binding every step of
+ * {@code Calendar.feature} except its Background login step, bound in {@link com.testinium.step_definitions.Session}.
  *
  * <p>The steps open the Calendar module, switch between the day, week and month views, check the
  * date shown in the control-panel header, and create, select and edit a calendar event.
@@ -31,8 +31,8 @@ public class Calendar {
     WebDriverWait wait = new WebDriverWait(Driver.getDriver(),2);
 
     /**
-     * Opens the Calendar module by clicking {@code calendarP.calendarButton}, then waits up to
-     * 2 seconds for that button to be visible.
+     * Opens the Calendar module by clicking {@code calendarP.calendarButton}, then waits for that button to be visible
+     * with a two-second configured explicit timeout; the 10-second implicit wait can extend the elapsed time.
      * <p>
      * Gherkin: {@code User click on the calendar dashboard}
      *
@@ -47,8 +47,8 @@ public class Calendar {
     }
 
     /**
-     * Switches the calendar to the day view by clicking {@code calendarP.day}, then waits up to
-     * 2 seconds for that button to be visible.
+     * Switches the calendar to the day view by clicking {@code calendarP.day}, then waits for that button to be
+     * visible with a two-second configured explicit timeout; the 10-second implicit wait can extend the elapsed time.
      * <p>
      * Gherkin: {@code User click on day button}
      */
@@ -59,8 +59,8 @@ public class Calendar {
     }
 
     /**
-     * Switches the calendar to the week view by clicking {@code calendarP.week}, then waits up to
-     * 2 seconds for that button to be visible.
+     * Switches the calendar to the week view by clicking {@code calendarP.week}, then waits for that button to be
+     * visible with a two-second configured explicit timeout; the 10-second implicit wait can extend the elapsed time.
      * <p>
      * Gherkin: {@code User click on week button}
      */
@@ -71,8 +71,8 @@ public class Calendar {
     }
 
     /**
-     * Switches the calendar to the month view by clicking {@code calendarP.month}, then waits up to
-     * 2 seconds for that button to be visible.
+     * Switches the calendar to the month view by clicking {@code calendarP.month}, then waits for that button to be
+     * visible with a two-second configured explicit timeout; the 10-second implicit wait can extend the elapsed time.
      * <p>
      * Gherkin: {@code User click on month button}
      */
@@ -83,10 +83,10 @@ public class Calendar {
     }
 
     /**
-     * Verifies that the Calendar module has loaded: waits up to 2 seconds for
-     * {@code calendarP.calendarModule} to be visible, then asserts that the browser page title,
-     * read from {@link com.testinium.utilities.Driver#getDriver()}, equals the Meetings page title
-     * hard-coded in this method.
+     * Verifies that the Calendar module has loaded: waits for {@code calendarP.calendarModule} to be visible with a
+     * two-second configured explicit timeout (the 10-second implicit wait can extend the elapsed time), then asserts
+     * that the browser page title, read from {@link com.testinium.utilities.Driver#getDriver()}, equals the Meetings
+     * page title hard-coded in this method.
      * <p>
      * Gherkin: {@code User should see the last stage of calendar view}
      */
@@ -101,14 +101,14 @@ public class Calendar {
     /**
      * Switches to the day view and verifies that the control-panel header shows today's date.
      *
-     * <p>The step clicks {@code calendarP.day} and waits up to 2 seconds for it to be visible. It
-     * builds the expected header text from three values: the day of month, read as the text of
-     * {@code calendarP.dayCalendar}; the month, read from the zero-based {@code data-month}
-     * attribute of {@code calendarP.monthAndYearCalendar}, incremented by 1 and mapped by a
-     * {@code switch} to its English name; and the year, read from the {@code data-year} attribute
-     * of the same element. The expected text is the module name followed, in parentheses, by the
-     * month name, day and year. After a fixed 3-second {@code Thread.sleep}, it asserts that the
-     * text of {@code calendarP.dateActual} equals the expected text.
+     * <p>The step clicks {@code calendarP.day} and waits for it to be visible with a two-second configured explicit
+     * timeout; the 10-second implicit wait can extend the elapsed time. It builds the expected header text from
+     * three values: the day of month, read as the text of {@code calendarP.dayCalendar}; the month, read from the
+     * zero-based {@code data-month} attribute of {@code calendarP.monthAndYearCalendar}, incremented by 1 and mapped
+     * by a {@code switch} to its English name; and the year, read from the {@code data-year} attribute of the same
+     * element. The expected text is the module name followed, in parentheses, by the month name, day and year.
+     * After a fixed 3-second {@code Thread.sleep}, it asserts that the text of {@code calendarP.dateActual} equals
+     * the expected text.
      *
      * <p>The {@code switch} has no {@code default} branch, so a month number outside 1 to 12 leaves
      * the month name empty in the expected text; the assertion then fails unless the header shows that same text.
@@ -179,13 +179,13 @@ public class Calendar {
      * Switches to the month view and verifies that the control-panel header shows the current
      * month and year.
      *
-     * <p>The step clicks {@code calendarP.month} and waits up to 2 seconds for it to be visible. It
-     * reads the zero-based {@code data-month} attribute of {@code calendarP.monthAndYearCalendar},
-     * increments it by 1 and maps it by a {@code switch} to its English name, and reads the year
-     * from the {@code data-year} attribute of the same element. The expected text is the module
-     * name followed, in parentheses, by the month name and year. After a fixed 3-second
-     * {@code Thread.sleep}, it asserts that the text of {@code calendarP.dateActual} equals the
-     * expected text.
+     * <p>The step clicks {@code calendarP.month} and waits for it to be visible with a two-second configured
+     * explicit timeout; the 10-second implicit wait can extend the elapsed time. It reads
+     * the zero-based {@code data-month} attribute of {@code calendarP.monthAndYearCalendar}, increments it by 1 and
+     * maps it by a {@code switch} to its English name, and reads the year from the {@code data-year} attribute of
+     * the same element. The expected text is the module name followed, in parentheses, by the month name and
+     * year. After a fixed 3-second {@code Thread.sleep}, it asserts that the text of {@code calendarP.dateActual}
+     * equals the expected text.
      *
      * <p>Although bound with {@code @Then}, this step performs an action (the view switch) as well
      * as the assertion. As in the day-view step, a month number outside 1 to 12 leaves the month
@@ -295,9 +295,9 @@ public class Calendar {
         Assert.assertTrue(calendarP.createdNote.isDisplayed());
     }
     /**
-     * Opens the created event by clicking {@code calendarP.selectNote}, waits up to 2 seconds for
-     * that element to be visible, and asserts that the first {@code modal-content} on the page
-     * ({@code calendarP.createdModele}) is displayed, whichever modal it belongs to.
+     * Opens the created event by clicking {@code calendarP.selectNote}, waits for it to be visible with a two-second
+     * configured explicit timeout (the 10-second implicit wait can extend the elapsed time), and asserts that the first
+     * {@code modal-content} on the page ({@code calendarP.createdModele}) is displayed, whichever modal it belongs to.
      * <p>
      * Gherkin: {@code User can select the note}
      */
@@ -308,9 +308,9 @@ public class Calendar {
         Assert.assertTrue(calendarP.createdModele.isDisplayed());
     }
     /**
-     * Edits the opened event: clicks {@code calendarP.editButton} and waits up to 2 seconds for it
-     * to be visible, clears {@code calendarP.editText}, types the replacement text hard-coded in
-     * this method, and waits up to 2 seconds for {@code calendarP.editText} to be visible.
+     * Edits the opened event: clicks {@code calendarP.editButton} and waits for it to be visible, clears
+     * {@code calendarP.editText}, types hard-coded replacement text, and waits for that field to be visible. Each
+     * wait has a two-second configured explicit timeout; the 10-second implicit wait can extend the elapsed time.
      *
      * <p>Known discrepancy: the step calls {@code calendarP.tagsCheckbox.isSelected()} but
      * discards the result, so the checkbox state is read but not asserted, and the step makes

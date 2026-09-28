@@ -8,8 +8,8 @@ import io.cucumber.java.en.Then;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 
 /**
- * Step Definition for the Logout flow of the Odoo/Upgenix application, bound to the steps of
- * {@code Logout.feature}.
+ * Step Definition for the Odoo/Upgenix Logout flow, binding the three logout-specific steps of {@code Logout.feature}.
+ * Its Background step and login steps (username, password, login button, dashboard) are bound in {@link LoginSD}.
  *
  * <p>The steps drive the Page Object {@link com.testinium.pages.LogOutP} through the
  * {@code logOutP} field: they open the user menu and click its "Log out" entry, check the title of

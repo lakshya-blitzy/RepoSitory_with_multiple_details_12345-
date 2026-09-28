@@ -12,9 +12,9 @@ import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
 /**
- * Step Definition for the Login module of the Odoo/Upgenix application, binding the steps of
- * {@code Login.feature}. {@code Logout.feature} also reuses the {@code @Given} step of this class in
- * its Background.
+ * Step Definition for the Login module of the Odoo/Upgenix application, binding the steps of {@code Login.feature}.
+ * {@code Logout.feature} also reuses five of these steps: the {@code @Given} step in its Background and the username,
+ * password, login-button and dashboard steps in both scenarios; {@code Inventory.feature} reuses the dashboard step.
  *
  * <p>The steps drive the login form through the Login Page Object
  * {@link com.testinium.pages.LoginP} (field {@code loginP}) and use

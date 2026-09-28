@@ -51,7 +51,7 @@ public class NotesP {
     @FindBy(xpath = "//p[.='Note created']")
     public WebElement createdMessage;
 
-    /** Save button of the note form ({@code o_form_button_save}). */
+    /** Form Save button ({@code o_form_button_save}) of whichever form is open; the locator is not note-specific. Clicked by the Notes description and save steps, including the shared {@code User clicks save button} step that {@code Contact.feature} also uses to save a contact. */
     @FindBy(xpath = "//button[@class='btn btn-primary btn-sm o_form_button_save']")
     public WebElement saveBtn;
 
