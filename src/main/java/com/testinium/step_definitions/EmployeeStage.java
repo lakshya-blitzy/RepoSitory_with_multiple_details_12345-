@@ -30,9 +30,9 @@ import org.openqa.selenium.support.ui.WebDriverWait;
  * against titles hard-coded in this class.
  *
  * <p>Instantiation: {@code employeePage} and the 3-second {@code WebDriverWait} are created in field
- * initializers that call {@link com.testinium.utilities.Driver#getDriver()}, so creating an instance
- * of this class opens, or reuses, the current thread's browser session. The class declares no
- * constructor.
+ * initializers calling {@link com.testinium.utilities.Driver#getDriver()}, so creating an instance reuses the
+ * thread's session, or starts one if the {@code browser} key is {@code chrome} or {@code firefox}. With no
+ * session and any other or absent key, or a failed start, creation throws. The class declares no constructor.
  *
  * <p>Synchronization: fixed {@code Thread.sleep} pauses of 3 to 7 seconds are used alongside the
  * explicit waits on {@code wait} and the 10-second implicit wait set by
@@ -84,9 +84,9 @@ public class EmployeeStage {
     }
 
     /**
-     * Clicks the Badges, Challenges and Goals History menu links ({@code badgesBtn},
-     * {@code challengesBtn} and {@code goalsHistoryBtn}) in turn; after each click it waits up to
-     * 3 seconds for the link just clicked to be visible.
+     * Clicks the Badges, Challenges and Goals History menu links ({@code badgesBtn}, {@code challengesBtn}
+     * and {@code goalsHistoryBtn}) in turn; after each click it waits for the link just clicked to be visible,
+     * using {@code wait}, configured for 3 seconds; the 10-second implicit wait on each lookup can extend it.
      * <p>
      * Gherkin: {@code User clicks Challenges stage}
      */

@@ -17,11 +17,11 @@ public class ContactsP {
 
     /**
      * Creates the page and initializes its {@code @FindBy} proxies by calling
-     * {@code PageFactory.initElements(Driver.getDriver(), this)}.
+     * {@code PageFactory.initElements(Driver.getDriver(), this)}. Step classes construct pages in field initializers.
      *
-     * <p>{@link com.testinium.utilities.Driver#getDriver()} creates, or reuses, the current thread's
-     * {@code WebDriver}, choosing the browser from the {@code browser} configuration key. Step classes
-     * construct pages in field initializers, so constructing a page starts the browser if this thread has none yet.
+     * <p>{@link Driver#getDriver()} reuses this thread's {@code WebDriver}; with none, it starts one only if the {@code browser}
+     * key is {@code chrome} or {@code firefox}, and a failed start throws. Any other value binds the proxies to a {@code null} driver,
+     * so using an element throws {@code NullPointerException}; a missing key or configuration file makes this constructor throw it.
      */
     public ContactsP(){
         PageFactory.initElements(Driver.getDriver(), this);
@@ -43,23 +43,23 @@ public class ContactsP {
     @FindBy(name = "name")
     public WebElement nameInput;
 
-    /** Street address input ({@code name="street"}). */
+    /** Street address input ({@code name="street"}); {@code Contacts.user_enters(String)} types into it on the create and edit forms without clearing it first. */
     @FindBy(name = "street")
     public WebElement streetInput;
 
-    /** Phone number input ({@code name="phone"}). */
+    /** Phone number input ({@code name="phone"}); {@code Contacts.user_enters_and(String, String)} types its first value into it on the create and edit forms without clearing it first. */
     @FindBy(name = "phone")
     public WebElement phoneNoInput;
 
-    /** Email input ({@code name="email"}). */
+    /** Email input ({@code name="email"}); {@code Contacts.user_enters_and(String, String)} types its second value into it on the create and edit forms without clearing it first. */
     @FindBy(name = "email")
     public WebElement emailInput;
 
-    /** Ok button of a confirmation dialog (span text "Ok"). */
+    /** First {@code <span>} on the page whose text is exactly {@code Ok}, clicked by the created-contact step as a dialog's Ok control; the locator is scoped to neither a button nor a dialog. */
     @FindBy(xpath="//span[.='Ok']")
     public WebElement okBtn;
 
-    /** List row checkbox selected by a fixed index (the 12th checkbox); fragile, depends on list contents. */
+    /** Twelfth input directly inside an {@code o_checkbox} div, counted across the whole page and clicked to choose a profile; it is not scoped to a list row, so earlier matching checkboxes change which element it finds. */
     @FindBy(xpath = "(//div[@class='o_checkbox']/input)[12]")
     public WebElement newContact;
 
@@ -67,7 +67,7 @@ public class ContactsP {
     @FindBy(xpath = "(//div[@class='o_cp_sidebar']/div/div)[2]")
     public WebElement actionInput;
 
-    /** Delete entry of the Action dropdown ({@code data-index='3'}); its text is also read to verify the deletion. */
+    /** First link with {@code data-index='3'} on the page, clicked as the Action dropdown's Delete entry; the deleted-profile step compares its label with {@code "Deleted"}, which does not verify that the contact was removed. */
     @FindBy(xpath = "//a[@data-index='3']")
     public WebElement deleteInput;
 
@@ -88,7 +88,7 @@ public class ContactsP {
     public WebElement printInput;
 
 
-    /** Button inside the open Print dropdown, used for the due-payment print action. */
+    /** First {@code <button>} directly inside the open Print dropdown group; the locator names no Due Payments entry, so which button it finds depends on the rendered dropdown. */
     @FindBy(xpath = "(//div[@class='btn-group o_dropdown open']/button)")
     public WebElement duePayment;
 

@@ -15,16 +15,16 @@ import org.openqa.selenium.support.ui.ExpectedConditions;
  * {@code logOutP} field: they open the user menu and click its "Log out" entry, check the title of
  * the login page, and check the warning dialog shown when navigating back after logging out.
  *
- * <p>Both fields are created in field initializers that call
- * {@link com.testinium.utilities.Driver#getDriver()}: the 3-second {@code WebDriverWait}, declared
- * first, and {@code logOutP}, whose constructor binds its elements to the same driver.
- * Instantiating this class therefore opens the current thread's browser session, or reuses the
- * one the thread already holds.
+ * <p>Both fields are created in field initializers that call {@link com.testinium.utilities.Driver#getDriver()}:
+ * the 3-second {@code WebDriverWait}, declared first, and {@code logOutP}, whose constructor binds its elements to
+ * the same driver. Instantiating this class reuses the thread's browser session or, if it has none, starts one only
+ * when the {@code browser} key is {@code chrome} or {@code firefox}. Otherwise instantiation throws
+ * {@code NullPointerException}: from {@code getDriver()} if the key or the configuration file is missing, or from
+ * the {@code WebDriverWait} constructor, which rejects the {@code null} driver returned for any other value.
  *
- * <p>Known discrepancy: {@code User click Log out option} performs an action but is bound with
- * {@code @Then}. Cucumber matches a step by its expression regardless of the keyword, so
- * {@code Logout.feature} can use it after {@code And}. The binding is left unchanged because this
- * change adds documentation only.
+ * <p>Known discrepancy: {@code User click Log out option} performs an action but is bound with {@code @Then}.
+ * Cucumber matches a step by its expression regardless of the keyword, so {@code Logout.feature} can use it after
+ * {@code And}.
  */
 public class LogOutSD {
 
@@ -51,10 +51,10 @@ public class LogOutSD {
     }
 
     /**
-     * Verifies that the browser shows the login page after logging out.
+     * Checks only that the page title equals the expected login-page title after Log out is clicked.
      *
-     * <p>Reads the page title from {@link com.testinium.utilities.Driver#getDriver()} and asserts
-     * with {@code Assert.assertEquals} that it equals the login-page title hard-coded in this method.
+     * <p>Reads the title from {@link com.testinium.utilities.Driver#getDriver()} and compares it with
+     * {@code Assert.assertEquals} to the one hard-coded in this method; the page content and session are not checked.
      * <p>
      * Gherkin: {@code User should see the login dashboard}
      */
@@ -66,13 +66,13 @@ public class LogOutSD {
     }
 
     /**
-     * Verifies that navigating back after logging out does not return to the home page.
+     * Navigates back after logging out and asserts that the warning dialog body is displayed.
      *
-     * <p>Calls {@code navigate().back()} on {@link com.testinium.utilities.Driver#getDriver()}, then
-     * asserts with {@code Assert.assertTrue} that {@code logOutP.warningMess}, the body of the warning
-     * dialog, is displayed. The element is located lazily, so if the dialog never appears the lookup
-     * throws {@code NoSuchElementException} after the driver's implicit wait rather than failing the
-     * assertion.
+     * <p>Calls {@code navigate().back()} on {@link com.testinium.utilities.Driver#getDriver()}, then asserts with
+     * {@code Assert.assertTrue} that {@code logOutP.warningMess}, the body of the warning dialog, is displayed. The
+     * element is located lazily, so if the dialog never appears the lookup throws {@code NoSuchElementException} after
+     * the driver's implicit wait rather than failing the assertion. Despite the step's wording, it does not check the
+     * URL, whether home-page or other protected content is still reachable, or whether the session was revoked.
      * <p>
      * Gherkin: {@code User can not click the step back button to go the home page}
      */

@@ -38,7 +38,7 @@ public class Driver {
 
     }
 
-    /** Per-thread holder of the current {@code WebDriver} session; empty until {@link #getDriver()} creates one. */
+    /** Per-thread holder of the current {@code WebDriver} session; empty until {@link #getDriver()} creates one, unless the thread was created while its parent held a driver, in which case it starts with that same instance. */
     private static InheritableThreadLocal<WebDriver> driverPool = new InheritableThreadLocal<>();
     /*
     Create a re-usable utility method which will return same driver instance when we call it

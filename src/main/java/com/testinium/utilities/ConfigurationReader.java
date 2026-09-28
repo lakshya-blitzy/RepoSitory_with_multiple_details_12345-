@@ -7,11 +7,11 @@ import java.util.Properties;
 /**
  * Utility-layer accessor for the framework's externalized test configuration.
  *
- * <p>A static initializer loads {@code configuration.properties} exactly once, when this
- * class is first loaded, into an in-memory {@link java.util.Properties} snapshot. The file
- * is opened with {@code new FileInputStream("configuration.properties")}, a path resolved
- * against the JVM working directory, which is normally the project root when Maven runs
- * the tests.
+ * <p>A static initializer loads {@code configuration.properties} exactly once, when the class is
+ * first initialized (normally by the first {@link #getProperty(String)} call), into an in-memory
+ * {@link java.util.Properties} snapshot; edits made after that initialization are not reloaded. The
+ * file is opened with {@code new FileInputStream("configuration.properties")}, a path resolved against
+ * the JVM working directory, which is normally the project root when Maven runs the tests.
  *
  * <p>{@code configuration.properties} is not committed to the repository. Create it at the
  * project root before running the suite.
@@ -59,9 +59,9 @@ public class ConfigurationReader {
     /**
      * Returns the configured value for the given key.
      *
-     * <p>The lookup reads the in-memory snapshot captured at class-load time and performs no
-     * file I/O or reload, so edits to {@code configuration.properties} during a run take
-     * effect only on the next JVM start.
+     * <p>The lookup reads the in-memory snapshot captured when the class was initialized, normally by the
+     * first call to this method, and performs no file I/O; edits to {@code configuration.properties}
+     * made after that initialization are not reloaded.
      *
      * @param keyword the property key to look up, for example {@code "browser"}
      * @return the property value, or {@code null} if the key is not in the loaded snapshot; see the

@@ -22,11 +22,11 @@ import org.openqa.selenium.support.ui.WebDriverWait;
  *
  * <p>Page Object: {@link com.testinium.pages.CrmP}, held in the {@code crm} field.
  *
- * <p>Instantiation: {@code crm} and the 2-second {@code WebDriverWait} are created in field
- * initializers that call {@link com.testinium.utilities.Driver#getDriver()}, so creating this class
- * opens the current thread's browser session, or reuses it if one is already open.
+ * <p>Instantiation: {@code crm} and the two-second {@code WebDriverWait} are created in field initializers that call
+ * {@link com.testinium.utilities.Driver#getDriver()}, which reuses the thread's browser session or starts one when the
+ * {@code browser} key is {@code chrome} or {@code firefox}; otherwise construction throws {@code NullPointerException}.
  *
- * <p>Known limitations, documented and left unchanged because this change adds documentation only:
+ * <p>Known limitations:
  * <ul>
  *   <li>The data entered and the expected values checked are hard-coded in the method bodies, and the
  *       checks read the first card or the total of a fixed pipeline stage, so they depend on the data
@@ -40,13 +40,13 @@ public class Crm {
     /** Page Object for the CRM screens; constructing it binds its elements to the thread's driver. */
     CrmP crm = new CrmP();
 
-    /** Explicit wait of 2 seconds on the thread's driver. */
+    /** Explicit wait with a two-second configured timeout on the thread's driver. */
     WebDriverWait wait = new WebDriverWait(Driver.getDriver(),2);
 
 
     /**
-     * Opens the CRM module by clicking {@code crm.crmLink}, then waits up to 2 seconds for that link
-     * to be visible.
+     * Opens the CRM module by clicking {@code crm.crmLink}, then waits for that link to be visible with a two-second
+     * configured explicit timeout; the 10-second implicit wait can extend the elapsed time.
      * <p>
      * Gherkin: {@code User click on the crm dashboard}
      */
@@ -57,8 +57,8 @@ public class Crm {
     }
 
     /**
-     * Opens the opportunity quick-create dialog by clicking {@code crm.createButton}, then waits up to
-     * 2 seconds for that button to be visible.
+     * Opens the opportunity quick-create dialog by clicking {@code crm.createButton}, then waits for that button to be
+     * visible with a two-second configured explicit timeout; the 10-second implicit wait can extend the elapsed time.
      * <p>
      * Gherkin: {@code User click on the pipeline button}
      */
@@ -74,10 +74,10 @@ public class Crm {
      *
      * <p>Types a hard-coded title, followed by ENTER, into {@code crm.opportunityTitle}; picks the
      * customer by clicking {@code crm.customer} and then {@code crm.customerId}; clears
-     * {@code crm.expectedRevenue} and types a hard-coded amount followed by ENTER; clicks
-     * {@code crm.priority} and {@code crm.createPipeline}; then waits up to 2 seconds for
-     * {@code crm.createPipeline} to be visible. The title and amount are the values that
-     * {@link #userCanSeeNewPipeline()} and {@link #userCanSeeTheTotalPrice()} rely on.
+     * {@code crm.expectedRevenue} and types a hard-coded amount followed by ENTER; clicks {@code crm.priority} and
+     * {@code crm.createPipeline}; then waits for {@code crm.createPipeline} to be visible with a two-second configured
+     * explicit timeout; the 10-second implicit wait can extend the elapsed time. The title and amount are the values
+     * that {@link #userCanSeeNewPipeline()} and {@link #userCanSeeTheTotalPrice()} rely on.
      * <p>
      * Gherkin: {@code User can create the new pipeline}
      */
@@ -100,7 +100,7 @@ public class Crm {
      * revenue typed by {@link #userCanCreateTheNewPipeline()}, prints the result and a hard-coded
      * expected total, and asserts with JUnit that the two are equal.
      *
-     * <p>Known limitations, left unchanged:
+     * <p>Known limitations:
      * <ul>
      *   <li>The expected total is a constant, so the check passes only when the displayed stage total
      *       plus the fixed amount equals it; the result depends on the opportunities already in that
@@ -150,10 +150,10 @@ public class Crm {
      * Opens the first opportunity of pipeline stage {@code data-id='1'} in edit mode and replaces its title,
      * expected revenue and probability.
      *
-     * <p>Clicks {@code crm.buttonPipeline}, waits up to 2 seconds for it to be visible, and clicks
-     * {@code crm.editButton}. It then clears {@code crm.opportunityTitleEdit},
-     * {@code crm.expectedRevenueEdit} and {@code crm.probabilityEdit} in turn and types the matching
-     * argument, followed by ENTER, into each. The changes are saved by {@link #userCanSaveInformation()}.
+     * <p>Clicks {@code crm.buttonPipeline}, waits for it to be visible with a two-second configured explicit timeout
+     * (the 10-second implicit wait can extend the elapsed time), and clicks {@code crm.editButton}. It then clears
+     * {@code crm.opportunityTitleEdit}, {@code crm.expectedRevenueEdit} and {@code crm.probabilityEdit} in turn and
+     * types the matching argument, followed by ENTER, into each. {@link #userCanSaveInformation()} saves the changes.
      * <p>
      * Gherkin: {@code User can change any user's information like {string} , {string} and {string}}
      *
@@ -178,8 +178,8 @@ public class Crm {
     }
 
     /**
-     * Saves the edited opportunity: waits up to 2 seconds for {@code crm.probabilityEdit} to be visible,
-     * then clicks {@code crm.saveEdit}.
+     * Saves the edited opportunity: waits for {@code crm.probabilityEdit} to be visible with a two-second configured
+     * explicit timeout (the 10-second implicit wait can extend the elapsed time), then clicks {@code crm.saveEdit}.
      * <p>
      * Gherkin: {@code User can save information}
      */
@@ -190,10 +190,10 @@ public class Crm {
     }
 
     /**
-     * Verifies the edited opportunity: clicks {@code crm.pipelineSideButton} to return to the pipeline,
-     * waits up to 2 seconds for {@code crm.buttonPipeline} to be visible, reads the text of
-     * {@code crm.findTitleTest}, prints it with the expected name, and asserts with JUnit that it
-     * equals a hard-coded expected name.
+     * Verifies the edited opportunity: clicks {@code crm.pipelineSideButton} to return to the pipeline, waits for
+     * {@code crm.buttonPipeline} to be visible with a two-second configured explicit timeout (the 10-second implicit
+     * wait can extend the elapsed time), reads the text of {@code crm.findTitleTest}, prints it with the expected
+     * name, and asserts with JUnit that it equals a hard-coded expected name.
      *
      * <p>The expected name is not taken from the {@code opportunity} argument of
      * {@link #userCanChangeAnyUserSInformationLikeAnd(String, String, String)}, so the check passes
@@ -268,11 +268,11 @@ public class Crm {
     /**
      * Registers a customer and searches the customer list.
      *
-     * <p>Clicks {@code crm.customerSideButton} and then {@code crm.createCustomer}, waiting up to
-     * 2 seconds for each to be visible after its click; types a hard-coded name, followed by ENTER,
-     * into {@code crm.inputName}; clicks {@code crm.createCustomerButton} and waits for it; then types
-     * a hard-coded search term, followed by ENTER, into {@code crm.searchingText}. The step makes no
-     * assertion.
+     * <p>Clicks {@code crm.customerSideButton} and then {@code crm.createCustomer}, waiting for each to be visible
+     * after its click with a two-second configured explicit timeout; types a hard-coded name, followed by ENTER,
+     * into {@code crm.inputName}; clicks {@code crm.createCustomerButton} and waits for it the same way; then types
+     * a hard-coded search term, followed by ENTER, into {@code crm.searchingText}. The 10-second implicit wait can
+     * extend the elapsed time of each wait. The step makes no assertion.
      * <p>
      * Gherkin: {@code User can register new customer}
      */
@@ -290,11 +290,11 @@ public class Crm {
     }
 
     /**
-     * Opens a customer profile and its print options: clicks {@code crm.nameCustomer} and waits up to
-     * 2 seconds for it to be visible, clicks {@code crm.printButton}, waits for
-     * {@code crm.duePaymentButton} and clicks it.
+     * Opens a customer profile and its print options: clicks {@code crm.nameCustomer} and waits for it to be visible,
+     * clicks {@code crm.printButton}, then waits for {@code crm.duePaymentButton} and clicks it. Each wait has a
+     * two-second configured explicit timeout; the 10-second implicit wait can extend the elapsed time.
      *
-     * <p>Known limitation, left unchanged: although annotated {@code @Then}, the step contains no
+     * <p>Known limitation: although annotated {@code @Then}, the step contains no
      * assertion, so it fails only when an element cannot be found or clicked, or a wait times out.
      * <p>
      * Gherkin: {@code User can print the profile}

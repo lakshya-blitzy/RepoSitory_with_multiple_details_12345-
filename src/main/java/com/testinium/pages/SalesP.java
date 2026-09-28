@@ -21,11 +21,11 @@ public class SalesP {
 
     /**
      * Creates the page and initializes its {@code @FindBy} proxies by calling
-     * {@code PageFactory.initElements(Driver.getDriver(), this)}.
+     * {@code PageFactory.initElements(Driver.getDriver(), this)}. Step classes construct pages in field initializers.
      *
-     * <p>{@link com.testinium.utilities.Driver#getDriver()} creates, or reuses, the current thread's
-     * {@code WebDriver}, choosing the browser from the {@code browser} configuration key. Step classes
-     * construct pages in field initializers, so constructing a page starts the browser if this thread has none yet.
+     * <p>{@link Driver#getDriver()} reuses this thread's {@code WebDriver}; with none, it starts one only if the {@code browser}
+     * key is {@code chrome} or {@code firefox}, and a failed start throws. Any other value binds the proxies to a {@code null} driver,
+     * so using an element throws {@code NullPointerException}; a missing key or configuration file makes this constructor throw it.
      */
     public SalesP(){
         PageFactory.initElements(Driver.getDriver(),this);
@@ -75,7 +75,7 @@ public class SalesP {
     @FindBy(xpath = "//li[@id='ui-id-30']/a")
     public  WebElement countrySelection;
 
-    /** Save button (label span) of the state-create dialog. */
+    /** First {@code span} child of any button whose class is exactly {@code btn btn-sm btn-primary}, not scoped to a dialog; {@code Sales.user_can_save_the_customer()} clicks it as the state-create dialog's Save. */
     @FindBy(xpath = "//button[@class='btn btn-sm btn-primary']/span")
     public  WebElement saveButton;
 
@@ -91,7 +91,7 @@ public class SalesP {
     @FindBy(xpath = "//strong[@class='o_kanban_record_title oe_partner_heading']/span")
     public WebElement nameCheck;
 
-    /** Primary button of a modal dialog; not referenced by the current step definitions. */
+    /** First button whose class is exactly {@code btn btn-sm btn-primary}, anywhere on the page and not scoped to a dialog; not referenced by the current step definitions. */
     @FindBy(xpath = "//button[@class='btn btn-sm btn-primary']")
     public WebElement warningButton;
 
@@ -107,7 +107,7 @@ public class SalesP {
     @FindBy(xpath = "//a[@href='/web#menu_id=447&action=48']")
     public WebElement link;
 
-    /** Detail text span inside a customer kanban card; not referenced by the current step definitions. */
+    /** First {@code span} descendant of any div whose class is exactly {@code oe_kanban_details}, not scoped to a customer card; not referenced by the current step definitions. */
     @FindBy(xpath = "//div[@class=\"oe_kanban_details\"]//span")
     public WebElement details;
 

@@ -22,11 +22,11 @@ import org.openqa.selenium.support.ui.WebDriverWait;
  * title checks and reading element attributes. The login page URL is read from the {@code web.table.url}
  * configuration key with {@link com.testinium.utilities.ConfigurationReader#getProperty(String)}.
  *
- * <p>Field-initializer note: {@code loginP} and the 3-second {@code WebDriverWait} ({@code wait}) are
- * created in field initializers, and both call {@link com.testinium.utilities.Driver#getDriver()}.
- * Instantiating this class therefore opens or reuses the current thread's browser session. Cucumber's
- * default object factory creates an instance for each scenario the first time that scenario runs one of
- * these steps; a dry run executes no step and so opens no browser.
+ * <p>Field-initializer note: {@code loginP} and the 3-second {@code WebDriverWait} ({@code wait}) both call
+ * {@link com.testinium.utilities.Driver#getDriver()} in field initializers, so an instance reuses this thread's browser
+ * or, if none, starts the {@code chrome} or {@code firefox} browser named by the {@code browser} key; if that key is
+ * missing or holds any other value, instantiation throws {@code NullPointerException}. Cucumber's default object factory
+ * creates an instance per scenario the first time it runs one of these steps; a dry run runs no step and opens no browser.
  */
 public class LoginSD {
 
@@ -36,10 +36,10 @@ public class LoginSD {
     WebDriverWait wait = new WebDriverWait(Driver.getDriver(),3);
 
     /**
-     * Opens the Upgenix login page by reading the {@code web.table.url} configuration key with
-     * {@link com.testinium.utilities.ConfigurationReader#getProperty(String)} and navigating the thread's
-     * driver to that URL. The commented-out expected-title line in the body is inactive; this step
-     * performs no assertion.
+     * Attempts to open the Upgenix login page: navigates the thread's driver to the URL read from the required
+     * {@code web.table.url} key with {@link com.testinium.utilities.ConfigurationReader#getProperty(String)}. If the
+     * key is missing, {@code get(String)} receives {@code null} and throws {@code NullPointerException} without navigating.
+     * The commented-out expected-title line in the body is inactive; this step performs no assertion.
      * <p>
      * Gherkin: {@code User is on the upgenix login page}
      */
@@ -77,7 +77,7 @@ public class LoginSD {
     }
 
     /**
-     * Submits the login form by clicking the "Log in" button {@code loginP.button}.
+     * Clicks the "Log in" button {@code loginP.button} to attempt form submission; an empty required input can block it.
      * <p>
      * Gherkin: {@code User clicks the login button}
      */
@@ -87,9 +87,9 @@ public class LoginSD {
     }
 
     /**
-     * Verifies a successful login: waits up to 3 seconds (the {@code wait} field) for the main menu bar
-     * {@code loginP.dashboard} to become visible, then asserts that the browser page title equals the
-     * expected title hard-coded in this method.
+     * Verifies a successful login: waits for the main menu bar {@code loginP.dashboard} to become visible, with a
+     * configured 3-second timeout ({@code wait}); each check looks the bar up under the driver's 10-second implicit wait,
+     * so the step can run past 3 seconds. It then asserts that the page title equals the expected title hard-coded here.
      * <p>
      * Gherkin: {@code User should see the dashboard}
      */
@@ -102,8 +102,8 @@ public class LoginSD {
     }
 
     /**
-     * Verifies a rejected login by asserting that the error alert {@code loginP.alertErrorMessage} is
-     * displayed.
+     * Asserts that the login error alert is displayed after the login attempt: {@code loginP.alertErrorMessage}, the first
+     * {@code alert}-class element. Its text and the session state go unchecked, so this does not prove the login was rejected.
      * <p>
      * Gherkin: {@code User sees error message}
      */
@@ -119,7 +119,7 @@ public class LoginSD {
      * <p>
      * Naming note: the local variable {@code expectedMessage} actually holds the browser's (actual) value
      * and is passed as JUnit's expected argument, with {@code alertMessage} as the actual one, so a
-     * failure message reports the two values in swapped roles. The code is left as written.
+     * failure message reports the two values in swapped roles.
      * <p>
      * Gherkin: {@code User sees {string} message}
      *
@@ -146,9 +146,9 @@ public class LoginSD {
     /**
      * Clicks the same "Log in" button {@code loginP.button} as the login-button step.
      * <p>
-     * Behavior note: despite its wording, and although the scenario using it checks the keyboard Enter
-     * key, this step does not send an Enter key press; it performs a mouse click, so it duplicates the
-     * login-button step. The code is left as written.
+     * Behavior note: despite its wording, this step sends no Enter key press; it performs a mouse click and so
+     * duplicates the login-button step. The {@code Login.feature} scenario using it is intended to test the keyboard
+     * Enter key, but it only checks the dashboard after this click.
      * <p>
      * Gherkin: {@code User clicks the enter button}
      */

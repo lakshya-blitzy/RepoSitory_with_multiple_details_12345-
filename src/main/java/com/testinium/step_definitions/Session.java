@@ -16,11 +16,11 @@ import io.cucumber.java.en.When;
  * but Cucumber matches steps by their text rather than their keyword, so the Background
  * sections call it with {@code Given}.
  *
- * <p>The step drives the login form through the {@link com.testinium.pages.SessionP} Page Object
- * held in the {@code session} field. That field is created in a field initializer, and the
- * {@code SessionP} constructor calls {@link com.testinium.utilities.Driver#getDriver()}, so when
- * Cucumber instantiates this class for a scenario, the current thread's browser session is opened
- * or reused.
+ * <p>The step drives the login form through the {@link com.testinium.pages.SessionP} Page Object held in the
+ * {@code session} field, created in a field initializer whose {@code SessionP} constructor calls
+ * {@link com.testinium.utilities.Driver#getDriver()}. Instantiating this class therefore reuses the current thread's
+ * browser or, if it has none, starts one only for a {@code browser} key of {@code chrome} or {@code firefox}: a
+ * missing key makes instantiation fail, and any other value starts no browser, so the step's first statement fails.
  *
  * <p>The class uses no {@code WebDriverWait} and declares no constructor.
  */
@@ -30,16 +30,16 @@ public class Session {
     SessionP session = new SessionP();
 
     /**
-     * Logs in to the application under test with the configured account.
+     * Attempts to log in to the application under test with the configured account, without verifying the result.
      *
      * <p>The step navigates the current thread's driver to the URL stored under the
      * {@code web.table.url} key. It then types the values of the {@code username} and
      * {@code password} keys, read with
      * {@link com.testinium.utilities.ConfigurationReader#getProperty(String)}, into the login and
-     * password fields, and clicks the login button.
+     * password fields, and clicks the login button. A missing key fails this step with an exception.
      *
-     * <p>The step performs no wait or assertion on the result, so it does not verify that the login
-     * succeeded; a failed login surfaces only in the steps that follow.
+     * <p>Nothing checks the outcome, so a rejected login can go undetected: later steps expose it only if they check
+     * the logged-in state, and {@code Session.feature}, where this is the only step, passes regardless.
      *
      * <p>
      * Gherkin: {@code User login to test other features}

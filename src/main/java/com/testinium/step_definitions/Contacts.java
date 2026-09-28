@@ -13,20 +13,20 @@ import org.openqa.selenium.support.ui.WebDriverWait;
  * {@code Contact.feature}.
  *
  * <p>The steps cover creating a contact, choosing a profile from the list view, deleting it through
- * the Action menu, selecting and editing a profile, and printing due payments. Every UI element is
+ * the Action menu, selecting and editing a profile, and clicking in the open Print dropdown group. Every UI element is
  * reached through the Page Object {@link com.testinium.pages.ContactsP}, held in {@code contactP}.
  * {@code Contact.feature} also uses {@code User login to test other features}, bound in
  * {@link com.testinium.step_definitions.Session}, and {@code User clicks save button}, bound in
  * {@link com.testinium.step_definitions.Notes}.
  *
- * <p>Both {@code contactP} and the 20-second {@code WebDriverWait} are created in field initializers
- * that call {@link com.testinium.utilities.Driver#getDriver()}, so instantiating this class, which
- * Cucumber does for each scenario, opens or reuses the current thread's browser session.
+ * <p>{@code contactP} and the 20-second {@code WebDriverWait} are created in field initializers, so instantiating this class, which
+ * Cucumber does in each scenario that runs one of its steps, calls {@link com.testinium.utilities.Driver#getDriver()}. That reuses the
+ * thread's browser or, with none, starts one if {@code browser} is {@code chrome} or {@code firefox}; otherwise instantiation throws {@code NullPointerException}.
  *
  * <p>Several steps pause with a fixed {@code Thread.sleep(3000)} instead of an explicit wait and
  * therefore declare {@code InterruptedException}.
  *
- * <p>Known gaps, left unchanged because this change adds documentation only:
+ * <p>Known behavior limitations:
  * <ul>
  *   <li>{@link #user_sees_the_created_new_contact_details_at_dashboard()} and
  *       {@link #user_sees_the_updated_contact_details_at_dashboard()} make no assertion.</li>
@@ -114,7 +114,7 @@ public class Contacts {
 
     /**
      * Clicks the Contacts module link {@code contactP.contactModule}, waits until it is visible, then
-     * clicks the Ok button {@code contactP.okBtn}. It makes no assertion, so it does not verify that
+     * clicks the {@code Ok} span {@code contactP.okBtn}. It makes no assertion, so it does not verify that
      * the new contact's details are shown.
      * <p>
      * Gherkin: {@code User sees the created new contact details at dashboard}
@@ -127,8 +127,8 @@ public class Contacts {
     }
 
     /**
-     * Clicks the list-view button {@code contactP.callList}, pauses for 3 seconds, then clicks the list
-     * row checkbox {@code contactP.newContact} to choose a profile.
+     * Clicks the list-view button {@code contactP.callList}, pauses for 3 seconds, then clicks
+     * {@code contactP.newContact}, the twelfth matching checkbox on the whole page, to choose a profile.
      * <p>
      * Gherkin: {@code User clicks list section and choose the profile}
      *
@@ -210,8 +210,8 @@ public class Contacts {
 //    }
 
     /**
-     * Clicks the Print dropdown {@code contactP.printInput}, then pauses for 3 seconds. The due-payment
-     * entry is selected by the next step, {@link #user_can_see_the_downloaded_file()}.
+     * Clicks the Print dropdown group {@code contactP.printInput}, which its locator finds only while the group is already open, then
+     * pauses for 3 seconds. It selects no entry itself; the next step, {@link #user_can_see_the_downloaded_file()}, clicks a button in that group.
      * <p>
      * Gherkin: {@code User clicks the print button and then select due payments}
      *
@@ -224,8 +224,8 @@ public class Contacts {
     }
 
     /**
-     * Clicks the due-payment entry {@code contactP.duePayment} of the open Print dropdown. It does not
-     * verify that any file was downloaded.
+     * Clicks {@code contactP.duePayment}, the first {@code <button>} directly inside the open Print dropdown group. The locator names no Due
+     * Payments entry, so the clicked button depends on the rendered dropdown, and the step does not verify that any file was downloaded.
      * <p>
      * Gherkin: {@code User can see the downloaded file}
      */

@@ -13,18 +13,18 @@ Automating the Testinium browser  (JAVA, Selenium, Cucumber, JUnit, Jira, Jenkin
   <img src="https://selenium.dev/images/selenium_logo_square_green.png" alt="selenium" width="60" height="60"/> 
 </a>    
 
-<a href="https://cucumber.io/" target="_blank" rel="noreferrer"> 
-  <img src="https://lisacrispin.com/wp-content/uploads/2019/01/Screen-Shot-2019-01-17-at-12.13.33-PM.png" alt="cucumber" width="60" height="60"/> 
+<a href="https://cucumber.io/" target="_blank" rel="noreferrer">
+  <img src="https://lisacrispin.com/wp-content/uploads/2019/01/Screen-Shot-2019-01-17-at-12.13.33-PM.png" alt="cucumber" width="60" height="60"/>
 </a>
 
 <a href="https://junit.org/junit4/" rel="noreferrer">
-  <img src="https://junit.org/junit4/images/junit-logo.png" alt="junit" width="115" height="60"/> 
+  <img src="https://junit.org/junit4/images/junit-logo.png" alt="junit" width="115" height="60"/>
 </a> 
 <a href="https://www.atlassian.com/software/jira" rel="noreferrer">
-  <img src="https://i0.wp.com/invotra.com/wp-content/uploads/2019/09/jira_software_logo-e1571063680300.png?fit=768%2C216&ssl=1" alt="jira" width="160" height="60"/> 
+  <img src="https://i0.wp.com/invotra.com/wp-content/uploads/2019/09/jira_software_logo-e1571063680300.png?fit=768%2C216&ssl=1" alt="jira" width="160" height="60"/>
 </a> 
 <a href="https://www.jenkins.io/" rel="noreferrer">
-  <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/e/e9/Jenkins_logo.svg/500px-Jenkins_logo.svg.png" alt="jenkins" width="50" height="80"/> 
+  <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/e/e9/Jenkins_logo.svg/500px-Jenkins_logo.svg.png" alt="jenkins" width="50" height="80"/>
 </a> 
 </p>
 
@@ -167,13 +167,15 @@ Execution order for one scenario:
 2. Cucumber matches every step's text against the `@Given`/`@When`/`@Then`/`@And` expressions in the glue package
    (Source: `src/main/java/com/testinium/runners/CukesRunner.java:L46`).
 3. The step class is instantiated for the scenario. Its field initializers create its Page Object (two in `Notes`) and,
-   in every step class except `Session`, a `WebDriverWait`. Each calls `Driver.getDriver()`, which opens a browser if
-   the thread has none yet and otherwise reuses the thread's open browser, for example one opened by the `Session`
-   login step or left open by an earlier scenario, because the unregistered hook never closes it
+   in every step class except `Session`, a `WebDriverWait`. Each calls `Driver.getDriver()`, which reuses the thread's
+   open browser, for example one opened by the `Session` login step or left open by an earlier scenario, because the
+   unregistered hook never closes it. If the thread has none, a browser starts only when `browser` is `chrome` or
+   `firefox`: a missing key or file makes instantiation throw `NullPointerException`, and any other value yields a
+   `null` driver, so the `WebDriverWait` constructor or the first element use throws one
    (Source: `src/main/java/com/testinium/step_definitions/LoginSD.java:L34-L36`;
-   `src/main/java/com/testinium/step_definitions/Session.java:L30`; `src/main/java/com/testinium/utilities/Driver.java:L82`).
-4. `Driver.getDriver()` reads `browser` through `ConfigurationReader` and creates the WebDriver for the current thread
-   (Source: `src/main/java/com/testinium/utilities/Driver.java:L81-L105`).
+   `src/main/java/com/testinium/step_definitions/Session.java:L30`; `src/main/java/com/testinium/utilities/Driver.java:L82`, `L87-L104`).
+4. When the thread has no driver, `Driver.getDriver()` reads `browser` through `ConfigurationReader` and creates the
+   WebDriver for the current thread (Source: `src/main/java/com/testinium/utilities/Driver.java:L81-L105`).
 5. Step methods act on Page Object elements and assert on the resulting page
    (Source: `src/main/java/com/testinium/step_definitions/LoginSD.java:L96-L102`).
 
@@ -186,11 +188,20 @@ Required to build the project and to run a [dry run](#dry-run), which executes n
    so the `dependency:build-classpath` goal used in [Run from the Command Line](#run-from-the-command-line) and the
    [API Reference](#api-reference) runs the version that the super-POM of your Maven release sets: 3.7.0 under 3.9.16.
    That plugin requires Maven 3.6.3, the plugin baseline of Apache's
-   [Maven compatibility plan](https://maven.apache.org/developers/compatibility-plan.html). Source: `pom.xml:L15-L32`
+   [Maven compatibility plan](https://maven.apache.org/developers/compatibility-plan.html).
+   Source: `pom.xml:L15-L32` (no `maven-dependency-plugin` entry); Maven 3.9.16 super-POM
+   [`pom-4.0.0.xml:L80-L83`](https://github.com/apache/maven/blob/maven-3.9.16/maven-model-builder/src/main/resources/org/apache/maven/model/pom-4.0.0.xml#L80-L83)
+   (`maven-dependency-plugin` 3.7.0); maven-dependency-plugin 3.7.0
+   [`pom.xml:L64-L66`](https://github.com/apache/maven-dependency-plugin/blob/maven-dependency-plugin-3.7.0/pom.xml#L64-L66)
+   (`<prerequisites>`) and [`L90`](https://github.com/apache/maven-dependency-plugin/blob/maven-dependency-plugin-3.7.0/pom.xml#L90)
+   (`mavenVersion` 3.6.3)
     - To run exactly that plugin with any 3.6.3+ release, replace `dependency:build-classpath` in those commands with
       `org.apache.maven.plugins:maven-dependency-plugin:3.7.0:build-classpath`.
-    - Maven 4 is not covered: it [needs Java 17 to run](https://maven.apache.org/whatsnewinmaven4.html), and this
-      project uses JDK 8.
+    - Maven 4 release candidates are not covered: they need Java 17 to run, and this project uses JDK 8. The
+      4.0.0-rc-7 launcher stops on an older JDK with `Error: Apache Maven 4.x requires Java 17 or newer to run.`
+      Source: Maven 4.0.0-rc-7
+      [`apache-maven/src/assembly/maven/bin/mvn:L110-L114`](https://github.com/apache/maven/blob/maven-4.0.0-rc-7/apache-maven/src/assembly/maven/bin/mvn#L110-L114)
+      and [`pom.xml:L131`](https://github.com/apache/maven/blob/maven-4.0.0-rc-7/pom.xml#L131) (`javaVersion` 17)
 3. Access to a Maven artifact repository for the first build, which downloads the declared dependencies and the Maven
    plugins. The pom declares no `<repositories>`, so Maven uses Maven Central (`https://repo.maven.apache.org/maven2`)
    unless `settings.xml` routes it through an approved [mirror](https://maven.apache.org/guides/mini/guide-mirror-settings.html).
@@ -260,9 +271,21 @@ Source: `pom.xml:L11-L14`; `pom.xml:L60-L65`; `pom.xml:L76-L80`
 >   `target/cucumber.json` and `target/rerun.txt`. Untracked output, such as `target/classpath.txt` and new `.class`
 >   files, is kept.
 > - Full reset: appending `&& git clean -fdq -- target` also **permanently deletes** every untracked file and
->   directory under `target/`. Preview what it would remove with `git clean -nd -- target`.
+>   directory under `target/` that no ignore rule matches. Preview what it would remove with `git clean -nd -- target`.
 >
-> Source: `src/main/java/com/testinium/runners/CukesRunner.java:L39-L44` (the report outputs that a run regenerates)
+> Source: `git ls-files -- target | wc -l` prints `45` (the tracked snapshot); Maven 3.9.16 super-POM
+> [`pom-4.0.0.xml:L51-L52`](https://github.com/apache/maven/blob/maven-3.9.16/maven-model-builder/src/main/resources/org/apache/maven/model/pom-4.0.0.xml#L51-L52)
+> (a build writes to `target/` and `target/classes`); Git 2.51.0 `git restore`
+> [description](https://git-scm.com/docs/git-restore/2.51.0#_description),
+> [`--source`](https://git-scm.com/docs/git-restore/2.51.0#Documentation/git-restore.txt---sourcetree) and
+> [`--worktree`](https://git-scm.com/docs/git-restore/2.51.0#Documentation/git-restore.txt---worktree) (restores the
+> tracked paths from the given tree into the working tree; untracked files are not touched); Git 2.45.0 `git clean`
+> [description](https://git-scm.com/docs/git-clean/2.45.0#_description) (removes files not under version control,
+> ignored ones only with `-x`), [`-f`](https://git-scm.com/docs/git-clean/2.45.0#Documentation/git-clean.txt--f),
+> [`-d`](https://git-scm.com/docs/git-clean/2.45.0#Documentation/git-clean.txt--d),
+> [`-n`](https://git-scm.com/docs/git-clean/2.45.0#Documentation/git-clean.txt--n) and
+> [`-q`](https://git-scm.com/docs/git-clean/2.45.0#Documentation/git-clean.txt--q);
+> `src/main/java/com/testinium/runners/CukesRunner.java:L39-L44` (the report outputs that a run regenerates)
 
 ### Create `configuration.properties`
 
@@ -309,6 +332,9 @@ the `Examples` tables of their feature files, and `EmployeeP.login()` types an a
 
 > The repository has no `.gitignore`. Check `git status` before every commit so that `configuration.properties` and
 > its credentials are never committed.
+> Source: `git ls-files -- .gitignore` and `git ls-files -- configuration.properties` print nothing (neither file is
+> tracked); `src/main/java/com/testinium/utilities/ConfigurationReader.java:L46` (the file is opened relative to the
+> working directory, the project root)
 
 ## Running Tests
 
@@ -482,10 +508,23 @@ selected scenarios to `target/cucumber-junit.xml`:
 java -Dcucumber.plugin="junit:target/cucumber-junit.xml" -cp "target/classes:$(cat target/classpath.txt)" org.junit.runner.JUnitCore com.testinium.runners.CukesRunner
 ```
 
-Cucumber keeps the plugins in a set in which two entries are equal when they name the same plugin with the same
-argument. Repeating an annotation entry, such as `html:target/cucumber-reports.html`, therefore adds no report.
-Source: `src/main/java/com/testinium/runners/CukesRunner.java:L39-L44`; cucumber-core 7.2.3
-`io.cucumber.core.options.RuntimeOptions` (the `plugins` set) and `io.cucumber.core.options.PluginOption.equals`
+Cucumber builds the runtime options in layers: a `cucumber.properties` file (this project has none), the
+`@CucumberOptions` annotation, environment variables, then JVM system properties such as `cucumber.plugin`. Each layer
+adds its plugins to those of the layer before, into an insertion-ordered set in which two entries are equal when they
+have the same plugin class and the same argument. Repeating an annotation entry, such as
+`html:target/cucumber-reports.html`, therefore adds no report.
+Source: `src/main/java/com/testinium/runners/CukesRunner.java:L39-L44` (the configured entries); cucumber-junit 7.3.4
+[`Cucumber.java:L114-L130`](https://github.com/cucumber/cucumber-jvm/blob/v7.3.4/junit/src/main/java/io/cucumber/junit/Cucumber.java#L114-L130)
+(each layer is built on the previous one); cucumber-core 7.2.3
+[`RuntimeOptionsBuilder.java:L129`](https://github.com/cucumber/cucumber-jvm/blob/v7.2.3/core/src/main/java/io/cucumber/core/options/RuntimeOptionsBuilder.java#L129)
+(adds the layer's plugins to the earlier options),
+[`RuntimeOptions.java:L42`](https://github.com/cucumber/cucumber-jvm/blob/v7.2.3/core/src/main/java/io/cucumber/core/options/RuntimeOptions.java#L42)
+(`LinkedHashSet`) and
+[`L80-L82`](https://github.com/cucumber/cucumber-jvm/blob/v7.2.3/core/src/main/java/io/cucumber/core/options/RuntimeOptions.java#L80-L82)
+(`addPlugins`),
+[`PluginOption.java:L207-L220`](https://github.com/cucumber/cucumber-jvm/blob/v7.2.3/core/src/main/java/io/cucumber/core/options/PluginOption.java#L207-L220)
+(`equals` and `hashCode` compare the plugin class and its argument); `git ls-files -- src/main/resources` lists only
+the ten feature files (no `cucumber.properties`)
 
 
 ## API Reference
@@ -501,6 +540,30 @@ javadoc -d target/apidocs -sourcepath src/main/java -subpackages com.testinium -
 ```
 
 Open `target/apidocs/index.html` in a browser.
+
+Source: `pom.xml:L34-L81` (the declared dependencies are Selenium, WebDriverManager, JavaFaker, Cucumber, the reporting
+plugin and JUnit; none is an HTTP server library); `git ls-files -- src/main/java` lists 25 files in the packages `pages`,
+`runners`, `step_definitions` and `utilities` under `src/main/java/com/testinium`;
+`src/main/resources/features/*.feature` (the Gherkin vocabulary). Class Javadoc, paths under
+`src/main/java/com/testinium/`: `utilities/Driver.java:L11-L33`, `utilities/ConfigurationReader.java:L7-L37`;
+`runners/CukesRunner.java:L7-L36`, `runners/FailedTestRunner.java:L8-L34`; `pages/CalendarP.java:L8-L15`,
+`pages/ContactsP.java:L8-L15`, `pages/CrmP.java:L8-L16`, `pages/EmployeeP.java:L8-L17`, `pages/InventoryP.java:L8-L16`,
+`pages/LogOutP.java:L8-L15`, `pages/LoginP.java:L8-L15`, `pages/NotesP.java:L8-L15`, `pages/SalesP.java:L11-L19`,
+`pages/SessionP.java:L8-L16`; `step_definitions/Calendar.java:L12-L25`, `step_definitions/Contacts.java:L11-L37`,
+`step_definitions/Crm.java:L14-L37`, `step_definitions/EmployeeStage.java:L12-L40`, `step_definitions/Hooks.java:L9-L26`,
+`step_definitions/Inventory.java:L10-L26`, `step_definitions/LogOutSD.java:L10-L28`,
+`step_definitions/LoginSD.java:L14-L30`, `step_definitions/Notes.java:L14-L32`, `step_definitions/Sales.java:L13-L38`,
+`step_definitions/Session.java:L8-L26`. Classpath: the sources import pom dependencies, such as
+`io.github.bonigarcia.wdm` and `org.openqa.selenium` in `src/main/java/com/testinium/utilities/Driver.java:L3-L9`,
+which are not on `javadoc`'s default classpath. Run without `-classpath` with the JDK 8 `javadoc` (measured with
+OpenJDK 1.8.0_492), the command above prints 39 `error: package ... does not exist` lines for the current sources,
+followed by `error: cannot find symbol` lines. That `javadoc` counts these messages as warnings: its summary reads
+`100 warnings`, it still writes the HTML pages, and it exits with status 0, so check its output rather than its exit
+status.
+JDK 8 `javadoc` option [`-classpath`](https://docs.oracle.com/javase/8/docs/technotes/tools/unix/javadoc.html#CHDGAHAJ);
+maven-dependency-plugin 3.7.0
+[`BuildClasspathMojo.java:L94-L98`](https://github.com/apache/maven-dependency-plugin/blob/maven-dependency-plugin-3.7.0/src/main/java/org/apache/maven/plugins/dependency/fromDependencies/BuildClasspathMojo.java#L94-L98)
+(`mdep.outputFile`, the file the classpath is written to)
 
 ### Utilities
 
@@ -534,7 +597,7 @@ in source). Read-only accessor for `configuration.properties`; see
 | Member | Signature | Behavior | Source |
 |--------|-----------|----------|--------|
 | Field | `private static Properties properties` | In-memory snapshot of the file | `ConfigurationReader.java:L41` |
-| Static initializer | `static { ... }` | Loads `configuration.properties` from the working directory once, at class load. On an `IOException` it prints a message and the stack trace and does not rethrow. Any other exception, such as the `IllegalArgumentException` from a malformed `\uXXXX` escape, propagates and the class fails to initialize | `ConfigurationReader.java:L43-L57` |
+| Static initializer | `static { ... }` | Loads `configuration.properties` from the working directory once, when the class is first initialized (normally by the first `getProperty` call); edits made after that are not reloaded. On an `IOException` it prints a message and the stack trace and does not rethrow. Any other exception, such as the `IllegalArgumentException` from a malformed `\uXXXX` escape, propagates and the class fails to initialize | `ConfigurationReader.java:L43-L57` |
 | Method | `public static String getProperty(String keyword)` | Returns the value for `keyword`, or `null` when the key is not in the loaded snapshot: absent from the file, or lost because the file could not be opened or its read failed partway. No reload happens during a run | `ConfigurationReader.java:L70-L72` |
 
 ### Runners
@@ -625,7 +688,7 @@ declares no fields and uses no Page Objects.
 
 | Method | Signature | Behavior | Source |
 |--------|-----------|----------|--------|
-| `teardownScenario` | `@After public void teardownScenario(Scenario scenario)` | If `scenario.isFailed()`, captures `getScreenshotAs(OutputType.BYTES)` from `Driver.getDriver()` (which starts a new browser if the thread holds none) and attaches it as `image/png`, named after the scenario. It then calls `Driver.closeDriver()` only if nothing before it throws: there is no `finally`, so an exception from `getDriver()`, the screenshot or `attach` skips the cleanup and leaves any browser already open (none exists when `getDriver()` itself failed to create one) | `Hooks.java:L45-L52` |
+| `teardownScenario` | `@After public void teardownScenario(Scenario scenario)` | If `scenario.isFailed()`, captures `getScreenshotAs(OutputType.BYTES)` from `Driver.getDriver()` (which, if the thread holds none, starts a new browser only for a `browser` value of `chrome` or `firefox`) and attaches it as `image/png`, named after the scenario. It then calls `Driver.closeDriver()` only if nothing before it throws: there is no `finally`, so an exception from `getDriver()`, the screenshot or `attach` skips the cleanup and leaves any browser already open (none exists when `getDriver()` itself failed to create one) | `Hooks.java:L45-L52` |
 
 > **Finding:** `@After` is imported from JUnit (`org.junit.After`, L5), not from Cucumber (`io.cucumber.java.After`).
 > Cucumber 7 registers hooks only from `io.cucumber.java` annotations, so as written this method never runs: no failure
@@ -675,10 +738,11 @@ class except `Session`, a `WebDriverWait`; `LoginSD`, for example, declares `log
 Source: `src/main/java/com/testinium/runners/CukesRunner.java:L46`; `src/main/java/com/testinium/step_definitions/LoginSD.java:L25-L36`;
 `src/main/java/com/testinium/step_definitions/Notes.java:L36-L41`; `src/main/java/com/testinium/step_definitions/Session.java:L30`
 
-> **Shared step:** `User login to test other features` (`Session.java:L47-L53`) logs in with the `web.table.url`,
-> `username` and `password` keys. The Backgrounds of `Calendar.feature` (L9), `Contact.feature` (L5), `Crm.feature`
-> (L7), `Inventory.feature` (L9), `Notes.feature` (L8) and `Sales.feature` (L10) use it, and it is the only step of
-> `Session.feature` (L4).
+> **Shared step:** `User login to test other features` (`Session.java:L47-L53`) attempts a login with the
+> `web.table.url`, `username` and `password` keys and does not verify the result, so a rejected login surfaces only in
+> a later step that checks the logged-in state. The Backgrounds of `Calendar.feature` (L9), `Contact.feature` (L5),
+> `Crm.feature` (L7), `Inventory.feature` (L9), `Notes.feature` (L8) and `Sales.feature` (L10) use it, and it is the
+> only step of `Session.feature` (L4), which therefore passes even when the login is rejected.
 
 Steps reused across features: `User should see the dashboard` (`LoginSD`) also closes the first scenario of
 `Inventory.feature` (L16), and `User clicks save button` (`Notes`) is also used by `Contact.feature` (L13, L32). The
@@ -718,7 +782,7 @@ double-quoted value, which is passed to the listed parameter.
 | L321 | `@When` | `User can edit the information` | `user_can_edit_the_information` | — |
 | L338 | `@Then` | `User can save all edit` | `user_can_save_all_edit` | — |
 
-Source: `src/main/java/com/testinium/step_definitions/Calendar.java`
+Source: `src/main/java/com/testinium/step_definitions/Calendar.java:L43-L344`
 
 #### `Contacts`
 
@@ -741,7 +805,7 @@ The commented-out step at L207 is not active and is not listed.
 | L220 | `@When` | `User clicks the print button and then select due payments` | `user_clicks_the_print_button_and_then_select_due_payments` | — |
 | L232 | `@Then` | `User can see the downloaded file` | `user_can_see_the_downloaded_file` | — |
 
-Source: `src/main/java/com/testinium/step_definitions/Contacts.java`
+Source: `src/main/java/com/testinium/step_definitions/Contacts.java:L53-L236`
 
 #### `Crm`
 
@@ -760,7 +824,7 @@ Source: `src/main/java/com/testinium/step_definitions/Contacts.java`
 | L279 | `@And` | `User can register new customer` | `userCanRegisterNewCustomer` | — |
 | L302 | `@Then` | `User can print the profile` | `userCanPrintTheProfile` | — |
 
-Source: `src/main/java/com/testinium/step_definitions/Crm.java`
+Source: `src/main/java/com/testinium/step_definitions/Crm.java:L53-L311`
 
 #### `EmployeeStage`
 
@@ -779,7 +843,7 @@ Source: `src/main/java/com/testinium/step_definitions/Crm.java`
 | L213 | `@When` | `User edits created employees in the Employees module` | `user_edits_created_employees_in_the_employees_module` | — |
 | L235 | `@Then` | `User should see the edited name in the Employees module` | `user_should_see_the_edited_name_in_the_employees_module` | — |
 
-Source: `src/main/java/com/testinium/step_definitions/EmployeeStage.java`
+Source: `src/main/java/com/testinium/step_definitions/EmployeeStage.java:L54-L241`
 
 #### `Inventory`
 
@@ -795,7 +859,7 @@ Source: `src/main/java/com/testinium/step_definitions/EmployeeStage.java`
 | L121 | `@Then` | `User should see the title includes the Product Name` | `user_should_see_the_title_includes_the_product_name` | — |
 | L133 | `@Then` | `User sees the created Product` | `user_sees_the_created_product` | — |
 
-Source: `src/main/java/com/testinium/step_definitions/Inventory.java`
+Source: `src/main/java/com/testinium/step_definitions/Inventory.java:L39-L140`
 
 #### `LoginSD`
 
@@ -811,7 +875,7 @@ Source: `src/main/java/com/testinium/step_definitions/Inventory.java`
 | L141 | `@Then` | `User should see the password in bullet signs` | `user_should_see_the_password_in_bullet_signs` | — |
 | L155 | `@When` | `User clicks the enter button` | `user_clicks_the_enter_button` | — |
 
-Source: `src/main/java/com/testinium/step_definitions/LoginSD.java`
+Source: `src/main/java/com/testinium/step_definitions/LoginSD.java:L46-L159`
 
 #### `LogOutSD`
 
@@ -821,7 +885,7 @@ Source: `src/main/java/com/testinium/step_definitions/LoginSD.java`
 | L61 | `@Then` | `User should see the login dashboard` | `user_should_see_the_login_dashboard` | — |
 | L79 | `@Then` | `User can not click the step back button to go the home page` | `user_can_not_click_the_step_back_button_to_go_the_home_page` | — |
 
-Source: `src/main/java/com/testinium/step_definitions/LogOutSD.java`
+Source: `src/main/java/com/testinium/step_definitions/LogOutSD.java:L46-L84`
 
 #### `Notes`
 
@@ -839,7 +903,7 @@ Source: `src/main/java/com/testinium/step_definitions/LogOutSD.java`
 | L166 | `@When` | `User move element from New section to Today section` | `user_move_element_from_new_section_to_today_section` | — |
 | L180 | `@Then` | `User sees Today new added element` | `user_sees_today_new_added_element` | — |
 
-Source: `src/main/java/com/testinium/step_definitions/Notes.java`
+Source: `src/main/java/com/testinium/step_definitions/Notes.java:L50-L187`
 
 #### `Sales`
 
@@ -853,7 +917,7 @@ Source: `src/main/java/com/testinium/step_definitions/Notes.java`
 | L174 | `@And` | `User can create new customer` | `userCanCreateNewCustomer` | — |
 | L190 | `@Then` | `User can get the error` | `userCanGetTheError` | — |
 
-Source: `src/main/java/com/testinium/step_definitions/Sales.java`
+Source: `src/main/java/com/testinium/step_definitions/Sales.java:L55-L202`
 
 #### `Session`
 
@@ -861,7 +925,7 @@ Source: `src/main/java/com/testinium/step_definitions/Sales.java`
 |------|---------|-----------------|-------------|------------|
 | L47 | `@When` | `User login to test other features` | `user_login_to_test_other_features` | — |
 
-Source: `src/main/java/com/testinium/step_definitions/Session.java`
+Source: `src/main/java/com/testinium/step_definitions/Session.java:L47-L54`
 
 ### Gherkin Feature Catalog
 
@@ -1030,7 +1094,7 @@ flowchart LR
         Bat["bat: mvn clean test"]
     end
     subgraph Report["Stage: Generate report"]
-        Cuc["cucumber step<br/>publishes **/*.json if present<br/>sortingMethod: ALPHABETICAL<br/>all thresholds: -1"]
+        Cuc["cucumber step<br/>publishes **/*.json if present<br/>sortingMethod: ALPHABETICAL<br/>6 count thresholds: -1, no buildStatus"]
     end
     Git --> Unix
     Unix -- "yes" --> Sh
@@ -1043,7 +1107,7 @@ flowchart LR
 |-------|--------------|--------------|--------|
 | `Clone code` | `git 'https://github.com/BalamiRR/Upgenix-QA.git'` | Clones the repository into the workspace | `Jenkins:L2-L4` |
 | `Run tests` | `sh "mvn clean test"` on Unix agents, `bat "mvn clean test"` otherwise, chosen by `isUnix()` | Runs the Maven build. Surefire reports `No tests to run.`, so no scenario executes and no Cucumber JSON is written | `Jenkins:L6-L12`; `pom.xml:L17-L30` |
-| `Generate report` | `cucumber` with `fileIncludePattern: '**/*.json'`, `sortingMethod: 'ALPHABETICAL'` and `failedFeaturesNumber`, `failedScenariosNumber`, `failedStepsNumber`, `pendingStepsNumber`, `skippedStepsNumber`, `undefinedStepsNumber` all set to `-1` | Configured to publish every `**/*.json` file in the workspace with the Cucumber Reports plugin. None exists after `mvn clean test`: `clean` deletes the only committed one, `target/cucumber.json`, and the `Run tests` stage writes none. A threshold of `-1` skips that rule, so the step never changes the build result because of test counts | `Jenkins:L14-L16` |
+| `Generate report` | `cucumber` with `fileIncludePattern: '**/*.json'`, `sortingMethod: 'ALPHABETICAL'` and `failedFeaturesNumber`, `failedScenariosNumber`, `failedStepsNumber`, `pendingStepsNumber`, `skippedStepsNumber`, `undefinedStepsNumber` all set to `-1` | Configured to publish every `**/*.json` file in the workspace with the Cucumber Reports plugin. None exists after `mvn clean test`: `clean` deletes the only committed one, `target/cucumber.json`, and the `Run tests` stage writes none. A value of `-1` skips each of those six count rules. The percentage rules, which the step does not set, default to 0, so any failed, skipped, pending or undefined step marks the report failed. The build result still stays unchanged: no `buildStatus` is set, so the plugin only logs `Build status is left unchanged`, and without `stopBuildOnFailedReport` the build is not stopped | `Jenkins:L14-L16`; Cucumber Reports plugin 5.11.0 [`help-failedStepsNumber.html:L1-L2`](https://github.com/jenkinsci/cucumber-reports-plugin/blob/cucumber-reports-5.11.0/src/main/resources/net/masterthought/jenkins/CucumberReportPublisher/help-failedStepsNumber.html#L1-L2), [`help-buildStatus.html:L1-L2`](https://github.com/jenkinsci/cucumber-reports-plugin/blob/cucumber-reports-5.11.0/src/main/resources/net/masterthought/jenkins/CucumberReportPublisher/help-buildStatus.html#L1-L2), [`CucumberReportPublisher.java:L65-L73`](https://github.com/jenkinsci/cucumber-reports-plugin/blob/cucumber-reports-5.11.0/src/main/java/net/masterthought/jenkins/CucumberReportPublisher.java#L65-L73) (unset fields), [`L580-L592`](https://github.com/jenkinsci/cucumber-reports-plugin/blob/cucumber-reports-5.11.0/src/main/java/net/masterthought/jenkins/CucumberReportPublisher.java#L580-L592) (build result), [`L651-L680`](https://github.com/jenkinsci/cucumber-reports-plugin/blob/cucumber-reports-5.11.0/src/main/java/net/masterthought/jenkins/CucumberReportPublisher.java#L651-L680) (count rules), [`L682-L716`](https://github.com/jenkinsci/cucumber-reports-plugin/blob/cucumber-reports-5.11.0/src/main/java/net/masterthought/jenkins/CucumberReportPublisher.java#L682-L716) (percentage rules) |
 
 ### Setting Up the Jenkins Job
 
@@ -1058,9 +1122,69 @@ flowchart LR
    `src/main/java/com/testinium/utilities/Driver.java:L90-L101`
 3. Create the job: **New Item**, then **Pipeline**. Either paste the contents of `Jenkins` as the *Pipeline script*,
    or choose *Pipeline script from SCM* and set *Script Path* to `Jenkins` (the file is not named `Jenkinsfile`).
-4. Provide `configuration.properties` in the workspace root before the `Run tests` stage, for example with a
-   managed file or a secret-file credential. Never commit it. See
-   [Create `configuration.properties`](#create-configurationproperties).
+4. Provide `configuration.properties`, which holds the ERP login account, only for the duration of the test command.
+   The committed pipeline provisions no secrets: it has no credentials binding, no permission restriction and no
+   cleanup step, so do not run it with live ERP credentials as written. The `Jenkins` file is documented as found and
+   left unchanged. For live runs, set up an approved job on a trusted, isolated agent, a dedicated node or a single
+   executor that runs no untrusted jobs, and handle the file as follows:
+
+   - Store the whole `configuration.properties` as a Jenkins **Secret file** credential, and bind it with
+     `withCredentials([file(...)])` around the test command only. The binding copies it to a temporary location that
+     is deleted when the build completes; other builds running at the same time on a node with several executors can
+     read that copy, and, at least on Linux, other processes of the same account can read the bound variables.
+   - `ConfigurationReader` opens the fixed relative path `configuration.properties`, resolved against the JVM working
+     directory, so the bound file has to be copied to the workspace root. First remove any file or symbolic link
+     already at that path, for example one left by an aborted build in a reused workspace: `cp` keeps the permissions
+     of an existing destination file, whatever the `umask`, and writes through a symbolic link. Then copy the file
+     under `umask 077`, set mode `600` (owner read and write only), check that mode before the test command runs, and
+     delete the file in a `finally` block. A secret file inside the workspace is visible to anyone who can browse the
+     job's workspace, so restrict who holds the Workspace permission on the job.
+   - Never archive, stash or print the file. Pass the path in single-quoted `sh` scripts, so that the shell and not
+     Groovy expands the variable, and start them with `set +x`, so that the shell does not echo the commands.
+
+   Job-side example, not a change to the repository's `Jenkins` file. `testinium-configuration` stands for the ID you
+   give the Secret file credential:
+
+   ```groovy
+   stage('Run tests') {
+       withCredentials([file(credentialsId: 'testinium-configuration', variable: 'TESTINIUM_CONFIG')]) {
+           try {
+               sh '''
+                   set +x
+                   set -e
+                   umask 077
+                   rm -f configuration.properties
+                   cp "$TESTINIUM_CONFIG" configuration.properties
+                   chmod 600 configuration.properties
+                   test ! -L configuration.properties
+                   test "$(stat -c %a configuration.properties)" = 600
+               '''
+               sh 'mvn clean test'
+           } finally {
+               sh 'rm -f configuration.properties'
+           }
+       }
+   }
+   ```
+
+   With `set -e`, a failed removal, copy, `chmod` or mode check ends the script with a non-zero status, so the `sh`
+   step fails before `mvn` starts and the `finally` block still deletes the file. `stat -c` is the GNU coreutils form
+   used on Linux agents. Windows agents need `bat` equivalents and an ACL that limits the copied file to the build
+   account. The example only shows where the file belongs: `mvn clean test` runs no scenario today, see
+   [CI Caveats](#ci-caveats). Never commit the file. See [Create `configuration.properties`](#create-configurationproperties).
+   Source: `Jenkins:L1-L17`; `src/main/java/com/testinium/step_definitions/Session.java:L50-L51` (account keys);
+   `src/main/java/com/testinium/utilities/ConfigurationReader.java:L46` (fixed relative path); GNU Coreutils 9.12
+   [`cp` invocation](https://www.gnu.org/software/coreutils/manual/html_node/cp-invocation.html) (introduction:
+   copying to a symbolic link that refers to an existing regular file follows the link) and its
+   [`--preserve`](https://www.gnu.org/software/coreutils/manual/html_node/cp-invocation.html#index-_002d_002dpreserve)
+   option (without it the permissions of an existing destination file are unchanged, and a new file takes the source
+   mode limited by the `umask`); Credentials Binding plugin
+   [`BindingStep/help.html:L9-L49`](https://github.com/jenkinsci/credentials-binding-plugin/blob/728.v902a_273b_8947/src/main/resources/org/jenkinsci/plugins/credentialsbinding/impl/BindingStep/help.html#L9-L49)
+   (single-quoted `sh` with `set +x`, Groovy interpolation, no untrusted jobs on the same node),
+   [`BindingStep/help.html:L86-L99`](https://github.com/jenkinsci/credentials-binding-plugin/blob/728.v902a_273b_8947/src/main/resources/org/jenkinsci/plugins/credentialsbinding/impl/BindingStep/help.html#L86-L99)
+   (a secret file inside the workspace is visible to anyone able to browse it) and
+   [`FileBinding/help.html:L1-L9`](https://github.com/jenkinsci/credentials-binding-plugin/blob/728.v902a_273b_8947/src/main/resources/org/jenkinsci/plugins/credentialsbinding/impl/FileBinding/help.html#L1-L9)
+   (temporary copy deleted when the build completes, readable by concurrent builds on the same node)
 5. Run **Build Now** to execute the three stages. The build shows Cucumber scenario results only if a Cucumber JSON
    file is in the workspace when the `Generate report` stage runs, and the committed `Jenkins` and `pom.xml` do not
    produce one (see [CI Caveats](#ci-caveats)). To generate the reports, run `CukesRunner` with `JUnitCore` from the
@@ -1077,6 +1201,49 @@ flowchart LR
 | `target/rerun.txt` | `rerun:target/rerun.txt` | `path:line` of each failed scenario | `FailedTestRunner` | `src/main/java/com/testinium/runners/CukesRunner.java:L42`; `src/main/java/com/testinium/runners/FailedTestRunner.java:L38` |
 | `target/cucumber/` | `me.jvt.cucumber.report.PrettyReports:target/cucumber` | PrettyReports HTML site (`cucumber-html-reports/`) | Browser | `src/main/java/com/testinium/runners/CukesRunner.java:L43` |
 
+> **Sensitive report data.** Treat the HTML, JSON and PrettyReports output as confidential. Cucumber writes every
+> Scenario Outline step with the cells of its `Examples` row substituted into the step text, the JSON report stores
+> that text as the step name, and the HTML report embeds the same run messages. The committed snapshot shows it:
+> `target/cucumber-reports.html`, `target/cucumber.json` and
+> `target/cucumber/cucumber-html-reports/report-feature_1735223818.html` contain the `Crm.feature` outline step (L18)
+> with the values of its `Examples` row (L24), and the HTML reports also record the absolute path of the feature files
+> on the machine that ran them. The Login and Logout outlines type the `username` and `password` cells of their
+> `Examples` tables, so the reports of a live run hold those account values in plain text. Once the failure hook is
+> registered, it also embeds a PNG screenshot of the page open at the failure, which can show ERP records, in the HTML
+> and JSON reports. The hook is currently not registered, so no screenshot is taken today (see
+> [Known Findings](#known-findings), item 3). `target/rerun.txt` holds only feature paths and line numbers.
+>
+> - **Access.** Restrict who can view the Jenkins job and its builds: the Cucumber Reports plugin copies the JSON files
+>   into each build's directory and generates the report there. Restrict shared copies of the reports the same way.
+> - **Redaction.** Remove account values and page data before sharing a report outside the team.
+> - **No commits.** `target/` is tracked, so a run modifies tracked report files. Check `git status --short -- target`
+>   and restore the snapshot as described under [Build](#build) before every commit.
+> - **Retention.** Delete local reports when you no longer need them, and give the Jenkins job a build discarder, for
+>   example `properties([buildDiscarder(logRotator(numToKeepStr: '10'))])`, so that old builds and their reports are
+>   deleted.
+>
+> Source: Gherkin 22.0.0 (on the classpath that `mvn dependency:build-classpath` lists)
+> [`PickleCompiler.java:L186`](https://github.com/cucumber/common/blob/gherkin/v22.0.0/gherkin/java/src/main/java/io/cucumber/gherkin/pickles/PickleCompiler.java#L186)
+> and [`L221-L230`](https://github.com/cucumber/common/blob/gherkin/v22.0.0/gherkin/java/src/main/java/io/cucumber/gherkin/pickles/PickleCompiler.java#L221-L230);
+> cucumber-core 7.2.3
+> [`JsonFormatter.java:L239`](https://github.com/cucumber/cucumber-jvm/blob/v7.2.3/core/src/main/java/io/cucumber/core/plugin/JsonFormatter.java#L239)
+> (step name),
+> [`L137-L139`](https://github.com/cucumber/cucumber-jvm/blob/v7.2.3/core/src/main/java/io/cucumber/core/plugin/JsonFormatter.java#L137-L139)
+> and [`L337-L343`](https://github.com/cucumber/cucumber-jvm/blob/v7.2.3/core/src/main/java/io/cucumber/core/plugin/JsonFormatter.java#L337-L343)
+> (`embeddings`),
+> [`HtmlFormatter.java:L22-L33`](https://github.com/cucumber/cucumber-jvm/blob/v7.2.3/core/src/main/java/io/cucumber/core/plugin/HtmlFormatter.java#L22-L33);
+> `src/main/resources/features/Crm.feature:L18`, `L24`; `src/main/resources/features/Login.feature:L14-L16`, `L21`,
+> `L38`; `src/main/resources/features/Logout.feature:L14-L16`, `L22`, `L29`, `L38-L40`, `L48`, `L55`;
+> `src/main/java/com/testinium/step_definitions/LoginSD.java:L61-L63`, `L74-L76`;
+> `src/main/java/com/testinium/step_definitions/Hooks.java:L5`, `L48-L49`;
+> `src/main/java/com/testinium/runners/CukesRunner.java:L40-L43`; Cucumber Reports plugin 5.11.0
+> [`CucumberReportPublisher.java:L478-L481`](https://github.com/jenkinsci/cucumber-reports-plugin/blob/cucumber-reports-5.11.0/src/main/java/net/masterthought/jenkins/CucumberReportPublisher.java#L478-L481),
+> [`L516-L517`](https://github.com/jenkinsci/cucumber-reports-plugin/blob/cucumber-reports-5.11.0/src/main/java/net/masterthought/jenkins/CucumberReportPublisher.java#L516-L517)
+> and [`L530`](https://github.com/jenkinsci/cucumber-reports-plugin/blob/cucumber-reports-5.11.0/src/main/java/net/masterthought/jenkins/CucumberReportPublisher.java#L530);
+> `git ls-files -- target | wc -l` prints `45` (tracked snapshot); Jenkins
+> [`properties` step](https://www.jenkins.io/doc/pipeline/steps/workflow-multibranch/#properties-set-job-properties)
+> (`buildDiscarder`)
+
 ### CI Caveats
 
 - In the current layout `mvn clean test` runs no scenario (see
@@ -1084,10 +1251,18 @@ flowchart LR
   snapshot, including `target/cucumber.json`, the only committed JSON file, so the `Generate report` stage has no
   `cucumber.json` to publish. Source: `pom.xml:L17-L30`; `Jenkins:L6-L16`
 - Once Surefire executes the runner and a run produces `target/cucumber.json`, `testFailureIgnore=true` would keep
-  the Maven build green when tests fail, and the `-1` thresholds would leave the build result unchanged. Failed
-  tests would still be listed in Maven's console test summary, in Surefire's reports (its default
-  `target/surefire-reports`) and in the published Cucumber report.
-  Source: `pom.xml:L17-L30`; `Jenkins:L15`
+  the Maven build green when tests fail, and the `cucumber` step would leave the build result unchanged, because it
+  sets no `buildStatus`: when the plugin marks the report failed, it only logs `Build status is left unchanged`. The
+  `-1` values only disable the six count rules; the unset percentage rules default to 0 and still mark the report
+  failed on any failed, skipped, pending or undefined step. Failed tests would still be listed in Maven's console
+  test summary, in Surefire's reports (its default `target/surefire-reports`) and in the published Cucumber report.
+  Source: `pom.xml:L17-L30`; `Jenkins:L15`; Cucumber Reports plugin 5.11.0
+  [`CucumberReportPublisher.java:L65-L73`](https://github.com/jenkinsci/cucumber-reports-plugin/blob/cucumber-reports-5.11.0/src/main/java/net/masterthought/jenkins/CucumberReportPublisher.java#L65-L73),
+  [`L580-L592`](https://github.com/jenkinsci/cucumber-reports-plugin/blob/cucumber-reports-5.11.0/src/main/java/net/masterthought/jenkins/CucumberReportPublisher.java#L580-L592),
+  [`L651-L680`](https://github.com/jenkinsci/cucumber-reports-plugin/blob/cucumber-reports-5.11.0/src/main/java/net/masterthought/jenkins/CucumberReportPublisher.java#L651-L680)
+  and [`L682-L716`](https://github.com/jenkinsci/cucumber-reports-plugin/blob/cucumber-reports-5.11.0/src/main/java/net/masterthought/jenkins/CucumberReportPublisher.java#L682-L716);
+  [`help-failedStepsNumber.html:L1-L2`](https://github.com/jenkinsci/cucumber-reports-plugin/blob/cucumber-reports-5.11.0/src/main/resources/net/masterthought/jenkins/CucumberReportPublisher/help-failedStepsNumber.html#L1-L2)
+  and [`help-buildStatus.html:L1-L2`](https://github.com/jenkinsci/cucumber-reports-plugin/blob/cucumber-reports-5.11.0/src/main/resources/net/masterthought/jenkins/CucumberReportPublisher/help-buildStatus.html#L1-L2)
 - Today the reports are generated by running `CukesRunner` with `JUnitCore` from the project root, see
   [Run from the Command Line](#run-from-the-command-line) and [Report Output](#report-output). The `Jenkins` file is
   documented as found and left unchanged; see [Known Findings](#known-findings), item 6.
@@ -1095,17 +1270,21 @@ flowchart LR
 
 ## Inline Code Explanations
 
-The excerpts below are copied verbatim from the current sources, original `//` and `/* */` comments included. Each
-excerpt's `Source:` line lists the line ranges it shows. A code block that joins several ranges skips only the
-Javadoc blocks between them; separate code blocks show separate parts of a file, and Javadoc that falls inside a
-listed range is shown.
+The excerpts below copy the statements of the current sources verbatim and keep their accurate `//` and `/* */`
+comments. A source comment that is commented-out code, only restates the next statement, or misstates the behavior is
+omitted or replaced by an explanatory README comment, and the excerpt's `Source:` line or its notes name the affected
+source comment lines. Each `Source:` line lists the line ranges its excerpt shows, less those named comments. A code
+block that joins several ranges skips only the Javadoc blocks and named source comments between them; separate code
+blocks show separate parts of a file, and Javadoc that falls inside a listed range is shown.
 
 ### Thread-Local WebDriver: `Driver`
 
 ```java
     private static InheritableThreadLocal<WebDriver> driverPool = new InheritableThreadLocal<>();
     /*
-    Create a re-usable utility method which will return same driver instance when we call it
+    Returns the calling thread's driver: its own, or the one inherited from its parent thread when the thread
+    was created. A new browser session is created only when the thread holds none, including after closeDriver()
+    removed its entry. An unsupported browser value creates nothing and returns null.
     */
     public static WebDriver getDriver(){
         if(driverPool.get() == null){
@@ -1134,7 +1313,9 @@ listed range is shown.
     }
 
     /*
-       This method will make sure our driver value is always null after using quit() method
+       With a driver present, calls quit() and then removes the thread's pool entry, so the next getDriver()
+       starts a new session; with none, does nothing. If quit() throws, remove() is skipped and the thread
+       keeps that driver.
     */
     public static void closeDriver(){
         if (driverPool.get() != null){
@@ -1144,7 +1325,9 @@ listed range is shown.
     }
 ```
 
-Source: `src/main/java/com/testinium/utilities/Driver.java:L42-L45`, `L81-L109`, `L120-L125`
+Source: `src/main/java/com/testinium/utilities/Driver.java:L42`, `L81-L106`, `L120-L125`. The two `/* */` comments
+above `getDriver()` and `closeDriver()` are README annotations standing in for the source comments at `L43-L45` and
+`L107-L109`.
 
 1. **One driver per thread (L42).** `driverPool` is an `InheritableThreadLocal`, so each thread reads its own pool
    entry. Surefire is configured with `parallel=methods` and `useUnlimitedThreads` (`pom.xml:L22-L23`). Separate
@@ -1156,7 +1339,7 @@ Source: `src/main/java/com/testinium/utilities/Driver.java:L42-L45`, `L81-L109`,
    - **Scenarios on one thread.** Scenarios that run one after another on a thread share its browser until
      `closeDriver()` runs, which today never happens (see [Known Findings](#known-findings), item 3).
 2. **Lazy creation (L82).** A browser is created only when `getDriver()` finds no driver for the thread, its own or
-   inherited; later calls return the same instance (L104).
+   inherited; later calls return the same instance (L104) until `closeDriver()` removes it (item 6).
 3. **Externalized browser choice (L87-L89).** The `browser` key selects the branch, so switching browsers needs no
    code change. The `switch` has no `default`: an unknown value returns `null`, and a missing key throws a
    `NullPointerException` (see [Known Findings](#known-findings), item 5).
@@ -1172,18 +1355,16 @@ Source: `src/main/java/com/testinium/utilities/Driver.java:L42-L45`, `L81-L109`,
 ### Externalized Configuration: `ConfigurationReader`
 
 ```java
-    //1- Create the object of Properties
     private static Properties properties = new Properties();
 
     static {
         try {
-            //2 - We need to open the file in java memory: FileInputStream
+            // FileInputStream only opens a byte stream on the file, resolved against the JVM working directory;
+            // properties.load(file) below reads its key/value pairs into the in-memory snapshot.
             FileInputStream file = new FileInputStream("configuration.properties");
 
-            //3- Load the properties object using FileInputStream object
             properties.load(file);
 
-            //close the file
             file.close();
         } catch (IOException e) {
             System.out.println("File is not found in the ConfigurationReader class");
@@ -1196,10 +1377,13 @@ Source: `src/main/java/com/testinium/utilities/Driver.java:L42-L45`, `L81-L109`,
     }
 ```
 
-Source: `src/main/java/com/testinium/utilities/ConfigurationReader.java:L39`, `L41-L58`, `L70-L72`
+Source: `src/main/java/com/testinium/utilities/ConfigurationReader.java:L41-L58`, `L70-L72`. The excerpt omits the
+source comments at `L39`, `L48` and `L51`, which only restate the next statement, and replaces the one at `L45` with a
+README annotation.
 
-1. **Load once (L43).** The static initializer runs when the class is first used, typically from
-   `Driver.getDriver()` or a step reading a URL, and fills the shared `properties` object.
+1. **Load once (L43).** The static initializer runs once, when the class is first initialized, which in this code base
+   is the first `getProperty` call, typically from `Driver.getDriver()` or a step reading a URL (`Driver.java:L87`,
+   `LoginSD.java:L49`), and fills the shared `properties` object.
 2. **Working-directory path (L46).** `"configuration.properties"` is relative, so the JVM must start in the project
    root, which is the default for Maven and for IntelliJ run configurations.
 3. **I/O errors are swallowed (L53-L55).** Any `IOException` prints a message and a stack trace but does not stop the
@@ -1208,8 +1392,8 @@ Source: `src/main/java/com/testinium/utilities/ConfigurationReader.java:L39`, `L
    after that point return `null`. The stream is closed only on the success path (L52). Nothing else is caught: a
    malformed `\uXXXX` escape makes `load` throw an `IllegalArgumentException`, and the class fails to initialize (see
    [Create `configuration.properties`](#create-configurationproperties)).
-4. **Plain lookup (L70-L72).** `getProperty` reads the snapshot and never reloads, so edits made during a run take
-   effect on the next JVM start.
+4. **Plain lookup (L70-L72).** `getProperty` reads the snapshot and never reloads the file: an edit made before the
+   first `getProperty` call is read, and one made after it is not reloaded by that JVM.
 
 ### Step Definition Anatomy: `LoginSD`
 
@@ -1222,7 +1406,6 @@ Source: `src/main/java/com/testinium/utilities/ConfigurationReader.java:L39`, `L
 ```java
     @Given("User is on the upgenix login page")
     public void user_is_on_the_upgenix_login_page() {
-        //String expectedTitle = "Login | Best solution for startups";
         String url = ConfigurationReader.getProperty("web.table.url");
         Driver.getDriver().get(url);
     }
@@ -1238,18 +1421,22 @@ Source: `src/main/java/com/testinium/utilities/ConfigurationReader.java:L39`, `L
     }
 ```
 
-Source: `src/main/java/com/testinium/step_definitions/LoginSD.java:L34-L36`, `L46-L51`, `L96-L102`
+Source: `src/main/java/com/testinium/step_definitions/LoginSD.java:L34-L36`, `L46-L47`, `L49-L51`, `L96-L102`
 
 1. **Field initializers (L34, L36).** Creating `LoginP` binds its `@FindBy` fields to the thread's driver, and the
    `WebDriverWait` gives explicit waits a 3-second timeout. Both call `Driver.getDriver()`, so the first step of a
-   scenario that uses this class opens the browser if the thread has none, or reuses the thread's open browser, for
-   example one the `Session` Background step already opened in `Inventory.feature` or one left by an earlier scenario
-   (`Driver.java:L82`; `Session.java:L30`; `src/main/resources/features/Inventory.feature:L9`, `L16`).
+   scenario that uses this class reuses the thread's open browser, for example one the `Session` Background step
+   already opened in `Inventory.feature` or one left by an earlier scenario. If the thread has none, a browser starts
+   only when `browser` is `chrome` or `firefox`; a missing key or any other value makes instantiation throw
+   `NullPointerException` (`Driver.java:L82`, `L87-L104`; `Session.java:L30`;
+   `src/main/resources/features/Inventory.feature:L9`, `L16`).
 2. **Binding (L46).** The annotation text must equal the Gherkin step text; the method name is free.
 3. **Navigation (L49-L50).** The login URL comes from `web.table.url`, keeping environments out of the code. The
-   commented-out line (L48) is inactive.
-4. **Explicit wait (L98).** `wait.until(ExpectedConditions.visibilityOf(loginP.dashboard))` blocks for up to 3 seconds
-   until the main menu bar is visible, and throws a `TimeoutException` otherwise.
+   source's inactive commented-out line at L48 is omitted from the excerpt.
+4. **Explicit wait (L98).** `wait.until(ExpectedConditions.visibilityOf(loginP.dashboard))` waits, with a configured
+   3-second timeout, until the main menu bar is visible, and throws a `TimeoutException` otherwise. Each check looks
+   the bar up under the driver's 10-second implicit wait (`Driver.java:L94`, `L100`), so the step can run past
+   3 seconds.
 5. **Assertion (L99-L101).** The page title must equal `"Odoo"`; `Assert.assertEquals(message, expected, actual)`
    fails the step with the given message otherwise.
 
@@ -1277,7 +1464,8 @@ Source: `src/main/java/com/testinium/step_definitions/Hooks.java:L5`, `L45-L52`
    `Driver.getDriver()` returns the thread's existing driver; when the thread holds none, it starts a new browser at
    this point and captures that blank session instead (`Driver.java:L81-L105`).
 3. **Attachment (L49).** `scenario.attach(bytes, "image/png", name)` embeds the image in the Cucumber HTML and JSON
-   reports, named after the scenario.
+   reports, named after the scenario. The screenshot can show ERP page data, so handle those reports as described in
+   the sensitive-data note under [Report Artifacts](#report-artifacts); the hook does not run today (step 5).
 4. **Teardown (L51).** `Driver.closeDriver()` is reached for passed scenarios and for failed ones whose screenshot and
    attachment succeed. There is no `try`/`finally`: an exception at L48 or L49 skips it and leaves any browser already
    open. When no driver could be created, no browser exists: a missing `browser` value makes `getDriver()` throw, and
@@ -1300,8 +1488,10 @@ Source: `src/main/java/com/testinium/step_definitions/Hooks.java:L5`, `L45-L52`
 
 Source: `src/main/java/com/testinium/pages/LoginP.java:L25-L31`
 
-1. **Driver binding (L26).** `Driver.getDriver()` returns, or creates, the thread's browser, and
-   `PageFactory.initElements` replaces every `@FindBy` field with a proxy that uses that driver.
+1. **Driver binding (L26).** `Driver.getDriver()` returns the thread's browser or, if there is none, creates one when
+   `browser` is `chrome` or `firefox`, and `PageFactory.initElements` replaces every `@FindBy` field with a proxy that
+   uses that driver. Any other value yields a `null` driver, so each proxy throws `NullPointerException` when used,
+   and a missing key or configuration file makes the constructor throw it (`Driver.java:L87-L104`).
 2. **Lazy lookup (L30-L31).** The proxy locates the element by `name="login"` on every use, so the Page Object can be
    created before the page is loaded, and each call sees the current DOM.
 3. **Same pattern everywhere.** All 10 Page Objects use this constructor; see [Page Objects](#page-objects).
@@ -1434,33 +1624,48 @@ Source: `src/main/java/com/testinium/runners/CukesRunner.java:L42`;
 
 ```text
 .
-├── Jenkins                          # Jenkins scripted pipeline (Clone code, Run tests, Generate report)
+├── .gitattributes                   # *.html linguist-detectable=false (.gitattributes:L1)
+├── Hello_World Blitzy AI Technical Specification (1).pdf  # committed technical specification document
+├── Jenkins                          # scripted pipeline: Clone code, Run tests, Generate report (Jenkins:L1, L2, L6, L14)
 ├── README.md
-├── image/                           # report screenshots used in this README
+├── image/                           # 2 report screenshots, shown under Reports
 │   ├── Jenkins-Cucumber-Reports.png
 │   └── Jira-Test-Exectuion.png
-├── pom.xml                          # Maven build: Java 8, Surefire, Selenium, Cucumber, JUnit 4
+├── pom.xml                          # Java 8 (pom.xml:L11-L14), Surefire (L17-L30), Selenium, Cucumber, JUnit 4 (L34-L81)
 ├── src/main
 │   ├── java/com/testinium
-│   │   ├── pages/                   # 10 Page Objects
+│   │   ├── pages/                   # 10 Page Objects (git ls-files)
 │   │   │   ├── CalendarP.java  ContactsP.java  CrmP.java  EmployeeP.java  InventoryP.java
 │   │   │   └── LogOutP.java  LoginP.java  NotesP.java  SalesP.java  SessionP.java
-│   │   ├── runners/                 # 2 runners
+│   │   ├── runners/                 # 2 runners (git ls-files; CukesRunner.java:L37, FailedTestRunner.java:L35)
 │   │   │   └── CukesRunner.java  FailedTestRunner.java
-│   │   ├── step_definitions/        # 11 classes: 10 step classes + Hooks
+│   │   ├── step_definitions/        # 11 classes: 10 step classes + Hooks (git ls-files; Hooks.java:L45)
 │   │   │   ├── Calendar.java  Contacts.java  Crm.java  EmployeeStage.java  Hooks.java  Inventory.java
 │   │   │   └── LogOutSD.java  LoginSD.java  Notes.java  Sales.java  Session.java
-│   │   └── utilities/               # 2 utilities
+│   │   └── utilities/               # 2 utilities (git ls-files)
 │   │       └── ConfigurationReader.java  Driver.java
-│   └── resources/features/          # 10 Gherkin feature files
+│   └── resources/features/          # 10 Gherkin feature files (git ls-files)
 │       ├── Calendar.feature  Contact.feature  Crm.feature  EmployeeFc.feature  Inventory.feature
 │       └── Login.feature  Logout.feature  Notes.feature  Sales.feature  Session.feature
-└── target/                          # generated build output and reports (a snapshot is committed)
+└── target/                          # build output; 45 tracked files of an earlier run (git ls-files -- target)
 ```
+
+Source: `git ls-files` lists 87 tracked files: the 42 shown above and the 45 under `target/`. The counts in the tree
+are `git ls-files -- <directory> | wc -l`; `git ls-files -- src/test` and `git ls-files -- configuration.properties`
+print nothing. The screenshots are embedded under [Reports](#reports).
 
 There is no `src/test/java`: the runners and step definitions are compiled from `src/main/java`, which is why
 Surefire finds no tests (see [How Execution Works Today](#how-execution-works-today)). `configuration.properties` is
 created locally in the project root and is not part of the repository.
+Source: `pom.xml:L15-L32` (the `<build>` section overrides no source or test directory; Surefire 3.0.0-M5 at L17-L30);
+Maven 3.9.16 super-POM
+[`pom-4.0.0.xml:L52-L57`](https://github.com/apache/maven/blob/maven-3.9.16/maven-model-builder/src/main/resources/org/apache/maven/model/pom-4.0.0.xml#L52-L57)
+(`src/main/java` compiles to `target/classes`, `src/test/java` to `target/test-classes`); Surefire 3.0.0-M5
+[`AbstractSurefireMojo.java:L238-L243`](https://github.com/apache/maven-surefire/blob/surefire-3.0.0-M5/maven-surefire-common/src/main/java/org/apache/maven/plugin/surefire/AbstractSurefireMojo.java#L238-L243)
+(`testClassesDirectory` defaults to `target/test-classes`) and
+[`L1108-L1116`](https://github.com/apache/maven-surefire/blob/surefire-3.0.0-M5/maven-surefire-common/src/main/java/org/apache/maven/plugin/surefire/AbstractSurefireMojo.java#L1108-L1116)
+(`No tests to run.` when that directory does not exist); `src/main/java/com/testinium/utilities/ConfigurationReader.java:L46`
+(the file is opened relative to the working directory)
 
 ## Known Findings & Troubleshooting
 
@@ -1502,18 +1707,18 @@ The items below are documented as found; this documentation does not change the 
 
 ### Troubleshooting
 
-| Symptom | Cause | Fix |
-|---------|-------|-----|
-| Console shows `File is not found in the ConfigurationReader class`, then a `NullPointerException` in `Driver.getDriver()` | `configuration.properties` is missing, or the JVM working directory is not the project root (`ConfigurationReader.java:L46`, `L54`; `Driver.java:L89`) | Create the file in the project root with the keys in [Create `configuration.properties`](#create-configurationproperties), and set the IDE run configuration's working directory to the project root |
-| `ExceptionInInitializerError` caused by `IllegalArgumentException: Malformed \uxxxx encoding.`, then `NoClassDefFoundError: Could not initialize class com.testinium.utilities.ConfigurationReader` | A value in `configuration.properties` contains `\u` not followed by four hex digits, such as an unescaped Windows path; the initializer catches only `IOException` (`ConfigurationReader.java:L49`, `L53`) | Write each literal backslash as `\\`, or use `/` in paths |
-| `getDriver()` returns `null` and steps fail with a `NullPointerException` | `browser` is neither `chrome` nor `firefox`; the match is case-sensitive (`Driver.java:L89-L102`) | Set `browser=chrome` or `browser=firefox` |
-| The browser does not start; WebDriverManager errors or a `SessionNotCreatedException` about the driver version | WebDriverManager 5.1.0 cannot download the driver (no network or proxy), or it resolves a chromedriver older than the installed Chrome (`pom.xml:L42-L46`; `Driver.java:L91`) | Allow access to the driver download hosts, and use a Chrome version that the resolved chromedriver supports. Upgrading WebDriverManager would require a `pom.xml` change |
-| `firefox` is configured but Firefox does not start | The Firefox branch provisions chromedriver, not geckodriver (`Driver.java:L97`) | Put a geckodriver matching your Firefox on the `PATH`, or use `browser=chrome` |
-| The browser does not start on a CI agent | No display for the non-headless browser (`Driver.java:L92-L93`) | Run the agent with a desktop session or a virtual display |
-| `mvn test` prints `No tests to run.` | The runners compile from `src/main/java` (item 6) | Use [Run from IntelliJ](#run-from-intellij) or [Run from the Command Line](#run-from-the-command-line) |
-| `FailedTestRunner` reports `OK (0 tests)` | `target/rerun.txt` is empty because the last `CukesRunner` run had no failed scenario (`FailedTestRunner.java:L38`) | Nothing to rerun; run `CukesRunner` again first if you expected failures |
-| `FailedTestRunner` fails with `CucumberException: Failed to parse 'target/rerun.txt'` | The rerun file does not exist: no `CukesRunner` run yet, `mvn clean` deleted `target/`, or the working directory is not the project root | Run `CukesRunner` from the project root first, and do not run `mvn clean` before the rerun |
-| No screenshot is attached to a failed scenario | The hook is not registered (item 3) | Known finding; see [Known Findings](#known-findings) |
+| Symptom | Cause | Fix | Source |
+|---------|-------|-----|--------|
+| Console shows `File is not found in the ConfigurationReader class`, then a `NullPointerException` in `Driver.getDriver()` | `configuration.properties` is missing, or the JVM working directory is not the project root | Create the file in the project root with the keys in [Create `configuration.properties`](#create-configurationproperties), and set the IDE run configuration's working directory to the project root | `src/main/java/com/testinium/utilities/ConfigurationReader.java:L46`, `L54`; `src/main/java/com/testinium/utilities/Driver.java:L87-L89` |
+| `ExceptionInInitializerError` caused by `IllegalArgumentException: Malformed \uxxxx encoding.`, then `NoClassDefFoundError: Could not initialize class com.testinium.utilities.ConfigurationReader` | A value in `configuration.properties` contains `\u` not followed by four hex digits, such as an unescaped Windows path; the initializer catches only `IOException` | Write each literal backslash as `\\`, or use `/` in paths | `src/main/java/com/testinium/utilities/ConfigurationReader.java:L49`, `L53`; JDK 8 [`Properties.load(InputStream)`](https://docs.oracle.com/javase/8/docs/api/java/util/Properties.html#load-java.io.InputStream-) (throws `IllegalArgumentException` for a malformed Unicode escape) |
+| `getDriver()` returns `null` and steps fail with a `NullPointerException` | `browser` is neither `chrome` nor `firefox`; the match is case-sensitive | Set `browser=chrome` or `browser=firefox` | `src/main/java/com/testinium/utilities/Driver.java:L89-L102` |
+| The browser does not start; WebDriverManager errors or a `SessionNotCreatedException` about the driver version | WebDriverManager 5.1.0 cannot download the driver (no network or proxy), or it resolves a chromedriver older than the installed Chrome | Allow access to the driver download hosts, and use a Chrome version that the resolved chromedriver supports. Upgrading WebDriverManager would require a `pom.xml` change | `pom.xml:L42-L46`; `src/main/java/com/testinium/utilities/Driver.java:L91` |
+| `firefox` is configured but Firefox does not start | The Firefox branch provisions chromedriver, not geckodriver | Put a geckodriver matching your Firefox on the `PATH`, or use `browser=chrome` | `src/main/java/com/testinium/utilities/Driver.java:L96-L97` |
+| The browser does not start on a CI agent | No display for the non-headless browser | Run the agent with a desktop session or a virtual display | `src/main/java/com/testinium/utilities/Driver.java:L92-L93`, `L98-L99` |
+| `mvn test` prints `No tests to run.` | The runners compile from `src/main/java`, and Surefire runs only compiled test classes from `target/test-classes`, which does not exist (Known Findings item 6) | Use [Run from IntelliJ](#run-from-intellij) or [Run from the Command Line](#run-from-the-command-line) | `pom.xml:L17-L30`; Surefire 3.0.0-M5 [`AbstractSurefireMojo.java:L238-L243`](https://github.com/apache/maven-surefire/blob/surefire-3.0.0-M5/maven-surefire-common/src/main/java/org/apache/maven/plugin/surefire/AbstractSurefireMojo.java#L238-L243) and [`L1108-L1116`](https://github.com/apache/maven-surefire/blob/surefire-3.0.0-M5/maven-surefire-common/src/main/java/org/apache/maven/plugin/surefire/AbstractSurefireMojo.java#L1108-L1116) |
+| `FailedTestRunner` reports `OK (0 tests)` | `target/rerun.txt` is empty because the last `CukesRunner` run had no failed scenario | Nothing to rerun; run `CukesRunner` again first if you expected failures | `src/main/java/com/testinium/runners/FailedTestRunner.java:L38`; `src/main/java/com/testinium/runners/CukesRunner.java:L42` |
+| `FailedTestRunner` fails with `CucumberException: Failed to parse 'target/rerun.txt'`, caused by `java.nio.file.NoSuchFileException: target/rerun.txt` | The rerun file does not exist: no `CukesRunner` run yet, `mvn clean` deleted `target/`, or the working directory is not the project root | Run `CukesRunner` from the project root first, and do not run `mvn clean` before the rerun | `src/main/java/com/testinium/runners/FailedTestRunner.java:L38`; cucumber-core 7.2.3 [`CucumberOptionsAnnotationParser.java:L134-L136`](https://github.com/cucumber/cucumber-jvm/blob/v7.2.3/core/src/main/java/io/cucumber/core/options/CucumberOptionsAnnotationParser.java#L134-L136) (reads the `@` path) and [`OptionsFileParser.java:L24-L37`](https://github.com/cucumber/cucumber-jvm/blob/v7.2.3/core/src/main/java/io/cucumber/core/options/OptionsFileParser.java#L24-L37) (wraps the read failure) |
+| No screenshot is attached to a failed scenario | The hook is not registered (Known Findings item 3) | Known finding; see [Known Findings](#known-findings) | `src/main/java/com/testinium/step_definitions/Hooks.java:L5`, `L45-L52` |
 
 ### THE END
 

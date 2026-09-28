@@ -16,17 +16,17 @@ import org.openqa.selenium.support.PageFactory;
 public class CalendarP {
     /**
      * Creates the page and initializes its {@code @FindBy} proxies by calling
-     * {@code PageFactory.initElements(Driver.getDriver(), this)}.
+     * {@code PageFactory.initElements(Driver.getDriver(), this)}. Step classes construct pages in field initializers.
      *
-     * <p>{@link com.testinium.utilities.Driver#getDriver()} creates, or reuses, the current thread's
-     * {@code WebDriver}, choosing the browser from the {@code browser} configuration key. Step classes
-     * construct pages in field initializers, so constructing a page starts the browser if this thread has none yet.
+     * <p>{@link Driver#getDriver()} reuses this thread's {@code WebDriver}; with none, it starts one only if the {@code browser}
+     * key is {@code chrome} or {@code firefox}, and a failed start throws. Any other value binds the proxies to a {@code null} driver,
+     * so using an element throws {@code NullPointerException}; a missing key or configuration file makes this constructor throw it.
      */
     public CalendarP(){
         PageFactory.initElements(Driver.getDriver(),this);
     }
 
-    /** Document {@code <title>} element whose text is "Meetings - Odoo", identifying the Calendar page; not referenced by the current step definitions. */
+    /** HTML {@code <title>} element whose text is "Meetings - Odoo", which identifies the Calendar page; not referenced by the current step definitions. */
     @FindBy(xpath = "//title[.='Meetings - Odoo']" )
     public WebElement title;
 
@@ -66,7 +66,7 @@ public class CalendarP {
     @FindBy(xpath = "(//td[@class='fc-widget-content'])[29]")
     public WebElement dateBox;
 
-    /** Header of the quick-create modal that opens after clicking a grid cell. */
+    /** First {@code div} on the page whose {@code class} is exactly {@code modal-header}, whichever modal it belongs to; checked for visibility after a grid cell is clicked. */
     @FindBy(xpath = "//div[@class='modal-header']")
     public WebElement createNote;
 
@@ -94,7 +94,7 @@ public class CalendarP {
     @FindBy(id = "o_field_input_46")
     public WebElement editText;
 
-    /** Content container of the event modal shown after selecting a created event, checked for visibility. */
+    /** First {@code div} on the page whose {@code class} is exactly {@code modal-content}, whichever modal it belongs to; checked for visibility after a created event is selected. */
     @FindBy(xpath = "//div[@class='modal-content']")
     public WebElement createdModele;
 
@@ -102,7 +102,7 @@ public class CalendarP {
     @FindBy(id = "o_field_input_59")
     public WebElement tagsCheckbox;
 
-    /** Save button of the event form (span text "Save"). */
+    /** First {@code span} on the page whose text is exactly "Save"; the locator targets a {@code span}, not a {@code button}, and is not scoped to the event form. Clicked by the step that saves an edited event. */
     @FindBy(xpath = "//span[.='Save']")
     public WebElement saveButton;
 

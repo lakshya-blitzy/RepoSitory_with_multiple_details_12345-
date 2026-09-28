@@ -12,11 +12,11 @@ import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
 /**
- * Step Definition for the Notes module of the Odoo/Upgenix application, binding the steps of
- * {@code Notes.feature}.
+ * Step Definition for the Notes module of the Odoo/Upgenix application, binding every step of {@code Notes.feature}
+ * except its Background login step, which {@link com.testinium.step_definitions.Session} binds.
  *
- * <p>The steps create a tagged note, edit a note's description, verify the Notes list, and drag a
- * card from the New column to the Today column with Selenium {@code Actions}.
+ * <p>The steps create a tagged note, edit a note's description, check that the Notes menu link is
+ * displayed, and drag a card from the New column to the Today column with Selenium {@code Actions}.
  *
  * <p>Page Objects:
  * <ul>
@@ -26,9 +26,9 @@ import org.openqa.selenium.support.ui.WebDriverWait;
  *       which {@link #user_enters_new_description()} clicks to save the edited note.</li>
  * </ul>
  *
- * <p>Both Page Objects and the 20-second {@code WebDriverWait} are created in field initializers
- * that call {@link com.testinium.utilities.Driver#getDriver()}, so instantiating this class opens,
- * or reuses, the current thread's browser session.
+ * <p>Both Page Objects and the 20-second {@code WebDriverWait} are created in field initializers that call
+ * {@link com.testinium.utilities.Driver#getDriver()}, so instantiating this class reuses or opens a browser only
+ * when the {@code browser} key is {@code chrome} or {@code firefox}; otherwise it throws {@code NullPointerException}.
  */
 public class Notes {
 
@@ -90,8 +90,8 @@ public class Notes {
         notesP.saveBtn.click();
     }
     /**
-     * Waits up to 20 seconds for {@code notesP.saveBtn} to become visible, then clicks it to save
-     * the note form.
+     * Waits up to 20 seconds for {@code notesP.saveBtn} to become visible, then clicks it to save the open
+     * form. The locator is not note-specific, and {@code Contact.feature} also uses this step to save a contact.
      * <p>
      * Gherkin: {@code User clicks save button}
      */

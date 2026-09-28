@@ -18,10 +18,10 @@ import org.openqa.selenium.support.ui.WebDriverWait;
  *
  * <p>Page Object: {@link com.testinium.pages.CalendarP}, held in the {@code calendarP} field.
  * Both {@code calendarP} and the 2-second {@code WebDriverWait} are created in field initializers
- * that call {@link com.testinium.utilities.Driver#getDriver()}, so creating an instance of this class
- * opens the current thread's browser session, or reuses it if one already exists.
- *
- * <p>The class name does not clash with {@code java.util.Calendar}, which is not imported here.
+ * that call {@link com.testinium.utilities.Driver#getDriver()}. Creating an instance reuses the thread's
+ * browser session or, if it has none, opens one when the {@code browser} key is {@code chrome} or
+ * {@code firefox}. Otherwise creation fails with {@code NullPointerException}: from {@code getDriver()}
+ * if the key or configuration file is missing, or from the {@code WebDriverWait} for any other value.
  */
 public class Calendar {
 
@@ -37,8 +37,8 @@ public class Calendar {
      * Gherkin: {@code User click on the calendar dashboard}
      *
      * @throws InterruptedException never in practice: the signature declares it, but the body does
-     *         not call {@code Thread.sleep} or any other method that throws it; the clause is left
-     *         unchanged because this change adds documentation only
+     *         not call {@code Thread.sleep}, and neither {@code WebElement.click()} nor
+     *         {@code WebDriverWait.until} declares it
      */
     @When("User click on the calendar dashboard")
     public void user_clicks_on_the_calendar_dashboard() throws InterruptedException {
@@ -111,7 +111,7 @@ public class Calendar {
      * text of {@code calendarP.dateActual} equals the expected text.
      *
      * <p>The {@code switch} has no {@code default} branch, so a month number outside 1 to 12 leaves
-     * the month name empty and the assertion fails.
+     * the month name empty in the expected text; the assertion then fails unless the header shows that same text.
      * <p>
      * Gherkin: {@code User click day on the calendar and display day}
      *
@@ -189,7 +189,7 @@ public class Calendar {
      *
      * <p>Although bound with {@code @Then}, this step performs an action (the view switch) as well
      * as the assertion. As in the day-view step, a month number outside 1 to 12 leaves the month
-     * name empty and the assertion fails.
+     * name empty in the expected text; the assertion then fails unless the header shows that same text.
      * <p>
      * Gherkin: {@code User click month on the calendar and display month}
      *
@@ -251,8 +251,8 @@ public class Calendar {
     }
 
     /**
-     * Clicks the calendar grid cell {@code calendarP.dateBox} to start creating an event, then
-     * asserts that the header of the quick-create modal, {@code calendarP.createNote}, is displayed.
+     * Clicks the grid cell {@code calendarP.dateBox} to start creating an event, then asserts that the
+     * first {@code modal-header} on the page ({@code calendarP.createNote}) is displayed, whichever modal it belongs to.
      * <p>
      * Gherkin: {@code User click on desired date time}
      */
@@ -296,8 +296,8 @@ public class Calendar {
     }
     /**
      * Opens the created event by clicking {@code calendarP.selectNote}, waits up to 2 seconds for
-     * that element to be visible, and asserts that the event modal content,
-     * {@code calendarP.createdModele}, is displayed.
+     * that element to be visible, and asserts that the first {@code modal-content} on the page
+     * ({@code calendarP.createdModele}) is displayed, whichever modal it belongs to.
      * <p>
      * Gherkin: {@code User can select the note}
      */
@@ -312,9 +312,9 @@ public class Calendar {
      * to be visible, clears {@code calendarP.editText}, types the replacement text hard-coded in
      * this method, and waits up to 2 seconds for {@code calendarP.editText} to be visible.
      *
-     * <p>Known discrepancy: the step calls {@code calendarP.tagsCheckbox.isSelected()} but discards
-     * the result, so the checkbox state is read but not asserted and the step makes no assertion.
-     * The call is left unchanged because this change adds documentation only.
+     * <p>Known discrepancy: the step calls {@code calendarP.tagsCheckbox.isSelected()} but
+     * discards the result, so the checkbox state is read but not asserted, and the step makes
+     * no assertion.
      * <p>
      * Gherkin: {@code User can edit the information}
      */

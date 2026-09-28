@@ -14,25 +14,25 @@ import org.openqa.selenium.support.ui.WebDriverWait;
  * Step Definition for the Sales to Customers flow of the Odoo/Upgenix application, bound to the
  * steps of {@code Sales.feature}.
  *
- * <p>The steps open Sales and then Customers, create a customer with a new state, save it,
- * search for a customer by name, and cover blank-name validation by reading the warning shown when
- * a customer is saved with a blank name. The feature's Background login step is bound in
+ * <p>The steps open Sales and then Customers, fill in a new customer and a new state, save both,
+ * search for a customer by name, and cover blank-name validation by submitting a blank
+ * new-customer form and reading the warning shown. The feature's Background login step is bound in
  * {@link com.testinium.step_definitions.Session}, not in this class.
  *
  * <p>Page Object: {@link com.testinium.pages.SalesP}, held in the {@code salesp} field.
  *
- * <p>Both {@code salesp} and the 4-second {@code WebDriverWait} are created in field
- * initializers that call {@link com.testinium.utilities.Driver#getDriver()}: the
- * {@code SalesP} constructor passes it to {@code PageFactory.initElements}, and the wait is built
- * on it directly. Cucumber instantiates this class for each scenario that runs one of its steps,
- * and that instantiation opens the current thread's browser session, or reuses it if one is
- * already open. Each wait in this class waits for the element the step has just clicked or typed
- * into to be visible.
+ * <p>Cucumber instantiates this class for each scenario that runs one of its steps. The field initializers of
+ * {@code salesp} (through the {@code SalesP} constructor) and then of the 4-second {@code WebDriverWait} call
+ * {@link com.testinium.utilities.Driver#getDriver()}, which reuses the thread's open browser or, if there is
+ * none, creates one only when the {@code browser} key is {@code chrome} or {@code firefox}. Any other value
+ * makes it return {@code null}, so the {@code WebDriverWait} constructor throws a {@code NullPointerException};
+ * a missing key or {@code configuration.properties} file makes {@code getDriver()} itself throw one. Each wait
+ * in this class waits for the element the step has just clicked or typed into to be visible.
  *
  * <p>Known limitation: the search step
  * ({@link #userCanFindHisNameFromSearchBar(String)}) and the error step
  * ({@link #userCanGetTheError()}) read a value from the page and print it next to a hard-coded
- * value, but assert nothing, so they pass whatever text the page shows. The title check in
+ * value, but assert nothing, so any text they read passes. The title check in
  * {@link #user_click_customers_button()} does assert, but with inverted operand naming; see that
  * method.
  */
@@ -90,7 +90,7 @@ public class Sales {
     }
 
     /**
-     * Fills the new-customer form and creates a new state for it: clicks
+     * Fills the new-customer form and prepares a new state for it in the state creation dialog: clicks
      * {@code salesp.createButton} and waits for it, types a hard-coded customer name into
      * {@code salesp.customerName} and a hard-coded address into {@code salesp.address}, opens
      * {@code salesp.stateOptions} and chooses {@code salesp.createAndEditState}, types a
@@ -165,7 +165,7 @@ public class Sales {
     }
 
     /**
-     * Saves an empty new-customer form to trigger validation: clicks {@code salesp.createButton},
+     * Attempts to save an empty new-customer form to trigger validation: clicks {@code salesp.createButton},
      * waits for it, then clicks {@code salesp.createCustomer} (the form Save) without filling in any
      * field.
      * <p>
@@ -184,8 +184,8 @@ public class Sales {
      * <p>
      * Gherkin: {@code User can get the error}
      *
-     * <p>Known limitation: the step asserts nothing, so it passes whatever text the notification
-     * area shows, including none.
+     * <p>Known limitation: the step asserts nothing, so any text in an existing notification container passes,
+     * even empty; if it is absent, {@code getText()} throws {@code NoSuchElementException}, failing the step.
      */
     @Then("User can get the error")
     public void userCanGetTheError() {
