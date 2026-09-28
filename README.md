@@ -213,7 +213,10 @@ Additionally required for live runs, which drive a browser against the system un
 4. Google Chrome or Mozilla Firefox installed locally. You do not need to download a driver or set a driver class
    path: WebDriverManager 5.1.0 provisions the driver binary at runtime through
    `WebDriverManager.chromedriver().setup()`. The Firefox branch also calls the chromedriver setup, see
-   [Known Findings](#known-findings). Source: `pom.xml:L42-L46`; `src/main/java/com/testinium/utilities/Driver.java:L90-L101`
+   [Known Findings](#known-findings). With Chrome 115 or later, WebDriverManager 5.1.0 falls back to chromedriver
+   114, which that Chrome rejects; [Troubleshooting](#troubleshooting) gives the message and how to supply a
+   matching driver. Source: `pom.xml:L42-L46`; `src/main/java/com/testinium/utilities/Driver.java:L90-L101`; the
+   driver fallback is sourced in [Troubleshooting](#troubleshooting)
 5. Network access to the Odoo/Upgenix instance under test, and to the driver download hosts that WebDriverManager
    contacts when it resolves a driver.
    Source: navigation to the configured URLs: `src/main/java/com/testinium/step_definitions/LoginSD.java:L49-L50`,
@@ -313,14 +316,26 @@ an `IllegalArgumentException`. The initializer catches only `IOException`, so th
 `NoClassDefFoundError: Could not initialize class com.testinium.utilities.ConfigurationReader`.
 Source: `src/main/java/com/testinium/utilities/ConfigurationReader.java:L49`, `L53`
 
+`java.util.Properties` skips the whitespace between `=` and the value but keeps everything after the value up to the
+end of the line, so a trailing space or tab becomes part of the value: with `browser=chrome ` (trailing space),
+`getProperty("browser")` returns `chrome ` and `getDriver()` returns `null`. Check every line for trailing whitespace;
+keys are case-sensitive as well. Source: `src/main/java/com/testinium/utilities/ConfigurationReader.java:L49`;
+`src/main/java/com/testinium/utilities/Driver.java:L87-L102`; JDK 8
+[`Properties.load(Reader)`](https://docs.oracle.com/javase/8/docs/api/java/util/Properties.html#load-java.io.Reader-)
+(the line format that `load(InputStream)` also follows: "All remaining characters on the line become part of the
+associated element string")
+
 | Key | Used by (Source) | Purpose | Example (placeholder) |
 |-----|------------------|---------|-----------------------|
-| `browser` | `Driver.getDriver()`: `src/main/java/com/testinium/utilities/Driver.java:L87` | Browser to launch. Supported values are `chrome` (L90) and `firefox` (L96); the match is case-sensitive | `chrome` |
+| `browser` | `Driver.getDriver()`: `src/main/java/com/testinium/utilities/Driver.java:L87` | Browser to launch. Supported values are `chrome` (L90) and `firefox` (L96); the match is case-sensitive and exact, so a value with trailing whitespace matches neither case (see above). The key name is case-sensitive too | `chrome` |
 | `web.table.url` | `src/main/java/com/testinium/step_definitions/LoginSD.java:L49`; `src/main/java/com/testinium/step_definitions/Session.java:L49`; `src/main/java/com/testinium/step_definitions/EmployeeStage.java:L56` | Login page URL opened by the login steps | `https://<your-odoo-host>/web/login` |
 | `username` | `src/main/java/com/testinium/step_definitions/Session.java:L50` | Login of the shared account typed by the step `User login to test other features` | `<username>` |
 | `password` | `src/main/java/com/testinium/step_definitions/Session.java:L51` | Password of that shared account | `<password>` |
 | `url` | `src/main/java/com/testinium/step_definitions/EmployeeStage.java:L68`, `L141`, `L215` | Start URL of the Employees flow. It must show the login form, because `EmployeeP.login()` fills that form next | `https://<your-odoo-host>/web/login` |
 | `EmplTitle` | `src/main/java/com/testinium/step_definitions/EmployeeStage.java:L82` | Page title awaited after clicking Employees. The next line asserts the hard-coded title `Employees - Odoo` (L83), so use that value | `Employees - Odoo` |
+
+A missing key fails the class or step that reads it with a message that does not name the key;
+[Troubleshooting](#troubleshooting) maps each of those messages to its key. Source: the lines in the Used by column above
 
 ```properties
 # configuration.properties: create it in the project root and never commit it.
@@ -410,6 +425,26 @@ Source: `src/main/java/com/testinium/runners/CukesRunner.java:L48` (`tags = "@Sm
 [Run a Tag Subset](#run-a-tag-subset)); `src/main/resources/features/Crm.feature:L9`, `L16`, `L26`, `L31` (the four
 scenario headings; the `L16` outline has a single `Examples` row, `L24`)
 
+> **Note (classpath file):** the `java ... JUnitCore` commands in the rest of this README, in
+> [Run a Tag Subset](#run-a-tag-subset), [Rerun Failed Scenarios](#rerun-failed-scenarios), [Dry Run](#dry-run),
+> [Report Output](#report-output) and [HTML Report](#html-report), reuse `target/classes` and `target/classpath.txt`
+> from the `mvn` command above. Every `mvn clean ...` command deletes the whole `target/` directory, including
+> `target/classpath.txt`: the `mvn -B clean test-compile` of [Build](#build), the `mvn clean test` of
+> [Configured Maven Command](#configured-maven-command) and the Maven form in Run a Tag Subset. The full reset in
+> [Build](#build) (`git clean -fdq -- target`) deletes it too, because the file is untracked. The `java` commands then
+> stop with `cat: target/classpath.txt: No such file or directory` and
+> `Error: Could not find or load main class org.junit.runner.JUnitCore` (exit status 1), because JUnit reaches the
+> classpath only through that file. Run the `mvn -B clean compile dependency:build-classpath ...` command above again
+> before them, from the project root. That command runs `clean` as well, so it also deletes `target/rerun.txt` and the
+> reports of the last run: run it before a `CukesRunner` run, not between that run and its rerun, see
+> [Rerun Failed Scenarios](#rerun-failed-scenarios).
+> Source: `pom.xml:L71-L75` (JUnit 4.13.2, listed in `target/classpath.txt` by the `mvn` command above); Maven 3.9.16
+> [`components.xml:L80-L82`](https://github.com/apache/maven/blob/maven-3.9.16/maven-core/src/main/resources/META-INF/plexus/components.xml#L80-L82)
+> (binds maven-clean-plugin 3.2.0 to `clean`) and that plugin's
+> [`CleanMojo.java:L61-L62`](https://github.com/apache/maven-clean-plugin/blob/maven-clean-plugin-3.2.0/src/main/java/org/apache/maven/plugins/clean/CleanMojo.java#L61-L62)
+> (deletes `${project.build.directory}`, which is `target/`); after that `mvn` command, `git clean -nd -- target`
+> lists `target/classpath.txt` (untracked)
+
 ### Configured Maven Command
 
 This is the command that the Jenkins `Run tests` stage executes.
@@ -462,6 +497,27 @@ Source: the 23 scenarios are the `@SalesManager` `Examples` rows of `Login.featu
 `src/main/resources/features/Login.feature:L23-L35`, `L68-L72`, `L94`, `L113`, `L133-L135`), and the 87 are the Runs
 total of the scenario index in [Gherkin Feature Catalog](#gherkin-feature-catalog).
 
+Tags match exactly, including case: `@Logout` selects nothing, because the catalogued tag is `@LogOut`. An expression
+that selects no scenario, such as a misspelled tag or the wrong case, is not an error: JUnit prints `OK (0 tests)` and
+the exit status is 0. The run still rewrites the configured report artifacts. `target/rerun.txt` becomes empty, so the
+failures of the earlier run can no longer be rerun, and `target/cucumber.json` holds `[]`. The console logs
+`INFO: Unexpected error` and `net.masterthought.cucumber.ValidationException: Passed files have no features!` with a
+stack trace, and `target/cucumber/cucumber-html-reports/overview-features.html` becomes an error page. Check each tag
+against the table above. A [Dry Run](#dry-run) with the same expression shows how many scenarios it selects without
+opening a browser, but it rewrites the same artifacts.
+Source: tag-expressions 4.1.0 (resolved by cucumber-core 7.2.3)
+[`TagExpressionParser.java:L194-L196`](https://github.com/cucumber/tag-expressions/blob/v4.1.0/java/src/main/java/io/cucumber/tagexpressions/TagExpressionParser.java#L194-L196)
+(a tag literal matches with `List.contains`, that is exact string equality);
+`src/main/resources/features/Logout.feature:L1`; `src/main/java/com/testinium/runners/CukesRunner.java:L40-L43` (the
+four report plugins); cucumber-reporting 5.6.1, resolved by the `reporting-plugin` 7.2.0 of `pom.xml:L66-L70`:
+[`ReportParser.java:L77-L80`](https://github.com/damianszczepanik/cucumber-reporting/blob/cucumber-reporting-5.6.1/src/main/java/net/masterthought/cucumber/ReportParser.java#L77-L80)
+(throws when the JSON holds no feature),
+[`ReportBuilder.java:L112-L113`](https://github.com/damianszczepanik/cucumber-reporting/blob/cucumber-reporting-5.6.1/src/main/java/net/masterthought/cucumber/ReportBuilder.java#L112-L113)
+and [`L260-L263`](https://github.com/damianszczepanik/cucumber-reporting/blob/cucumber-reporting-5.6.1/src/main/java/net/masterthought/cucumber/ReportBuilder.java#L260-L263)
+(logs `Unexpected error` and writes the error page) and
+[`ErrorPage.java:L24-L25`](https://github.com/damianszczepanik/cucumber-reporting/blob/cucumber-reporting-5.6.1/src/main/java/net/masterthought/cucumber/generators/ErrorPage.java#L24-L25)
+(the error page is `ReportBuilder.HOME_PAGE`, `overview-features.html`)
+
 To run one feature file, override `cucumber.features` as well. The annotation's `@Smoke` filter still applies unless
 you also override the tags:
 
@@ -478,11 +534,15 @@ java -Dcucumber.features=src/main/resources/features/Notes.feature -Dcucumber.fi
 java -cp "target/classes:$(cat target/classpath.txt)" org.junit.runner.JUnitCore com.testinium.runners.FailedTestRunner
 ```
 
-Run it after a `CukesRunner` run, from the project root, and without `mvn clean` in between, because `clean` deletes
-`target/rerun.txt`. From the IDE, right-click `FailedTestRunner`, then **Run**. `mvn test -Dtest=FailedTestRunner`
-stops with `No tests were executed!`, because Surefire does not see the class.
+Run it after a `CukesRunner` run, from the project root, and without `mvn clean` or a [dry run](#dry-run) from the
+project root in between: `clean` deletes `target/classpath.txt`
+(see [Run from the Command Line](#run-from-the-command-line)) and `target/rerun.txt`, and a dry run rewrites
+`target/rerun.txt` without the earlier failures, so `FailedTestRunner` then reports `OK (0 tests)`. From the IDE,
+right-click `FailedTestRunner`, then **Run**. `mvn test -Dtest=FailedTestRunner` stops with `No tests were executed!`,
+because Surefire does not see the class.
 Source: `src/main/java/com/testinium/runners/CukesRunner.java:L42`; `src/main/java/com/testinium/runners/FailedTestRunner.java:L35-L40`;
-`src/main/java/com/testinium/runners/FailedTestRunner.java:L30-L33`
+`src/main/java/com/testinium/runners/FailedTestRunner.java:L30-L33`; the dry-run effect is sourced in
+[Dry Run](#dry-run)
 
 ### Dry Run
 
@@ -503,6 +563,47 @@ cucumber-junit 7.3.4 (the effective version, `pom.xml:L76-L80`) records an `Unde
 [`JUnitReporter.java:L121-L123`](https://github.com/cucumber/cucumber-jvm/blob/v7.3.4/junit/src/main/java/io/cucumber/junit/JUnitReporter.java#L121-L123)
 and builds its message, with the snippet, in
 [`UndefinedStepException.java:L16-L41`](https://github.com/cucumber/cucumber-jvm/blob/v7.3.4/junit/src/main/java/io/cucumber/junit/UndefinedStepException.java#L16-L41)
+
+**A dry run replaces the reports and the rerun list.** It is a normal `CukesRunner` run with all four configured
+plugins, so it rewrites `target/cucumber-reports.html`, `target/cucumber.json` and `target/rerun.txt` and regenerates
+the PrettyReports site in `target/cucumber/` for the scenarios it selects, see [Report Artifacts](#report-artifacts).
+Cucumber records every matched step of a dry run as `passed`, and no report marks the run as a dry run: with every
+feature selected, `target/cucumber.json` holds 87 scenarios and 469 steps, all `passed`, and both HTML reports show
+every scenario as passed. `target/rerun.txt` lists only scenarios whose result is neither `PASSED` nor `SKIPPED`, so a
+dry run drops every earlier failure from it. With every step matched, as in the current features, it writes the file
+empty, and a following `FailedTestRunner` run reports `OK (0 tests)`. If such a `cucumber.json` is in the Jenkins
+workspace at the `Generate report` stage, the `**/*.json` pattern publishes it as a run in which everything passed.
+
+Do not dry-run between a run and its [rerun](#rerun-failed-scenarios), or before you publish or share that run's
+reports. Copy the reports out of `target/` first, or start the dry run from another working directory: the plugin
+paths and the `features` path of `CukesRunner` are relative to the working directory, so pass the features and the
+classpath as absolute paths. Run this from the project root:
+
+```bash
+P="$PWD"; D="$(mktemp -d)"
+(cd "$D" && java -Dcucumber.execution.dry-run=true -Dcucumber.filter.tags="@Smoke or not @Smoke" -Dcucumber.features="$P/src/main/resources/features" -cp "$P/target/classes:$(cat "$P/target/classpath.txt")" org.junit.runner.JUnitCore com.testinium.runners.CukesRunner)
+```
+
+It also reports `OK (87 tests)`, writes its four artifacts under `$D/target/`, and leaves every file under the project's
+`target/` unchanged. It needs a POSIX shell for `mktemp` and the `( )` subshell. In PowerShell, copy the reports out of
+`target/` before a dry run instead.
+Source: `src/main/java/com/testinium/runners/CukesRunner.java:L39-L45` (the four plugin paths and the features path);
+`Jenkins:L15`; cucumber-core 7.2.3
+[`TestCase.java:L57`](https://github.com/cucumber/cucumber-jvm/blob/v7.2.3/core/src/main/java/io/cucumber/core/runner/TestCase.java#L57)
+(a dry run selects the `DRY_RUN` mode),
+[`ExecutionMode.java:L15-L21`](https://github.com/cucumber/cucumber-jvm/blob/v7.2.3/core/src/main/java/io/cucumber/core/runner/ExecutionMode.java#L15-L21)
+(a dry-run step returns `PASSED`),
+[`PickleStepDefinitionMatch.java:L72-L74`](https://github.com/cucumber/cucumber-jvm/blob/v7.2.3/core/src/main/java/io/cucumber/core/runner/PickleStepDefinitionMatch.java#L72-L74)
+(without running the step definition),
+[`RerunFormatter.java:L39-L52`](https://github.com/cucumber/cucumber-jvm/blob/v7.2.3/core/src/main/java/io/cucumber/core/plugin/RerunFormatter.java#L39-L52)
+(records a scenario only if its status is not OK, and writes the list when the run finishes) and
+[`PluginFactory.java:L192-L201`](https://github.com/cucumber/cucumber-jvm/blob/v7.2.3/core/src/main/java/io/cucumber/core/plugin/PluginFactory.java#L192-L201)
+(a plugin path becomes a `File`, which Java resolves against the working directory); cucumber-plugin 7.2.3
+[`Status.java:L32-L34`](https://github.com/cucumber/cucumber-jvm/blob/v7.2.3/plugin/src/main/java/io/cucumber/plugin/event/Status.java#L32-L34)
+(OK means `PASSED` or `SKIPPED`). After a failing `@Smoke` run, the first command of this section changes
+`target/rerun.txt` from `file:src/main/resources/features/Crm.feature:9:24:26:31` to 0 bytes and writes a
+`target/cucumber.json` of 10 features, 87 scenarios and 469 steps, all `passed`; `grep -ciE 'dry.?run'` then finds no
+match in `target/cucumber-reports.html`, `target/cucumber.json` or `target/cucumber/cucumber-html-reports/*.html`
 
 ### Report Output
 
@@ -1128,8 +1229,11 @@ flowchart LR
    `PATH`. JDK and Maven installations managed by Jenkins are not applied, because the script has no `tool` step.
    Source: `Jenkins:L1-L17`; `Jenkins:L8`, `L10`
 2. Install Chrome or Firefox on the agent. `Driver` starts a regular, non-headless browser and maximizes its window,
-   so a Linux agent needs a display (for example a virtual X server). Source:
-   `src/main/java/com/testinium/utilities/Driver.java:L90-L101`
+   so a Linux agent needs a display (for example a virtual X server). For Chrome, the agent must also run as a
+   non-root user: `Driver` passes no options, and Chrome refuses to start as root without `--no-sandbox`, so a
+   display alone does not fix a root agent; [Troubleshooting](#troubleshooting) lists the messages. Source:
+   `src/main/java/com/testinium/utilities/Driver.java:L90-L101`; the root and display failures are sourced in
+   [Troubleshooting](#troubleshooting)
 3. Create the job: **New Item**, then **Pipeline**. Either paste the contents of `Jenkins` as the *Pipeline script*,
    or choose *Pipeline script from SCM* and set *Script Path* to `Jenkins` (the file is not named `Jenkinsfile`).
    Source: `Jenkins:L1-L17` (the pipeline script at the repository root; `git ls-files` lists `Jenkins` and no
@@ -1211,7 +1315,16 @@ flowchart LR
 | `target/cucumber-reports.html` | `html:target/cucumber-reports.html` | Single-file Cucumber HTML report | Browser | `src/main/java/com/testinium/runners/CukesRunner.java:L40` |
 | `target/cucumber.json` | `json:target/cucumber.json` | Cucumber JSON results | Jenkins `cucumber` step (`fileIncludePattern: '**/*.json'`), when the file is in the workspace at the `Generate report` stage | `src/main/java/com/testinium/runners/CukesRunner.java:L41`; `Jenkins:L15` |
 | `target/rerun.txt` | `rerun:target/rerun.txt` | `path:line` of each failed scenario | `FailedTestRunner` | `src/main/java/com/testinium/runners/CukesRunner.java:L42`; `src/main/java/com/testinium/runners/FailedTestRunner.java:L38` |
-| `target/cucumber/` | `me.jvt.cucumber.report.PrettyReports:target/cucumber` | PrettyReports HTML site (`cucumber-html-reports/`) | Browser | `src/main/java/com/testinium/runners/CukesRunner.java:L43` |
+| `target/cucumber/` | `me.jvt.cucumber.report.PrettyReports:target/cucumber` | PrettyReports HTML site (`cucumber-html-reports/`). A run adds and overwrites pages but deletes none, so pages of earlier runs stay, unlinked from the current overview, see [HTML Report](#html-report) | Browser | `src/main/java/com/testinium/runners/CukesRunner.java:L43`; upstream sources in [HTML Report](#html-report) |
+
+Every `CukesRunner` run writes these artifacts relative to its working directory, and a [dry run](#dry-run) is no
+exception: started from the project root, it rewrites `target/cucumber-reports.html` and `target/cucumber.json`, and
+regenerates the PrettyReports overview in `target/cucumber/`, with a result in which every selected scenario with
+matched steps passed, and it rewrites `target/rerun.txt` without the earlier failures, empty while every step matches.
+Copy the reports of a real run out of `target/` before a dry run, or start the dry run from another directory as shown
+in [Dry Run](#dry-run).
+Source: `src/main/java/com/testinium/runners/CukesRunner.java:L39-L44`; the working-directory resolution and the
+dry-run effect are sourced in [Dry Run](#dry-run)
 
 > **Sensitive report data.** Treat the HTML, JSON and PrettyReports output as confidential. Cucumber writes every
 > Scenario Outline step with the cells of its `Examples` row substituted into the step text, the JSON report stores
@@ -1227,12 +1340,17 @@ flowchart LR
 >
 > - **Access.** Restrict who can view the Jenkins job and its builds: the Cucumber Reports plugin copies the JSON files
 >   into each build's directory and generates the report there. Restrict shared copies of the reports the same way.
-> - **Redaction.** Remove account values and page data before sharing a report outside the team.
-> - **No commits.** `target/` is tracked, so a run modifies tracked report files. Check `git status --short -- target`
->   and restore the snapshot as described under [Build](#build) before every commit.
-> - **Retention.** Delete local reports when you no longer need them, and give the Jenkins job a build discarder, for
->   example `properties([buildDiscarder(logRotator(numToKeepStr: '10'))])`, so that old builds and their reports are
->   deleted.
+> - **Redaction.** Remove account values and page data before sharing a report outside the team. PrettyReports keeps
+>   the pages of earlier runs in `target/cucumber/cucumber-html-reports/` without a link from the current overview, so
+>   the directory can still hold the account values of an earlier Login or Logout run and, once the failure hook is
+>   registered, the screenshots saved in its `embeddings/` folder. Delete `target/cucumber/`
+>   (`rm -rf target/cucumber`) before the run whose site you share, see [HTML Report](#html-report).
+> - **No commits.** `target/` is tracked, so a run modifies tracked report files, and deleting `target/cucumber/`
+>   deletes 28 of them. Check `git status --short -- target` and restore the snapshot as described under
+>   [Build](#build) before every commit.
+> - **Retention.** Delete local reports when you no longer need them, including the PrettyReports pages of earlier
+>   runs, which no later run removes, and give the Jenkins job a build discarder, for example
+>   `properties([buildDiscarder(logRotator(numToKeepStr: '10'))])`, so that old builds and their reports are deleted.
 >
 > Source: Gherkin 22.0.0 (on the classpath that `mvn dependency:build-classpath` lists)
 > [`PickleCompiler.java:L186`](https://github.com/cucumber/common/blob/gherkin/v22.0.0/gherkin/java/src/main/java/io/cucumber/gherkin/pickles/PickleCompiler.java#L186)
@@ -1252,7 +1370,8 @@ flowchart LR
 > [`CucumberReportPublisher.java:L478-L481`](https://github.com/jenkinsci/cucumber-reports-plugin/blob/cucumber-reports-5.11.0/src/main/java/net/masterthought/jenkins/CucumberReportPublisher.java#L478-L481),
 > [`L516-L517`](https://github.com/jenkinsci/cucumber-reports-plugin/blob/cucumber-reports-5.11.0/src/main/java/net/masterthought/jenkins/CucumberReportPublisher.java#L516-L517)
 > and [`L530`](https://github.com/jenkinsci/cucumber-reports-plugin/blob/cucumber-reports-5.11.0/src/main/java/net/masterthought/jenkins/CucumberReportPublisher.java#L530);
-> `git ls-files -- target | wc -l` prints `45` (tracked snapshot); Jenkins
+> `git ls-files -- target | wc -l` prints `45` (tracked snapshot) and `git ls-files -- target/cucumber | wc -l` prints
+> `28`; the kept PrettyReports pages and embeddings are sourced in [HTML Report](#html-report); Jenkins
 > [`properties` step](https://www.jenkins.io/doc/pipeline/steps/workflow-multibranch/#properties-set-job-properties)
 > (`buildDiscarder`)
 
@@ -1626,6 +1745,45 @@ and [`L143`](https://github.com/cucumber/cucumber-jvm/blob/v7.2.3/core/src/main/
 (the supported `cucumber.features`, `cucumber.filter.tags` and `cucumber.plugin` names; the file defines no
 `cucumber.options` constant)
 
+**PrettyReports keeps the pages of earlier runs.** When a run finishes, PrettyReports passes its results to the
+cucumber-reporting `ReportBuilder`, which writes the overview pages (`overview-*.html`), one `report-feature_*.html`
+page per feature and one `report-tag_*.html` page per tag into `target/cucumber/cucumber-html-reports/`. It overwrites
+pages of the same name and deletes no file. A feature page's name is a number computed from the feature file's path,
+preceded, from the second feature of a run on, by the feature's zero-based position in the run, so a feature that
+another selection moves gets a new page.
+The overview pages link only the pages of the latest run. Pages of features and tags that it did not select, and the
+old pages of moved features, stay in the directory without a link, and those of a Login or Logout run keep the
+account values of their `Examples` rows. To get a site that holds one run only, for example one that you will share,
+delete the directory before that run; the run creates it again:
+
+```bash
+rm -rf target/cucumber
+```
+
+In PowerShell, run `Remove-Item -Recurse -Force target/cucumber`
+([`Remove-Item`](https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.management/remove-item)).
+`target/cucumber/` is part of the tracked snapshot, so the deletion and the new pages show in `git status`; restore
+the snapshot as described under [Build](#build) before you commit.
+Source: `src/main/java/com/testinium/runners/CukesRunner.java:L43`; `pom.xml:L66-L70` (reporting-plugin 7.2.0, which
+resolves `net.masterthought:cucumber-reporting` 5.6.1, as `mvn dependency:tree -Dincludes=net.masterthought` shows);
+reporting-plugin 7.2.0
+[`PrettyReports.java:L62-L75`](https://gitlab.com/jamietanna/cucumber-reporting-plugin/-/blob/v7.2.0/src/main/java/me/jvt/cucumber/report/PrettyReports.java#L62-L75)
+(builds the site when the run finishes); cucumber-reporting 5.6.1
+[`ReportBuilder.java:L80-L126`](https://github.com/damianszczepanik/cucumber-reporting/blob/cucumber-reporting-5.6.1/src/main/java/net/masterthought/cucumber/ReportBuilder.java#L80-L126)
+and [`L188-L207`](https://github.com/damianszczepanik/cucumber-reporting/blob/cucumber-reporting-5.6.1/src/main/java/net/masterthought/cucumber/ReportBuilder.java#L188-L207)
+(copies the static files and writes the pages; the class deletes no file),
+[`ReportResult.java:L48-L51`](https://github.com/damianszczepanik/cucumber-reporting/blob/cucumber-reporting-5.6.1/src/main/java/net/masterthought/cucumber/ReportResult.java#L48-L51)
+and [`Feature.java:L203-L219`](https://github.com/damianszczepanik/cucumber-reporting/blob/cucumber-reporting-5.6.1/src/main/java/net/masterthought/cucumber/json/Feature.java#L203-L219)
+(the page name from the feature's position and path),
+[`Util.java:L80-L83`](https://github.com/damianszczepanik/cucumber-reporting/blob/cucumber-reporting-5.6.1/src/main/java/net/masterthought/cucumber/util/Util.java#L80-L83)
+(the number is computed from the path's hash code),
+[`EmbeddingDeserializer.java:L68-L73`](https://github.com/damianszczepanik/cucumber-reporting/blob/cucumber-reporting-5.6.1/src/main/java/net/masterthought/cucumber/json/deserializers/EmbeddingDeserializer.java#L68-L73)
+(writes each embedded screenshot to a file in `embeddings/`); `git ls-files -- target/cucumber | wc -l` prints `28`.
+After `rm -rf target/cucumber`, a `@Login` run and then a default `@Smoke` run leave 11 pages in
+`cucumber-html-reports/`. The overview pages link the `Crm.feature` page and the `@Smoke` tag page. The other 9, the
+`Login.feature` page and 8 tag pages of the `@Login` run, have no link, and 7 of them hold `username` values of the
+`Login.feature` `Examples` rows
+
 ### Failed-Scenario Rerun List
 
 `target/rerun.txt` is not an execution report. It is a plain-text list that the `rerun:target/rerun.txt` plugin of
@@ -1634,14 +1792,17 @@ example, `file:src/main/resources/features/Crm.feature:9:24` names the scenario 
 Scenario Outline example row at line 24. The file is empty when no scenario failed. Its only consumer is
 `FailedTestRunner`, which reads it through `features = "@target/rerun.txt"`, see
 [Rerun Failed Scenarios](#rerun-failed-scenarios). The plugin is already configured, so no option is needed to produce
-the list. To see which scenarios the next rerun will replay:
+the list. A [dry run](#dry-run) fails no scenario whose steps all match, so a dry run from the project root replaces
+the list of the run before it, and leaves it empty while every step matches. To see which scenarios the next rerun
+will replay:
 
 ```bash
 cat target/rerun.txt
 ```
 
 Source: `src/main/java/com/testinium/runners/CukesRunner.java:L42`;
-`src/main/java/com/testinium/runners/FailedTestRunner.java:L38`; `src/main/resources/features/Crm.feature:L9`, `L24`
+`src/main/java/com/testinium/runners/FailedTestRunner.java:L38`; `src/main/resources/features/Crm.feature:L9`, `L24`;
+the dry-run effect is sourced in [Dry Run](#dry-run)
 
 ### Jira Test Execution
 
@@ -1737,14 +1898,20 @@ The items below are documented as found; this documentation does not change the 
 | Symptom | Cause | Fix | Source |
 |---------|-------|-----|--------|
 | Console shows `File is not found in the ConfigurationReader class`, then a `NullPointerException` in `Driver.getDriver()` | `configuration.properties` is missing, or the JVM working directory is not the project root | Create the file in the project root with the keys in [Create `configuration.properties`](#create-configurationproperties), and set the IDE run configuration's working directory to the project root | `src/main/java/com/testinium/utilities/ConfigurationReader.java:L46`, `L54`; `src/main/java/com/testinium/utilities/Driver.java:L87-L89` |
+| `CucumberException: Failed to instantiate class com.testinium.step_definitions.<class>`, whose last `Caused by` is a `NullPointerException` at `Driver.getDriver(Driver.java:89)`, with no `File is not found in the ConfigurationReader class` line | The file loaded but has no `browser` key; keys are case-sensitive, so `Browser=chrome` leaves `browser` unset. Step classes and Page Objects call `Driver.getDriver()` while Cucumber instantiates them, so the `NullPointerException` from the `switch` is reported two `Caused by` levels down, under `InvocationTargetException`, from a Page Object constructor such as `LoginP.<init>(LoginP.java:26)` or `SessionP.<init>(SessionP.java:28)` | Add `browser=chrome` (lower-case key) | `src/main/java/com/testinium/utilities/Driver.java:L87-L89`; `src/main/java/com/testinium/pages/LoginP.java:L26`; `src/main/java/com/testinium/pages/SessionP.java:L28` |
+| `java.lang.NullPointerException: null value in entry: url=null` | The URL key read by the failing step is missing. The message names Selenium's `url` command parameter, not the configuration key: at `LoginSD.java:50`, `Session.java:49` or `EmployeeStage.java:57` the missing key is `web.table.url`; at `EmployeeStage.java:68`, `:141` or `:215` it is `url` | Add the key that line reads (see [Create `configuration.properties`](#create-configurationproperties)) | `src/main/java/com/testinium/step_definitions/LoginSD.java:L49-L50`; `src/main/java/com/testinium/step_definitions/Session.java:L49`; `src/main/java/com/testinium/step_definitions/EmployeeStage.java:L56-L57`, `L68`, `L141`, `L215`; Selenium 3.141.59 [`RemoteWebDriver.java:L276-L278`](https://github.com/SeleniumHQ/selenium/blob/selenium-3.141.59/java/client/src/org/openqa/selenium/remote/RemoteWebDriver.java#L276-L278) (`get` builds `ImmutableMap.of("url", url)`) and Guava 25.0 [`CollectPreconditions.java:L31-L32`](https://github.com/google/guava/blob/v25.0/guava/src/com/google/common/collect/CollectPreconditions.java#L31-L32) (rejects the null value) |
+| `java.lang.IllegalArgumentException: Keys to send should be a not null CharSequence` at `Session.java:50` or `Session.java:51` | `username` (line 50) or `password` (line 51) is missing, so `sendKeys` receives `null` | Add the missing key with the shared account's value, as in `username=<username>` and `password=<password>` | `src/main/java/com/testinium/step_definitions/Session.java:L50-L51`; Selenium 3.141.59 [`RemoteWebElement.java:L91-L99`](https://github.com/SeleniumHQ/selenium/blob/selenium-3.141.59/java/client/src/org/openqa/selenium/remote/RemoteWebElement.java#L91-L99) |
+| A `java.lang.NullPointerException` with no message, thrown from `ExpectedConditions` inside `FluentWait.until`, at `EmployeeStage.java:82` | `EmplTitle` is missing, so `titleIs(null)` calls `equals` on `null` | Add `EmplTitle=Employees - Odoo` | `src/main/java/com/testinium/step_definitions/EmployeeStage.java:L82-L83`; Selenium 3.141.59 [`ExpectedConditions.java:L57-L65`](https://github.com/SeleniumHQ/selenium/blob/selenium-3.141.59/java/client/src/org/openqa/selenium/support/ui/ExpectedConditions.java#L57-L65) |
 | `ExceptionInInitializerError` caused by `IllegalArgumentException: Malformed \uxxxx encoding.`, then `NoClassDefFoundError: Could not initialize class com.testinium.utilities.ConfigurationReader` | A value in `configuration.properties` contains `\u` not followed by four hex digits, such as an unescaped Windows path; the initializer catches only `IOException` | Write each literal backslash as `\\`, or use `/` in paths | `src/main/java/com/testinium/utilities/ConfigurationReader.java:L49`, `L53`; JDK 8 [`Properties.load(InputStream)`](https://docs.oracle.com/javase/8/docs/api/java/util/Properties.html#load-java.io.InputStream-) (throws `IllegalArgumentException` for a malformed Unicode escape) |
-| `getDriver()` returns `null` and steps fail with a `NullPointerException` | `browser` is neither `chrome` nor `firefox`; the match is case-sensitive | Set `browser=chrome` or `browser=firefox` | `src/main/java/com/testinium/utilities/Driver.java:L89-L102` |
-| The browser does not start; WebDriverManager errors or a `SessionNotCreatedException` about the driver version | WebDriverManager 5.1.0 cannot download the driver (no network or proxy), or it resolves a chromedriver older than the installed Chrome | Allow access to the driver download hosts, and use a Chrome version that the resolved chromedriver supports. Upgrading WebDriverManager would require a `pom.xml` change | `pom.xml:L42-L46`; `src/main/java/com/testinium/utilities/Driver.java:L91` |
+| `getDriver()` returns `null` and steps fail with a `NullPointerException` | `browser` is neither `chrome` nor `firefox` (the match is case-sensitive), or the value carries trailing whitespace, which `java.util.Properties` keeps (`chrome ` does not match) | Set `browser=chrome` or `browser=firefox` with nothing after the value (remove trailing spaces or tabs) | `src/main/java/com/testinium/utilities/Driver.java:L87-L102`; JDK 8 [`Properties.load(Reader)`](https://docs.oracle.com/javase/8/docs/api/java/util/Properties.html#load-java.io.Reader-) (keeps all remaining characters on the line) |
+| The browser does not start; WebDriverManager errors, or the console shows `Starting ChromeDriver 114.0.5735.90` followed by `SessionNotCreatedException: session not created: This version of ChromeDriver only supports Chrome version 114` | WebDriverManager 5.1.0 cannot download the driver (no network or proxy), or it resolves a chromedriver older than the installed Chrome: it queries the legacy chromedriver index, which has no release for Chrome 115 or later (`LATEST_RELEASE_153` returns 404 and `LATEST_RELEASE` is `114.0.5735.90`), so it falls back to chromedriver 114.0.5735.90 (for example with Chrome 153). On an agent that runs as root, Chrome exits before this version check; see the CI agent row below | Allow access to the driver download hosts, and use a Chrome version that the resolved chromedriver supports. Or place a chromedriver matching the installed Chrome (from [Chrome for Testing](https://googlechromelabs.github.io/chrome-for-testing/)) at `<cache>/chromedriver/linux64/<version>/chromedriver`, where `<cache>` is `~/.cache/selenium` or the `-Dwdm.cachePath` value, and add the JVM option `-Dwdm.chromeDriverVersion=<version>` with the same `<version>`; the console then shows `Starting ChromeDriver <version>`. Upgrading WebDriverManager would require a `pom.xml` change | `pom.xml:L42-L46`; `src/main/java/com/testinium/utilities/Driver.java:L91-L92`; WebDriverManager 5.1.0 [`webdrivermanager.properties:L1`](https://github.com/bonigarcia/webdrivermanager/blob/webdrivermanager-5.1.0/src/main/resources/webdrivermanager.properties#L1) (`wdm.cachePath=~/.cache/selenium`) and [`L23`](https://github.com/bonigarcia/webdrivermanager/blob/webdrivermanager-5.1.0/src/main/resources/webdrivermanager.properties#L23) (`wdm.chromeDriverUrl=https://chromedriver.storage.googleapis.com/`) |
 | `firefox` is configured but Firefox does not start | The Firefox branch provisions chromedriver, not geckodriver | Put a geckodriver matching your Firefox on the `PATH`, or use `browser=chrome` | `src/main/java/com/testinium/utilities/Driver.java:L96-L97` |
-| The browser does not start on a CI agent | No display for the non-headless browser | Run the agent with a desktop session or a virtual display | `src/main/java/com/testinium/utilities/Driver.java:L92-L93`, `L98-L99` |
+| The browser does not start on a CI agent or in a container: `WebDriverException: unknown error: Chrome failed to start: exited abnormally.` with `(unknown error: DevToolsActivePort file doesn't exist)` (chromedriver 114), or `SessionNotCreatedException: session not created: Chrome instance exited` (newer chromedriver); the chromedriver log shows `Running as root without --no-sandbox is not supported` or `Missing X server or $DISPLAY` | The code creates the driver with no options, so Chrome starts non-headless, which needs a display, and without `--no-sandbox`, which Chrome requires when it runs as root. Chrome reports the root error before it checks the display, so a virtual display alone does not fix a root agent; without a display, a non-root user (or root with `--no-sandbox`) still gets `Missing X server or $DISPLAY` | Run the agent as a non-root user with a desktop session or a virtual display (such as Xvfb). To get the chromedriver log, add the JVM options `-Dwebdriver.chrome.verboseLogging=true -Dwebdriver.chrome.logfile=chromedriver.log` | `src/main/java/com/testinium/utilities/Driver.java:L92-L93`, `L98-L99`; Selenium 3.141.59 [`ChromeDriverService.java:L47-L54`](https://github.com/SeleniumHQ/selenium/blob/selenium-3.141.59/java/client/src/org/openqa/selenium/chrome/ChromeDriverService.java#L47-L54) (the two log properties) |
 | `mvn test` prints `No tests to run.` | The runners compile from `src/main/java`, and Surefire runs only compiled test classes from `target/test-classes`, which does not exist (Known Findings item 6) | Use [Run from IntelliJ](#run-from-intellij) or [Run from the Command Line](#run-from-the-command-line) | `pom.xml:L17-L30`; Surefire 3.0.0-M5 [`AbstractSurefireMojo.java:L238-L243`](https://github.com/apache/maven-surefire/blob/surefire-3.0.0-M5/maven-surefire-common/src/main/java/org/apache/maven/plugin/surefire/AbstractSurefireMojo.java#L238-L243) and [`L1108-L1116`](https://github.com/apache/maven-surefire/blob/surefire-3.0.0-M5/maven-surefire-common/src/main/java/org/apache/maven/plugin/surefire/AbstractSurefireMojo.java#L1108-L1116) |
-| `FailedTestRunner` reports `OK (0 tests)` | `target/rerun.txt` is empty because the last `CukesRunner` run had no failed scenario | Nothing to rerun; run `CukesRunner` again first if you expected failures | `src/main/java/com/testinium/runners/FailedTestRunner.java:L38`; `src/main/java/com/testinium/runners/CukesRunner.java:L42` |
+| `FailedTestRunner` reports `OK (0 tests)` | `target/rerun.txt` is empty because the last `CukesRunner` run had no failed scenario. That run can also be a [dry run](#dry-run) or a tag run that selected no scenario, started from the project root after the failing run: both rewrite the file without the earlier failures | Nothing to rerun; run `CukesRunner` again first if you expected failures, and do not dry-run between a run and its rerun | `src/main/java/com/testinium/runners/FailedTestRunner.java:L38`; `src/main/java/com/testinium/runners/CukesRunner.java:L42`; the dry-run and zero-match effects are sourced in [Dry Run](#dry-run) and [Run a Tag Subset](#run-a-tag-subset) |
 | `FailedTestRunner` fails with `CucumberException: Failed to parse 'target/rerun.txt'`, caused by `java.nio.file.NoSuchFileException: target/rerun.txt` | The rerun file does not exist: no `CukesRunner` run yet, `mvn clean` deleted `target/`, or the working directory is not the project root | Run `CukesRunner` from the project root first, and do not run `mvn clean` before the rerun | `src/main/java/com/testinium/runners/FailedTestRunner.java:L38`; cucumber-core 7.2.3 [`CucumberOptionsAnnotationParser.java:L134-L136`](https://github.com/cucumber/cucumber-jvm/blob/v7.2.3/core/src/main/java/io/cucumber/core/options/CucumberOptionsAnnotationParser.java#L134-L136) (reads the `@` path) and [`OptionsFileParser.java:L24-L37`](https://github.com/cucumber/cucumber-jvm/blob/v7.2.3/core/src/main/java/io/cucumber/core/options/OptionsFileParser.java#L24-L37) (wraps the read failure) |
+| A `java ... JUnitCore` command stops with `cat: target/classpath.txt: No such file or directory` and `Error: Could not find or load main class org.junit.runner.JUnitCore` | `target/classpath.txt` is missing: it was never built, a `mvn clean ...` command or the full reset `git clean -fdq -- target` deleted it, or the working directory is not the project root. JUnit reaches the classpath only through that file | From the project root, run `mvn -B clean compile dependency:build-classpath -Dmdep.outputFile=target/classpath.txt`, then the `java` command again, see [Run from the Command Line](#run-from-the-command-line) | `pom.xml:L71-L75`; maven-clean-plugin 3.2.0 [`CleanMojo.java:L61-L62`](https://github.com/apache/maven-clean-plugin/blob/maven-clean-plugin-3.2.0/src/main/java/org/apache/maven/plugins/clean/CleanMojo.java#L61-L62) (deletes `target/`) |
+| A tag run prints `OK (0 tests)`, logs `net.masterthought.cucumber.ValidationException: Passed files have no features!`, and `target/cucumber/cucumber-html-reports/overview-features.html` shows an error page | The `cucumber.filter.tags` expression selects no scenario, for example a misspelled tag or the wrong case (`@Logout` instead of `@LogOut`). The run leaves `target/cucumber.json` as `[]` and `target/rerun.txt` empty | Use each tag exactly as listed in [Run a Tag Subset](#run-a-tag-subset), and check the selection first with a [Dry Run](#dry-run), which also rewrites the report artifacts | tag-expressions 4.1.0 [`TagExpressionParser.java:L194-L196`](https://github.com/cucumber/tag-expressions/blob/v4.1.0/java/src/main/java/io/cucumber/tagexpressions/TagExpressionParser.java#L194-L196) (exact match); cucumber-reporting 5.6.1 [`ReportParser.java:L77-L80`](https://github.com/damianszczepanik/cucumber-reporting/blob/cucumber-reporting-5.6.1/src/main/java/net/masterthought/cucumber/ReportParser.java#L77-L80) (no feature in the JSON) |
 | No screenshot is attached to a failed scenario | The hook is not registered (Known Findings item 3) | Known finding; see [Known Findings](#known-findings) | `src/main/java/com/testinium/step_definitions/Hooks.java:L5`, `L45-L52` |
 
 ### THE END
