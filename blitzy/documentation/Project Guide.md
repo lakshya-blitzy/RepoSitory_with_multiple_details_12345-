@@ -22,7 +22,7 @@ pie showData title Completion 89.7%
 
 ## 1.3 Key Accomplishments
 
-- ✅ Javadoc on all 25 classes and 286 declarations, placed before annotations; no executable line changed.
+- ✅ Javadoc on all 25 classes and 286 declarations, placed before annotations; compiled classes are byte-identical to the original.
 - ✅ `javac -Xdoclint:all` and `javadoc` exit 0; 2 "no comment" warnings remain, both on local variables.
 - ✅ Every step still binds: Cucumber dry run `OK (87 tests)` across 10 features.
 - ✅ README has 12 sections and a full Table of Contents; all 157 internal links resolve and all 4 Mermaid diagrams render.
@@ -37,7 +37,7 @@ pie showData title Completion 89.7%
 
 | Issue | Impact | Owner | ETA |
 |---|---|---|---|
-| JSDoc/`server.js` request delivered as Javadoc on Java sources awaits requester confirmation (Section 5.2, D1) | The deliverable's form rests on an interpretation | Requester | 0.5 h |
+| JSDoc/`server.js` request delivered as Javadoc on Java sources; the requester's PR feedback asked for no change but did not state the reading explicitly (Section 5.2, D1) | The deliverable's form rests on an interpretation | Requester | 0.5 h |
 | README setup steps, Troubleshooting messages and locator descriptions never exercised against the real Odoo/Upgenix ERP | Accuracy against the live system is unproven | QA engineer | 6 h |
 | Jenkins job guidance (plugins, Secret-file credentials, report publishing) never run on a Jenkins server | CI instructions are unproven in practice | DevOps | 4 h |
 | GitHub rendering of the 4 Mermaid diagrams, badges and anchors not checked | Presentation or navigation defects possible | Maintainer | 1 h |
@@ -102,16 +102,17 @@ pie showData title Completion 89.7%
 
 # 3. Test Results
 
-The project has no unit-test suite (`src/test` does not exist) and no coverage tooling. Verification of a documentation change therefore rests on the checks below, each run against the delivered tree (commit `b50b03d`) with results observed first-hand.
+The project has no unit-test suite (`src/test` does not exist) and no coverage tooling. Verification of a documentation change therefore rests on the checks below, each run against the delivered tree at commit `6a1518c` with results observed first-hand.
 
 | Area / Category | Framework | Tests | Passed | Failed | Coverage | What This Proves |
 |---|---|---|---|---|---|---|
-| Javadoc well-formedness | JDK 8 `javac -Xdoclint:all` | 1 compile of 25 sources | 1 | 0 | 2 "no comment" warnings, both on local variables (`ConfigurationReader.java:46`, `:53`) | Every added doc comment is syntactically valid and every documentable declaration has one |
-| API documentation generation | JDK 8 `javadoc` with dependency classpath | 1 run | 1 | 0 | 37 pages for 25 classes, empty diagnostic output | The in-source Javadoc renders to HTML without errors or warnings |
-| Gherkin step binding | Cucumber 7.2.3 dry run via JUnit 4 `JUnitCore` | 87 scenarios | 87 | 0 | 10 of 10 feature files | Comment-only edits left every step bound to its `@Given/@When/@Then` method |
+| Javadoc well-formedness | JDK 8 `javac -Xdoclint:all` | 1 compile of 25 sources | 1 | 0 | 0 errors; 2 "no comment" warnings, both on local variables (`ConfigurationReader.java:46`, `:53`) | Every added doc comment is syntactically valid and every documentable declaration has one |
+| API documentation generation | JDK 8 `javadoc` with dependency classpath | 1 run | 1 | 0 | 47 HTML pages including all 25 class pages; empty diagnostic output | The in-source Javadoc renders to HTML without errors or warnings |
+| Comment-only change | JDK 8 `javac -g:none`, SHA-256 per class file | 25 classes | 25 | 0 | Original upload `c16cae2` vs `6a1518c`: every class file byte-identical | The Javadoc changed no executable statement, signature or annotation |
+| Gherkin step binding | Cucumber 7.2.3 dry run via JUnit 4 `JUnitCore` | 87 scenarios | 87 | 0 | 10 of 10 feature files; 0 undefined, ambiguous or pending steps | Every step is still bound to its `@Given/@When/@Then` method |
 | Tag-selection counts quoted in the README | Cucumber dry run | 6 tag expressions | 6 | 0 | Default `@Smoke` 4, `@Login` 48, `@LogOut` 12, `@Login and @SalesManager` 23, `@Smoke or @Calendar` 8, `not @LogOut` 75 | The README's documented selections and counts are exact |
-| Build gate | Maven 3.9.16 offline (`clean test-compile`, then `test`) | 2 goals | 2 | 0 | 25 sources compiled for Java 8; Surefire "No tests to run." | The project builds exactly as before; only the pre-existing duplicate-dependency and encoding warnings appear |
-| README diagrams | Mermaid CLI (`mmdc`) | 4 diagrams | 4 | 0 | Architecture, Jenkins pipeline, login sequence, failure-hook sequence | All diagrams parse and render with no syntax-error output |
+| Build gate | Maven 3.9.16 offline (`clean test-compile`, then `test`) | 2 goals | 2 | 0 | 25 sources compiled for Java 8; Surefire "No tests to run." | The project builds as before; only the pre-existing duplicate-dependency and platform-encoding warnings appear |
+| README diagrams | Mermaid CLI (`mmdc` 11.16.0) | 4 diagrams | 4 | 0 | Architecture, Jenkins pipeline, login sequence, failure-hook sequence | All diagrams parse and render with no syntax-error output |
 | README navigation | Scripted GitHub-slug anchor check | 157 internal links | 157 | 0 | 63 headings, 61 distinct targets | Every Table of Contents and cross-reference link lands on a heading |
 
 **Not Covered**
@@ -146,14 +147,14 @@ The framework has no server, API or UI of its own; its runtime is the Cucumber s
 | 1 | Class-level Javadoc on every Java class (R1) | AAP 0.7.1: 25 / 25 | ✅ Pass | 100% | 25 classes; doclint reports no undocumented declaration |
 | 2 | Javadoc on every constructor, field and method (R1) | AAP 0.7.1: 100% | ✅ Pass | 100% | 286 / 286 declarations; the only doclint warnings are 2 local variables, which Javadoc cannot document |
 | 3 | Tags and placement | AAP 0.7.2: `@param`/`@return`/`@throws` match signatures; Javadoc before annotations | ✅ Pass | 100% | doclint clean; every annotated declaration carries its block above the annotation |
-| 4 | Documentation-only source change | AAP 0.8.2 | ✅ Pass | 100% | Java diff +1,524 / −0 lines, 0 non-comment lines changed; `pom.xml`, `Jenkins`, features, `target/` untouched |
+| 4 | Documentation-only source change | AAP 0.8.2 | ✅ Pass | 100% | Java diff +1,524 / −0 lines, all comment lines; 25 / 25 compiled classes byte-identical to `c16cae2`; `pom.xml`, `Jenkins`, features, `target/` untouched |
 | 5 | README content areas: setup, API, deployment, inline explanations | AAP 0.7.1: 4 / 4 | ✅ Pass | 100% | `README.md` sections Setup & Configuration, API Reference, Deployment & CI, Inline Code Explanations |
 | 6 | Configuration keys documented with placeholders | AAP 0.7.1 / 0.10 | ✅ Pass | 6 / 6 | `browser`, `web.table.url`, `username`, `password`, `url`, `EmplTitle` (`README.md:L336-L356`) |
 | 7 | Gherkin feature catalog | AAP 0.7.1: 10 / 10 | ✅ Pass | 100% | 10 files, 34 scenarios, 87 executable, confirmed by dry run |
 | 8 | Mermaid diagrams | AAP 0.7.3: ≥ 3 | ✅ Pass | 4 / 3 | Architecture, Jenkins pipeline, login sequence, failure-hook sequence; all render |
 | 9 | Runnable examples per execution mode | AAP 0.7.3 | ✅ Pass | 100% | Full suite, tag subset, rerun, dry run, report output; executed as written |
 | 10 | Source citations for technical claims | AAP 0.9 / 0.10 | ✅ Pass | 100% | All in-repository `path:line` citations fall within their files |
-| 11 | No secrets in documentation | AAP 0.10 | ✅ Pass | 100% | No credential values in added README or Javadoc lines |
+| 11 | No secrets in documentation | AAP 0.10 | ✅ Pass | 100% | No credential values in added README or Javadoc lines; no `configuration.properties` committed |
 | 12 | Discrepancies surfaced, build unchanged | AAP 0.10 / 0.9 | ✅ Pass | 100% | 8 Known Findings; Maven gate BUILD SUCCESS |
 
 ## 5.2 AAP & Rule Divergences and Gaps
@@ -168,7 +169,7 @@ The framework has no server, API or UI of its own; its runtime is the Cucumber s
 | D6 | Cite every claim as `path:line` (AAP 0.9, 0.10); no rule on citation stability | Javadoc reflowed inside original line spans; ~330 line-level citations | Keep citations valid as Javadoc landed | Citations drift on future code edits | Re-check citations when cited files change |
 | D7 | Verbatim scenario example and complete catalog (AAP 0.7.3) under no-secrets rule (0.10) — **Sanctioned** | Account rows elided; catalog lists `Examples` metadata, not values; single index table | Feature files and `EmployeeP` hold account data | No credentials exposed | None |
 
-**D1 — JSDoc on `server.js` delivered as Javadoc.** The request asked for JSDoc on `server.js` functions. The repository has no `server.js` and no JavaScript; `pom.xml:L7-L14` defines a single Java 8 Maven module. JSDoc cannot apply to Java, so the AAP read the request as Javadoc on the Java classes and flagged that reading for confirmation. Javadoc now covers all 25 classes, for example `Driver.getDriver()` at `src/main/java/com/testinium/utilities/Driver.java:L46-L80`. Nothing is lost if the reading is right. The requester must confirm it; if a Node.js service was meant, the request belongs to another repository.
+**D1 — JSDoc on `server.js` delivered as Javadoc.** The request asked for JSDoc on `server.js` functions. The repository has no `server.js` and no JavaScript; `pom.xml:L7-L14` defines a single Java 8 Maven module. JSDoc cannot apply to Java, so the AAP read the request as Javadoc on the Java classes and flagged that reading for confirmation. Javadoc now covers all 25 classes, for example `Driver.getDriver()` at `src/main/java/com/testinium/utilities/Driver.java:L46-L80`. The requester's PR feedback ("ignore and do nothing no change is needed here", then "ignore this refinement call") asked for no change, so the PR stands byte-identical, but it never states the reading outright. The requester should confirm it; if a Node.js service was meant, that request belongs to another repository.
 
 **D2 — Execution commands use JUnitCore rather than Maven.** AAP 0.5.2 and 0.7.3 asked for Maven commands per execution mode. In this layout Maven cannot run a scenario: the runners compile from `src/main/java`, while Surefire scans only `target/test-classes` (`pom.xml:L17-L30`), so `mvn test` prints `No tests to run.` and `mvn test -Dtest=FailedTestRunner` fails with `No tests were executed!`. Changing `pom.xml` was forbidden (AAP 0.8.2), and accuracy (0.7.2) ruled out documenting commands that do nothing. `README.md:L378-L467` states this and supplies JUnitCore and IDE commands for every mode. If Maven-driven execution is wanted, moving the runners to `src/test/java` is a separate code change.
 
@@ -195,7 +196,7 @@ Risks 3–8 are pre-existing properties of the framework that the documentation 
 | 5 | Jenkins `mvn clean test` executes zero scenarios yet reports BUILD SUCCESS; `testFailureIgnore=true` also hides harness errors | Operational | High | High | Move runners to `src/test/java` or reconfigure Surefire in a follow-up; meanwhile run suites with JUnitCore as documented | Open (documented) |
 | 6 | WebDriverManager 5.1.0 resolves chromedriver 114 for Chrome ≥ 115, and `Driver` passes no `ChromeOptions`, so launches fail as root, headless or without a window manager | Integration | High | High | Use the README remedy (`-Dwdm.chromeDriverVersion` with a cached Chrome-for-Testing driver, non-root user, display with an EWMH window manager) or upgrade the dependency | Open (documented) |
 | 7 | `target/` is tracked: every build overwrites or deletes committed files, and `target/cucumber.json` already starts with a merge-conflict marker | Operational | Low | High | Restore with `git restore --source=HEAD --worktree -- target`; consider untracking `target/` and adding a `.gitignore` | Open (documented) |
-| 8 | Duplicate `cucumber-junit` (7.2.3 test scope, 7.3.4 compile scope) mixed with `cucumber-core` 7.2.3 | Technical | Low | Medium | Remove the duplicate and align Cucumber versions in a follow-up `pom.xml` change | Open (documented) |
+| 8 | Duplicate `cucumber-junit` (7.2.3 test scope, 7.3.4 compile scope) mixed with `cucumber-core` 7.2.3; no `project.build.sourceEncoding`, so the build uses the platform encoding | Technical | Low | Medium | Remove the duplicate, align Cucumber versions and set `project.build.sourceEncoding` to UTF-8 in a follow-up `pom.xml` change | Open (documented) |
 
 # 7. Visual Project Status
 
@@ -226,11 +227,11 @@ pie showData title Remaining Hours by Priority
 
 # 8. Summary & Recommendations
 
-The project is **89.7% complete** (174 of 194 hours). Every AAP deliverable is in place: Javadoc on all 25 classes and 286 declarations, and a 1,936-line README covering setup and configuration, the Java API and Gherkin catalog, test execution, Jenkins CI, inline code walkthroughs and troubleshooting. The change is strictly documentation: 1,524 Java lines were added and none removed, and not one executable line, annotation, dependency or pipeline step changed.
+The project is **89.7% complete** (174 of 194 hours). Every AAP deliverable is in place: Javadoc on all 25 classes and 286 declarations, and a 1,936-line README covering setup and configuration, the Java API and Gherkin catalog, test execution, Jenkins CI, inline code walkthroughs and troubleshooting. The change is strictly documentation: 1,524 Java lines were added and none removed, the compiled classes are byte-identical to the original upload, and no annotation, dependency or pipeline step changed.
 
 Verification is strong for a documentation deliverable. Doclint and `javadoc` run clean, all 87 scenarios still bind, the offline Maven build succeeds, the four diagrams render and all 157 internal links resolve. The README's commands were executed as written, its configuration failure messages were reproduced one by one, and the full suite behaved identically before and after the change against a local stub. What was never exercised is the real Odoo/Upgenix ERP, a Jenkins server, GitHub's renderer and the Windows/IDE launch paths.
 
-The remaining 20 hours are path-to-production work. The critical path is short: confirm the Javadoc interpretation of the JSDoc/`server.js` request (0.5 h), review the 26-file change (6 h), then validate the setup against a real ERP (6 h) and the CI guidance on Jenkins (4 h). None of these blocks merging the documentation; the live validations raise confidence that the runtime descriptions hold on the real system.
+The remaining 20 hours are path-to-production work. The critical path is short: confirm the Javadoc interpretation of the JSDoc/`server.js` request (0.5 h; the requester's PR feedback asked for no change but did not state the reading), review the 26-file change (6 h), then validate the setup against a real ERP (6 h) and the CI guidance on Jenkins (4 h). None of these blocks merging the documentation; the live validations raise confidence that the runtime descriptions hold on the real system.
 
 The documentation honestly exposes several framework weaknesses that the AAP excluded from this work and that a maintainer should schedule next: the unregistered `Hooks` import, a CI job that runs no scenario while reporting success, a browser-driver setup that fails on modern Chrome and containers, hard-coded credentials in `EmployeeP`, and a tracked `target/` directory. Fixing any of them will also require refreshing the README's line-level citations and the affected Known Findings.
 
@@ -241,7 +242,7 @@ The documentation honestly exposes several framework weaknesses that the AAP exc
 | README content areas | 4 / 4 | 4 / 4 |
 | Features catalogued | 10 / 10 | 10 / 10 |
 | Mermaid diagrams | ≥ 3 | 4 |
-| Executable lines changed | 0 | 0 |
+| Executable lines changed | 0 | 0 (bytecode identical) |
 
 **Production readiness:** ready to merge as a documentation release after requester confirmation and maintainer review.
 
